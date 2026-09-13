@@ -14,7 +14,7 @@ async function sendPush(appointment: Appointment) {
   if (!subscriptions?.length) return log(appointment.id,"push","failed","No active Push subscriptions");
   const publicKey=Deno.env.get("VAPID_PUBLIC_KEY"), privateKey=Deno.env.get("VAPID_PRIVATE_KEY");
   if (!publicKey || !privateKey) return log(appointment.id,"push","failed","VAPID is not configured");
-  webpush.setVapidDetails(`mailto:${Deno.env.get("VAPID_CONTACT_EMAIL") || "admin@booking.clickandfix.site"}`, publicKey, privateKey);
+  webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || `mailto:${Deno.env.get("VAPID_CONTACT_EMAIL") || "admin@booking.clickandfix.site"}`, publicKey, privateKey);
   const payload=JSON.stringify({title:"New Appointment Received",body:appointment.customer_name,url:`${adminUrl()}#appointment=${encodeURIComponent(appointment.id)}`});
   const outcomes=await Promise.allSettled(subscriptions.map(async(s)=>{try { await webpush.sendNotification({endpoint:s.endpoint,keys:{p256dh:s.p256dh,auth:s.auth}},payload); await db.from("admin_push_subscriptions").update({last_seen_at:new Date().toISOString(),is_active:true}).eq("id",s.id); } catch(error) { const status=(error as {statusCode?:number}).statusCode; if(status===404||status===410) await db.from("admin_push_subscriptions").update({is_active:false}).eq("id",s.id); throw error; }}));
   const failures=outcomes.filter((item)=>item.status==="rejected"); await log(appointment.id,"push",failures.length ? "failed":"sent",failures.length ? "One or more subscriptions failed" : undefined);

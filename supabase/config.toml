@@ -1,0 +1,18 @@
+project_id = "YOUR_SUPABASE_PROJECT_REF"
+
+[functions.book-appointment]
+verify_jwt = false
+[functions.availability]
+verify_jwt = false
+[functions.register-push-subscription]
+verify_jwt = true
+[functions.upload-photo]
+verify_jwt = false
+[functions.customer-tracking]
+verify_jwt = false
+[functions.customer-appointment-action]
+verify_jwt = false
+[functions.admin-api]
+verify_jwt = true
+[functions.technician-api]
+verify_jwt = true

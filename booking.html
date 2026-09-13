@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#0d6efd"
+    >
+
+    <title>
+        Book Appointment | Click & Fix Technologies
+    </title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/booking.css"
+    >
+
+    <link rel="manifest" href="manifest.webmanifest">
+
+</head>
+
+<body>
+
+
+<!-- HEADER -->
+
+<header class="site-header">
+
+    <div class="container">
+
+        <div class="booking-header">
+
+            <a
+                href="index.html"
+                class="back-button"
+            >
+                ←
+            </a>
+
+            <div>
+
+                <h1>
+                    Book Appointment
+                </h1>
+
+                <p>
+                    Click & Fix Technologies
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- MAIN -->
+
+<main class="container py-4">
+
+    <!-- PROGRESS -->
+
+    <div class="booking-progress mb-4">
+
+        <div class="progress-step active">
+            <span>1</span>
+            <small>Service</small>
+        </div>
+
+        <div class="progress-line"></div>
+
+        <div class="progress-step">
+            <span>2</span>
+            <small>Details</small>
+        </div>
+
+        <div class="progress-line"></div>
+
+        <div class="progress-step">
+            <span>3</span>
+            <small>Date & Time</small>
+        </div>
+
+        <div class="progress-line"></div>
+
+        <div class="progress-step">
+            <span>4</span>
+            <small>Customer</small>
+        </div>
+
+    </div>
+
+
+    <!-- BOOKING FORM -->
+
+    <form
+        id="bookingForm"
+        novalidate
+    >
+
+        <!-- STEP 1 -->
+
+        <section
+            class="booking-step active"
+            data-step="1"
+        >
+
+            <div class="booking-card">
+
+                <div class="step-heading">
+
+                    <span class="step-number">
+                        1
+                    </span>
+
+                    <div>
+
+                        <h2>
+                            What service do you need?
+                        </h2>
+
+                        <p>
+                            Select the service that best matches your requirement.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="row g-3">
+
+                    <div class="col-12 col-md-6">
+
+                        <label
+                            for="serviceCategory"
+                            class="form-label"
+                        >
+                            Service Category
+                            <span class="required">*</span>
+                        </label>
+
+                        <select
+                            id="serviceCategory"
+                            name="serviceCategory"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="">
+                                Select Service
+                            </option>
+
+                            <option value="computer_laptop">
+                                Computer / Laptop Service
+                            </option>
+
+                            <option value="cctv">
+                                CCTV Installation / Service
+                            </option>
+
+                            <option value="data_recovery">
+                                Data Recovery
+                            </option>
+
+                            <option value="networking_it">
+                                Networking / IT Support
+                            </option>
+
+                            <option value="printer_peripheral">
+                                Printer / Peripheral Service
+                            </option>
+
+                            <option value="other">
+                                Other Service
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-12 col-md-6">
+
+                        <label
+                            for="serviceType"
+                            class="form-label"
+                        >
+                            Service Type
+                        </label>
+
+                        <select
+                            id="serviceType"
+                            name="serviceType"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                Select service type
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="step-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-primary next-step"
+                    data-next="2"
+                >
+                    Continue →
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- STEP 2 -->
+
+        <section
+            class="booking-step"
+            data-step="2"
+        >
+
+            <div class="booking-card">
+
+                <div class="step-heading">
+
+                    <span class="step-number">
+                        2
+                    </span>
+
+                    <div>
+
+                        <h2>
+                            Service Details
+                        </h2>
+
+                        <p>
+                            Tell us briefly about the problem or requirement.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mb-3">
+
+                    <label
+                        for="problemDescription"
+                        class="form-label"
+                    >
+                        Problem / Requirement
+                        <span class="required">*</span>
+                    </label>
+
+                    <textarea
+                        id="problemDescription"
+                        name="problemDescription"
+                        class="form-control"
+                        rows="4"
+                        placeholder="Please describe your problem or requirement..."
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <div class="mb-4">
+
+                    <label
+                        for="servicePhoto"
+                        class="form-label"
+                    >
+                        Upload Photo
+                        <span class="optional">
+                            (Optional)
+                        </span>
+                    </label>
+
+                    <input
+                        type="file"
+                        id="servicePhoto"
+                        name="servicePhoto"
+                        class="form-control"
+                        accept="image/*"
+                    >
+
+                </div>
+
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Where do you need the service?
+                        <span class="required">*</span>
+                    </label>
+
+
+                    <div class="location-options">
+
+                        <label class="location-option">
+
+                            <input
+                                type="radio"
+                                name="serviceLocationType"
+                                value="service_centre"
+                                required
+                            >
+
+                            <span>
+                                🏢 Service Centre
+                            </span>
+
+                        </label>
+
+
+                        <label class="location-option">
+
+                            <input
+                                type="radio"
+                                name="serviceLocationType"
+                                value="home_office"
+                            >
+
+                            <span>
+                                🏠 Home / Office Visit
+                            </span>
+
+                        </label>
+
+
+                        <label class="location-option">
+
+                            <input
+                                type="radio"
+                                name="serviceLocationType"
+                                value="pickup_delivery"
+                            >
+
+                            <span>
+                                🚚 Pickup / Delivery
+                            </span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <!-- GPS AREA -->
+
+                <div
+                    id="gpsSection"
+                    class="gps-section d-none"
+                >
+
+                    <div class="gps-info">
+
+                        <strong>
+                            📍 Location Required
+                        </strong>
+
+                        <p>
+                            Your current location is required
+                            for a Home / Office Visit.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="captureLocationBtn"
+                        class="btn btn-outline-primary"
+                    >
+                        📍 Capture My Location
+                    </button>
+
+
+                    <div
+                        id="locationStatus"
+                        class="location-status"
+                    ></div>
+
+
+                    <input
+                        type="hidden"
+                        id="latitude"
+                        name="latitude"
+                    >
+
+                    <input
+                        type="hidden"
+                        id="longitude"
+                        name="longitude"
+                    >
+
+                    <input
+                        type="hidden"
+                        id="googleMapsUrl"
+                        name="googleMapsUrl"
+                    >
+
+                </div>
+
+
+                <!-- ADDRESS -->
+
+                <div
+                    id="addressSection"
+                    class="address-section d-none mt-3"
+                >
+
+                    <div class="mb-3">
+
+                        <label
+                            for="serviceAddress"
+                            class="form-label"
+                        >
+                            Service Address
+                            <span class="required">*</span>
+                        </label>
+
+                        <textarea
+                            id="serviceAddress"
+                            name="serviceAddress"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Enter your complete address"
+                        ></textarea>
+
+                    </div>
+
+
+                    <div>
+
+                        <label
+                            for="landmark"
+                            class="form-label"
+                        >
+                            Landmark
+                            <span class="optional">
+                                (Optional)
+                            </span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="landmark"
+                            name="landmark"
+                            class="form-control"
+                            placeholder="Nearby landmark"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="step-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary previous-step"
+                    data-previous="1"
+                >
+                    ← Back
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-primary next-step"
+                    data-next="3"
+                >
+                    Continue →
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- STEP 3 -->
+
+        <section
+            class="booking-step"
+            data-step="3"
+        >
+
+            <div class="booking-card">
+
+                <div class="step-heading">
+
+                    <span class="step-number">
+                        3
+                    </span>
+
+                    <div>
+
+                        <h2>
+                            Choose Date & Time
+                        </h2>
+
+                        <p>
+                            Select your preferred appointment slot.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="row g-3">
+
+                    <div class="col-12 col-md-6">
+
+                        <label
+                            for="appointmentDate"
+                            class="form-label"
+                        >
+                            Appointment Date
+                            <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="date"
+                            id="appointmentDate"
+                            name="appointmentDate"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="col-12 col-md-6">
+
+                        <label
+                            for="appointmentTime"
+                            class="form-label"
+                        >
+                            Appointment Time
+                            <span class="required">*</span>
+                        </label>
+
+                        <select
+                            id="appointmentTime"
+                            name="appointmentTime"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="">
+                                Select time
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="slotMessage"
+                    class="slot-message mt-3"
+                ></div>
+
+            </div>
+
+
+            <div class="step-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary previous-step"
+                    data-previous="2"
+                >
+                    ← Back
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-primary next-step"
+                    data-next="4"
+                >
+                    Continue →
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- STEP 4 -->
+
+        <section
+            class="booking-step"
+            data-step="4"
+        >
+
+            <div class="booking-card">
+
+                <div class="step-heading">
+
+                    <span class="step-number">
+                        4
+                    </span>
+
+                    <div>
+
+                        <h2>
+                            Your Details
+                        </h2>
+
+                        <p>
+                            We need these details to confirm your appointment.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mb-3">
+
+                    <label
+                        for="customerName"
+                        class="form-label"
+                    >
+                        Customer Name
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="customerName"
+                        name="customerName"
+                        class="form-control"
+                        placeholder="Enter your full name"
+                        autocomplete="name"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="mb-3">
+
+                    <label
+                        for="mobile"
+                        class="form-label"
+                    >
+                        Mobile Number
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="mobile"
+                        name="mobile"
+                        class="form-control"
+                        placeholder="Enter your mobile number"
+                        autocomplete="tel"
+                        inputmode="tel"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="mb-3">
+
+                    <label
+                        for="email"
+                        class="form-label"
+                    >
+                        Email Address
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="form-control"
+                        placeholder="Enter your email address"
+                        autocomplete="email"
+                        required
+                    >
+
+                    <div class="form-text">
+                        Your appointment confirmation will be sent here.
+                    </div>
+
+                </div>
+
+
+                <div class="mb-3">
+
+                    <label
+                        for="additionalNotes"
+                        class="form-label"
+                    >
+                        Additional Notes
+                        <span class="optional">
+                            (Optional)
+                        </span>
+                    </label>
+
+                    <textarea
+                        id="additionalNotes"
+                        name="additionalNotes"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Anything else you want us to know?"
+                    ></textarea>
+
+                </div>
+
+
+                <!-- TERMS -->
+
+                <div class="form-check mt-4">
+
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="bookingConsent"
+                        required
+                    >
+
+                    <label
+                        class="form-check-label"
+                        for="bookingConsent"
+                    >
+                        I confirm that the information provided above is correct.
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- SUMMARY -->
+
+            <div class="booking-card summary-card mt-3">
+
+                <h3>
+                    Appointment Summary
+                </h3>
+
+                <div id="bookingSummary">
+
+                    <p class="text-muted">
+                        Your selected details will appear here.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="step-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary previous-step"
+                    data-previous="3"
+                >
+                    ← Back
+                </button>
+
+                <button
+                    type="submit"
+                    id="submitBookingBtn"
+                    class="btn btn-primary"
+                >
+                    Confirm Appointment
+                </button>
+
+            </div>
+
+        </section>
+
+    </form>
+
+</main>
+
+
+<footer class="site-footer">
+
+    <div class="container text-center">
+
+        <p class="mb-1">
+            © <span id="currentYear"></span>
+            Click & Fix Technologies
+        </p>
+
+        <small>
+            Your trusted technology service partner
+        </small>
+
+    </div>
+
+</footer>
+
+
+<script>
+    document.getElementById("currentYear").textContent =
+        new Date().getFullYear();
+</script>
+
+<!-- Optional deployment-only public configuration; do not commit runtime-config.js. -->
+<script src="js/runtime-config.js" onerror="this.remove()"></script>
+<script src="js/app-config.js"></script>
+<script src="js/api-client.js"></script>
+<script src="js/service-options.js"></script>
+<script src="js/booking-steps.js"></script>
+<script src="js/appointment-slots.js"></script>
+<script src="js/booking-location.js"></script>
+<script src="js/booking-submission.js"></script>
+<script src="js/pwa.js"></script>
+</body>
+</html>

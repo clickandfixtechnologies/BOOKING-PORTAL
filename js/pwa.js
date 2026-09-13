@@ -1,0 +1,1 @@
+if ("serviceWorker" in navigator) window.addEventListener("load", function () { const path = /\/(admin|tracking)\//.test(location.pathname) ? "../service-worker.js" : "service-worker.js"; navigator.serviceWorker.register(path).catch(function (error) { console.warn("Service worker registration failed", error); }); });

@@ -23,6 +23,7 @@ async function route(db:any, userId:string, body:any) {
     case "notifications": return notifications(db,userId);
     case "notification_logs": return notificationLogs(db);
     case "mark_notification_read": return markRead(db,userId,body.id);
+    case "delete_appointment": return deleteAppointment(db,body.id);
     default: throw new Error("Unknown admin action.");
   }
 }
@@ -41,4 +42,5 @@ async function updateTechnician(db:any,input:any){if(!input?.id||!/^[0-9a-f-]{36
 async function notifications(db:any,userId:string){const{data,error}=await db.from("admin_notifications").select("*,appointments(appointment_id)").eq("admin_id",userId).order("created_at",{ascending:false}).limit(50);if(error)throw error;return{notifications:data||[]};}
 async function notificationLogs(db:any){const{data,error}=await db.from("notifications").select("id,channel,type,status,created_at,sent_at,error,appointments(appointment_id)").order("created_at",{ascending:false}).limit(100);if(error)throw error;return{logs:data||[]};}
 async function markRead(db:any,userId:string,id:string){const{error}=await db.from("admin_notifications").update({is_read:true,read_at:new Date().toISOString()}).eq("id",id).eq("admin_id",userId);if(error)throw error;return{ok:true};}
+async function deleteAppointment(db:any,id:string){if(!/^[0-9a-f-]{36}$/i.test(id||""))throw new Error("Invalid appointment.");const{error}=await db.from("appointments").delete().eq("id",id);if(error)throw error;return{ok:true};}
 function clean(value:any,max:number){return typeof value==="string"?value.trim().slice(0,max):null;}

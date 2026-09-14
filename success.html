@@ -310,38 +310,41 @@
 
 
     document
-        .getElementById("copyAppointmentIdBtn")
-        .addEventListener("click", async () => {
+    .getElementById("copyAppointmentIdBtn")
+    .addEventListener("click", async () => {
 
-            const id =
-                document
-                    .getElementById("appointmentId")
-                    .textContent
-                    .trim();
+        const id =
+            document
+                .getElementById("appointmentId")
+                .textContent
+                .trim();
 
-            if (!id || id === "—") {
-                return;
-            }
+        if (!id || id === "—") {
+            return;
+        }
 
-            try {
+        // Only copy the last 5 digits of the Appointment ID
+        const shortId = id.slice(-5);
 
-                await navigator.clipboard.writeText(id);
+        try {
 
-                document
-                    .getElementById("copyMessage")
-                    .textContent =
-                    "Appointment ID copied successfully.";
+            await navigator.clipboard.writeText(shortId);
 
-            } catch (error) {
+            document
+                .getElementById("copyMessage")
+                .textContent =
+                "Last 5 digits copied successfully.";
 
-                document
-                    .getElementById("copyMessage")
-                    .textContent =
-                    "Unable to copy. Please copy it manually.";
+        } catch (error) {
 
-            }
+            document
+                .getElementById("copyMessage")
+                .textContent =
+                "Unable to copy. Please copy it manually.";
 
-        });
+        }
+
+    });
 
 </script>
 

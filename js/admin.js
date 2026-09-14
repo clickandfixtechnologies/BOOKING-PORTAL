@@ -12,4 +12,105 @@ const existingDetail=detail;table=function(rows){return`<div class="table-respon
 signOut.onclick=async()=>{if(!window.confirm("Sign out of the administrator portal?"))return;await s.auth.signOut();location.replace("login.html")};s?.auth.getSession().then(({data:{session}})=>{if(!session)location.replace("login.html");else{login.hidden=true;panel.hidden=false;dashboard()}});
 availabilityView=async function(){pageTitle.textContent="Availability";const data=await api("availability"),settings=data.settings;q.innerHTML=`<div class="admin-card"><h2 class="h6">Business settings</h2><div class="row g-2"><div class="col-12"><label>Business days (1=Mon … 7=Sun)</label><input id="availabilityDays" class="form-control" value="${settings.business_days.join(",")}"></div>${[["availabilityOpen","Opening time",settings.opening_time],["availabilityClose","Closing time",settings.closing_time],["availabilityDuration","Slot minutes",settings.slot_duration_minutes],["availabilityBuffer","Buffer minutes",settings.buffer_minutes],["availabilityCapacity","Maximum appointments",settings.max_appointments_per_slot],["availabilityAdvance","Minimum advance minutes",settings.minimum_advance_minutes],["availabilityFuture","Maximum future days",settings.maximum_future_days]].map(item=>`<div class="col-md-4"><label>${item[1]}</label><input id="${item[0]}" class="form-control" value="${item[2]}"></div>`).join("")}</div><button id="saveAvailability" class="btn btn-primary mt-3">Save settings</button></div><div class="admin-card mt-3"><h2 class="h6">Holiday / blocked date or slot</h2><input id="blockDate" type="date" class="form-control mb-2"><input id="blockStart" type="time" class="form-control mb-2"><input id="blockEnd" type="time" class="form-control mb-2"><input id="blockReason" class="form-control mb-2" placeholder="Reason"><button id="addBlock" class="btn btn-outline-primary">Save block</button><ul class="mt-3">${data.blocks.map(block=>`<li>${e(block.block_date)} ${e(block.starts_at||"All day")} ${e(block.reason)} <button class="btn btn-sm btn-link" data-delete-block="${block.id}">Delete</button></li>`).join("")}</ul></div>`;document.getElementById("saveAvailability").onclick=async()=>{try{await api("save_availability",{settings:{business_days:document.getElementById("availabilityDays").value.split(",").map(Number),opening_time:document.getElementById("availabilityOpen").value,closing_time:document.getElementById("availabilityClose").value,slot_duration_minutes:document.getElementById("availabilityDuration").value,buffer_minutes:document.getElementById("availabilityBuffer").value,max_appointments_per_slot:document.getElementById("availabilityCapacity").value,minimum_advance_minutes:document.getElementById("availabilityAdvance").value,maximum_future_days:document.getElementById("availabilityFuture").value}});flash("Availability saved");availabilityView()}catch(error){flash(error.message,false)}};document.getElementById("addBlock").onclick=async()=>{try{await api("save_block",{block:{block_date:document.getElementById("blockDate").value,starts_at:document.getElementById("blockStart").value||null,ends_at:document.getElementById("blockEnd").value||null,reason:document.getElementById("blockReason").value}});availabilityView()}catch(error){flash(error.message,false)}};document.querySelectorAll("[data-delete-block]").forEach(button=>button.onclick=async()=>{try{await api("delete_block",{id:button.dataset.deleteBlock});availabilityView()}catch(error){flash(error.message,false)}})};
 const detailWithPhotos=detail;detail=async function(id){await detailWithPhotos(id);const {appointment}=await api("appointment",{id});if(appointment.photo_urls?.length){q.querySelector(".detail-grid").insertAdjacentHTML("beforeend",`<section><h2 class="h6">Customer photos</h2><div class="d-flex gap-2 flex-wrap">${appointment.photo_urls.map(url=>`<a href="${e(url)}" target="_blank" rel="noopener"><img src="${e(url)}" alt="Customer uploaded service photo" style="width:120px;height:90px;object-fit:cover;border-radius:.5rem"></a>`).join("")}</div></section>`)}};
-enablePush=async function(){const button=document.getElementById("enablePush");try{if(button){button.disabled=true;button.textContent="Enabling…"}if(!("serviceWorker" in navigator))throw Error("This browser does not support service-worker notifications.");if(!window.CFX_CONFIG.vapidPublicKey)throw Error("Push notifications are not configured for this deployment.");const permission=await Notification.requestPermission();if(permission!=="granted")throw Error("Notification permission was not granted. Enable notifications for this site in your browser settings and try again.");const registration=await navigator.serviceWorker.register("../service-worker.js",{updateViaCache:"none"});await registration.update();const active=registration.active||(await navigator.serviceWorker.ready).active;if(!active)throw Error("The notification service worker is not active yet. Please retry.");const subscription=await active.pushManager.getSubscription()||await active.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:base64(window.CFX_CONFIG.vapidPublicKey)}),accessToken=await getValidAccessToken(),response=await fetch(c.supabaseUrl.replace(/\/$/,"")+"/functions/v1/register-push-subscription",{method:"POST",headers:{"Content-Type":"application/json",apikey:c.supabaseAnonKey,Authorization:"Bearer "+accessToken},body:JSON.stringify({subscription,device_name:navigator.platform||"Unknown device",browser:navigator.userAgent})}),body=await response.json().catch(()=>({}));if(!response.ok)throw Error(body.error||"Push subscription could not be saved.");flash("Appointment notifications enabled.");notificationsView()}catch(error){if(button){button.disabled=false;button.textContent="Enable Appointment Notifications"}flash(error.message||"Notification enablement failed.",false)}};
+enablePush = async function () {
+    const button = document.getElementById("enablePush");
+
+    try {
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Enabling…";
+        }
+
+        if (!("serviceWorker" in navigator)) {
+            throw new Error(
+                "This browser does not support service-worker notifications."
+            );
+        }
+
+        if (!window.CFX_CONFIG?.vapidPublicKey) {
+            throw new Error(
+                "Push notifications are not configured for this deployment."
+            );
+        }
+
+        const permission = await Notification.requestPermission();
+
+        if (permission !== "granted") {
+            throw new Error(
+                "Notification permission was not granted."
+            );
+        }
+
+        const registration =
+            await navigator.serviceWorker.register(
+                "../service-worker.js",
+                { updateViaCache: "none" }
+            );
+
+        await registration.update();
+
+        await navigator.serviceWorker.ready;
+
+        const subscription =
+            await registration.pushManager.getSubscription() ||
+            await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey:
+                    base64(window.CFX_CONFIG.vapidPublicKey)
+            });
+
+        const accessToken = await getValidAccessToken();
+
+        const response = await fetch(
+            c.supabaseUrl.replace(/\/$/, "") +
+            "/functions/v1/register-push-subscription",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": c.supabaseAnonKey,
+                    "Authorization": "Bearer " + accessToken
+                },
+                body: JSON.stringify({
+                    subscription,
+                    device_name:
+                        navigator.platform || "Unknown device",
+                    browser:
+                        navigator.userAgent
+                })
+            }
+        );
+
+        const body =
+            await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(
+                body.error ||
+                "Push subscription could not be saved."
+            );
+        }
+
+        flash("Appointment notifications enabled.");
+        notificationsView();
+
+    } catch (error) {
+
+        console.error(
+            "Push notification setup failed:",
+            error
+        );
+
+        if (button) {
+            button.disabled = false;
+            button.textContent =
+                "Enable Appointment Notifications";
+        }
+
+        flash(
+            error.message ||
+            "Notification enablement failed.",
+            false
+        );
+    }
+};

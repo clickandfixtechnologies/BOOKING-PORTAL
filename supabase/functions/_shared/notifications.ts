@@ -437,33 +437,63 @@ async function sendBrevo(appointment: Appointment) {
 
 
           <!-- Support -->
-          <tr>
-            <td style="
-              padding:25px 32px;
-              background:#f9fafb;
-              border-top:1px solid #e5e7eb;
-            ">
+<tr>
+  <td style="
+    padding:25px 32px;
+    background:#f9fafb;
+    border-top:1px solid #e5e7eb;
+  ">
 
-              <div style="
-                font-size:15px;
-                font-weight:700;
-                color:#111827;
-              ">
-                Need assistance?
-              </div>
+    <div style="
+      font-size:15px;
+      font-weight:700;
+      color:#111827;
+    ">
+      Need assistance?
+    </div>
 
-              <div style="
-                margin-top:7px;
-                font-size:13px;
-                line-height:21px;
-                color:#6b7280;
-              ">
-                If you have any questions regarding your appointment,
-                please contact Click &amp; Fix Technologies.
-              </div>
+    <div style="
+      margin-top:7px;
+      font-size:13px;
+      line-height:21px;
+      color:#6b7280;
+    ">
+      If you have any questions regarding your appointment,
+      please feel free to contact Click &amp; Fix Technologies.
+    </div>
 
-            </td>
-          </tr>
+    <div style="
+  margin-top:14px;
+  font-size:13px;
+  line-height:24px;
+  color:#374151;
+  white-space:nowrap;
+">
+  <strong>Website:</strong>
+  <a
+    href="https://www.clickandfix.site/"
+    style="color:#2563eb; text-decoration:none;"
+  >www.clickandfix.site</a>
+
+  <span style="color:#9ca3af; padding:0 8px;">||</span>
+
+  <strong>Mobile:</strong>
+  <a
+    href="tel:7098889990"
+    style="color:#2563eb; text-decoration:none;"
+  >7098889990</a>
+
+  <span style="color:#9ca3af; padding:0 8px;">||</span>
+
+  <strong>Email:</strong>
+  <a
+    href="mailto:info.clicknfixtech@gmail.com"
+    style="color:#2563eb; text-decoration:none;"
+  >info.clicknfixtech@gmail.com</a>
+</div>
+
+  </td>
+</tr>
 
 
           <!-- Footer -->

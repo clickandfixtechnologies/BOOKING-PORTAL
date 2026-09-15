@@ -39,7 +39,7 @@ async function sendBrevo(appointment: Appointment) {
   }
 
  const track =
-  `${Deno.env.get("PUBLIC_SITE_URL") || "https://booking.clickandfix.site"}/tracking/${appointment.tracking_token}`;
+  `${Deno.env.get("PUBLIC_SITE_URL") || "https://booking.clickandfix.site"}/tracking/`;
 
   const serviceCategory = formatServiceCategory(
     appointment.service_category

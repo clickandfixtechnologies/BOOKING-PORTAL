@@ -38,75 +38,60 @@ if (photo) {
 });
 
 function showPhotoUploadProgress(percent, completed) {
-    let box = document.getElementById("photoUploadProgress");
 
-    if (!box) {
-        box = document.createElement("div");
-        box.id = "photoUploadProgress";
-        box.className = "mt-3";
+    const box =
+        document.getElementById("photoUploadProgress");
 
-        box.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center mb-1">
-                <small id="photoUploadStatus" class="text-muted">
-                    Uploading photo...
-                </small>
-                <small id="photoUploadPercent" class="fw-semibold">
-                    0%
-                </small>
-            </div>
+    const bar =
+        document.getElementById("photoUploadBar");
 
-            <div
-                class="progress"
-                role="progressbar"
-                aria-label="Photo upload progress"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                aria-valuenow="0"
-                style="height: 8px;"
-            >
-                <div
-                    id="photoUploadBar"
-                    class="progress-bar"
-                    style="width: 0%;"
-                ></div>
-            </div>
-        `;
+    const percentText =
+        document.getElementById("photoUploadPercent");
 
-        const photoInput = document.getElementById("servicePhoto");
+    const status =
+        document.getElementById("photoUploadStatus");
 
-        if (photoInput) {
-            photoInput.parentElement.appendChild(box);
-        }
+    if (!box || !bar || !percentText || !status) {
+        return;
     }
 
-    const bar = document.getElementById("photoUploadBar");
-    const percentText = document.getElementById("photoUploadPercent");
-    const status = document.getElementById("photoUploadStatus");
-    const progress = box.querySelector(".progress");
+    percent = Math.max(
+        0,
+        Math.min(100, Number(percent) || 0)
+    );
 
-    percent = Math.max(0, Math.min(100, Number(percent) || 0));
+    box.classList.remove("d-none");
 
-    if (bar) {
-        bar.style.width = percent + "%";
-    }
+    bar.style.width = percent + "%";
 
-    if (percentText) {
-        percentText.textContent = percent + "%";
-    }
+    percentText.textContent =
+        percent + "%";
 
-    if (progress) {
-        progress.setAttribute("aria-valuenow", String(percent));
-    }
+    box.setAttribute(
+        "aria-valuenow",
+        String(percent)
+    );
 
     if (completed || percent >= 100) {
-        if (status) {
-            status.textContent = "✓ Photo uploaded successfully";
-            status.className = "text-success";
-        }
+
+        status.textContent =
+            "✓ Photo uploaded successfully";
+
+        status.classList.remove("text-muted");
+        status.classList.add("text-success");
+
+        bar.classList.remove("bg-primary");
+        bar.classList.add("bg-success");
+
     } else {
-        if (status) {
-            status.textContent = "Uploading photo...";
-            status.className = "text-muted";
-        }
+
+        status.textContent =
+            "Uploading photo...";
+
+        status.classList.remove("text-success");
+        status.classList.add("text-muted");
+
+        bar.classList.remove("bg-success");
+        bar.classList.add("bg-primary");
     }
 }

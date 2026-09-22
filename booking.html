@@ -890,5 +890,37 @@
 <script src="js/booking-location.js"></script>
 <script src="js/booking-submission.js"></script>
 <script src="js/pwa.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const uppercaseFields = [
+            "problemDescription",
+            "serviceAddress",
+            "landmark",
+            "customerName",
+            "additionalNotes"
+        ];
+
+        uppercaseFields.forEach(function (id) {
+            const field = document.getElementById(id);
+
+            if (!field) return;
+
+            field.addEventListener("input", function () {
+                const start = field.selectionStart;
+                const end = field.selectionEnd;
+
+                field.value = field.value.toUpperCase();
+
+                field.setSelectionRange(start, end);
+            });
+
+            field.addEventListener("blur", function () {
+                field.value = field.value.toUpperCase();
+            });
+        });
+    });
+</script>
+
 </body>
 </html>

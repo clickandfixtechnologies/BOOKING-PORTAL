@@ -104,7 +104,9 @@ if(form)form.onsubmit=async e=>{e.preventDefault();let y=String(new Date().getFu
   return;
 }
     
-    trackSubmit.disabled=true;trackSubmit.textContent="Checking…";try{sessionStorage.setItem("cfx-tracking",JSON.stringify(await api("customer-tracking",{year:y,code:k,mobile:m})));location.href="../track/"}catch(x){
+    trackSubmit.disabled=true;trackSubmit.textContent="Checking…";try{sessionStorage.setItem("cfx-tracking",JSON.stringify(await api("customer-tracking",{year:y,code:k,mobile:m})));location.href="../track/"
+
+}catch(x){
   showTrackingAlert(
     "Appointment Not Found",
     "We couldn't find an appointment with the details you entered. Please check your Appointment Code and registered Mobile Number and try again."

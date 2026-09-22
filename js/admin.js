@@ -55,6 +55,32 @@ function serviceTypeLabel(value) {
   return SERVICE_TYPE_LABELS[value] || value || "—";
 }
 
+function formatAppointmentDateTime(date, time) {
+    if (!date) return "—";
+
+    const cleanTime = String(time || "").slice(0, 8);
+
+    const dateTime = new Date(`${date}T${cleanTime}`);
+
+    if (Number.isNaN(dateTime.getTime())) {
+        return `${date} ${time || ""}`.trim();
+    }
+
+    const formattedDate = dateTime.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    });
+
+    const formattedTime = dateTime.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+    });
+
+    return `${formattedDate} · ${formattedTime}`;
+}
+
 let filter={},refreshInFlight;async function getValidAccessToken(){let{data:{session}}=await s.auth.getSession();if(!session)throw Error("Sign in is required.");if(!session.expires_at||session.expires_at*1000-Date.now()>60000)return session.access_token;refreshInFlight??=s.auth.refreshSession().finally(()=>{refreshInFlight=null});let{data,error}=await refreshInFlight;if(error||!data.session)throw Error("Your session has expired. Please sign in again.");return data.session.access_token}async function api(action,more={}){let token=await getValidAccessToken(),r=await fetch(c.supabaseUrl.replace(/\/$/,"")+"/functions/v1/admin-api",{method:"POST",headers:{"Content-Type":"application/json",apikey:c.supabaseAnonKey,Authorization:"Bearer "+token},body:JSON.stringify({action,...more})}),d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||"Request failed.");return d}
 
 function flash(message, ok = true) {
@@ -122,7 +148,7 @@ function days(v){return(v||[1,2,3,4,5,6]).join(",")}function renderTechForm(t={}
 
 <div class="admin-card mt-3"><h2 class="h6">Status History</h2><ol>${(a.appointment_status_history||[]).map(h=>`<li>${L(h.old_status||"Created")} → <b>${L(h.new_status)}</b><br><small>${new Date(h.changed_at).toLocaleString()} ${e(h.note||"")}</small></li>`).join("")}</ol></div>`;back.onclick=dashboard;assignTech.onclick=()=>set(id,"technician_assigned",{technician_id:techAssign.value});confirm&&(confirm.onclick=()=>set(id,"confirmed"));way.onclick=()=>set(id,"on_the_way");progress.onclick=()=>set(id,"in_progress");jobCreated.onclick=()=>set(id,"job_id_created",{job_code:job.value});complete.onclick=()=>set(id,"completed");cancel.onclick=()=>set(id,"cancelled");jobSave.onclick=()=>set(id,a.status,{job_code:job.value})}
 renderTechForm=function(t={}){const needsAccount=Boolean(t.id&&!t.auth_user_id);return`<form id="techForm" class="row g-2"><div class="col-md-4"><input name="technician_code" class="form-control" required placeholder="CFX-TECH-2026-0001" value="${e(t.technician_code||"")}" ${t.id?"readonly":""}></div><div class="col-md-4"><input name="full_name" class="form-control" required placeholder="Name" value="${e(t.full_name||"")}"></div><div class="col-md-4"><input name="mobile" class="form-control" required inputmode="tel" placeholder="10-digit mobile" value="${e(t.mobile||"")}"></div><div class="col-md-4"><input name="username" class="form-control" required placeholder="Username" value="${e(t.username||"")}"></div><div class="col-md-4"><input name="email" class="form-control" type="email" placeholder="Login email" ${t.id&&!needsAccount?"disabled":"required"}></div><div class="col-md-4"><input name="password" class="form-control" type="password" ${t.id&&!needsAccount?"disabled":"required minlength=12"} placeholder="${needsAccount?"Create 12+ character password":t.id?"Password managed separately":"12+ character password"}"></div>${needsAccount?'<div class="col-12"><small class="text-warning">This older technician has no portal account. Saving creates and links one securely.</small></div>':""}<div class="col-md-4"><input name="specialization" class="form-control" placeholder="Specializations, comma separated" value="${e((t.specialization||[]).join(","))}"></div><div class="col-md-4"><input name="working_days" class="form-control" required value="${days(t.working_days)}" placeholder="1,2,3,4,5,6"></div><div class="col-md-2"><input name="working_start" type="time" class="form-control" value="${e(t.working_start||"10:00")}"></div><div class="col-md-2"><input name="working_end" type="time" class="form-control" value="${e(t.working_end||"19:00")}"></div><div class="col-12"><button class="btn btn-primary">${t.id?"Save technician":"Create technician"}</button></div></form>`};const sidebar=document.querySelector(".admin-sidebar"),sidebarOverlay=document.createElement("div"),menuClose=document.createElement("button"),closeSidebar=()=>{sidebar.classList.remove("open");sidebarOverlay.hidden=true;document.body.classList.remove("sidebar-open")},openSidebar=()=>{sidebar.classList.add("open");sidebarOverlay.hidden=false;document.body.classList.add("sidebar-open")};sidebarOverlay.id="sidebarOverlay";sidebarOverlay.className="sidebar-overlay";sidebarOverlay.hidden=true;document.querySelector(".admin-shell").prepend(sidebarOverlay);menuClose.type="button";menuClose.id="menuClose";menuClose.className="btn btn-sm btn-outline-light d-md-none";menuClose.setAttribute("aria-label","Close menu");menuClose.textContent="×";sidebar.prepend(menuClose);menuToggle.onclick=()=>sidebar.classList.contains("open")?closeSidebar():openSidebar();menuClose.onclick=closeSidebar;sidebarOverlay.onclick=closeSidebar;document.addEventListener("keydown",event=>{if(event.key==="Escape")closeSidebar()});document.querySelectorAll("[data-view]").forEach(button=>button.addEventListener("click",()=>{if(matchMedia("(max-width: 767px)").matches)closeSidebar()}));
-const existingDetail=detail;table=function(rows){return`<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Appointment</th><th>Customer</th><th>Service</th><th>Date / Time</th><th>Technician</th><th>Job</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows.map(item=>`<tr><td>${e(item.appointment_id)}</td><td>${e(item.customer_name)}<br><small>${e(item.mobile)} · ${e(item.email)}</small></td><td>${e(serviceCategoryLabel(item.service_category))}<br><small>${e(serviceTypeLabel(item.service_type))}</small></td><td>${e(item.appointment_date)}<br>${e(item.appointment_time)}</td><td>${e(item.technicians?.full_name)}</td><td>${e(item.job_code)}</td><td><span class="badge status-badge">${L(item.status)}</span></td><td class="actions"><button class="btn btn-sm btn-outline-primary" data-view-id="${item.id}">View</button>${item.status==="pending"?`<button class="btn btn-sm btn-primary" data-set="confirmed" data-id="${item.id}">Confirm</button>`:""}${!["completed","cancelled","no_show"].includes(item.status)?`<button class="btn btn-sm btn-outline-success" data-set="completed" data-id="${item.id}">Complete</button>`:""}${item.status !== "completed"
+const existingDetail=detail;table=function(rows){return`<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Appointment</th><th>Customer</th><th>Service</th><th>Date / Time</th><th>Technician</th><th>Job</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows.map(item=>`<tr><td>${e(item.appointment_id)}</td><td>${e(item.customer_name)}<br><small>${e(item.mobile)} · ${e(item.email)}</small></td><td>${e(serviceCategoryLabel(item.service_category))}<br><small>${e(serviceTypeLabel(item.service_type))}</small></td><td>${e(formatAppointmentDateTime(item.appointment_date, item.appointment_time))}</td><td>${e(item.technicians?.full_name)}</td><td>${e(item.job_code)}</td><td><span class="badge status-badge">${L(item.status)}</span></td><td class="actions"><button class="btn btn-sm btn-outline-primary" data-view-id="${item.id}">View</button>${item.status==="pending"?`<button class="btn btn-sm btn-primary" data-set="confirmed" data-id="${item.id}">Confirm</button>`:""}${!["completed","cancelled","no_show"].includes(item.status)?`<button class="btn btn-sm btn-outline-success" data-set="completed" data-id="${item.id}">Complete</button>`:""}${item.status !== "completed"
     ? `<button class="btn btn-sm btn-outline-danger" data-delete-id="${item.id}">Delete</button>`
     : ""}
     

@@ -58,7 +58,129 @@ async function api(name,body){if(!base||!c.supabaseAnonKey)throw Error("Tracking
 
 if(form)form.onsubmit=async e=>{e.preventDefault();let y=String(new Date().getFullYear()),k=code.value.trim(),m=mobile.value.replace(/\D/g,""),err=trackingError;if(!/^\d{5}$/.test(k)||!/^[6-9]\d{9}$/.test(m))return err.textContent="Enter the final five digits and registered 10-digit mobile number.";trackSubmit.disabled=true;trackSubmit.textContent="Checking…";try{sessionStorage.setItem("cfx-tracking",JSON.stringify(await api("customer-tracking",{year:y,code:k,mobile:m})));location.href="../track/"}catch(x){err.textContent=x.message;trackSubmit.disabled=false;trackSubmit.textContent="Track appointment"}};
 
-async function load(){if(!out)return;let part=location.pathname.split("/").filter(Boolean).at(-1),req=part&&/^[0-9a-f-]{36}$/i.test(part)?api("customer-tracking",{token:part}):Promise.resolve(JSON.parse(sessionStorage.getItem("cfx-tracking")||"null"));try{render(await req)}catch(_){out.className="tracking-card mt-4 text-center";out.innerHTML="<h1 class='h4'>We could not verify this appointment</h1><p class='text-muted mb-0'>Please return to tracking and check the details you entered.</p>"}}function render(r){if(!r?.appointment)throw Error();result=r;let a=r.appointment;token=a.tracking_token;let stages=a.job_code?[...flow.slice(0,-1),"job_id_created","completed"]:flow,at=stages.indexOf(a.status);out.className="";out.innerHTML=`<section class="tracking-hero"><div class="d-flex justify-content-between align-items-start gap-3 flex-wrap"><div><small class="text-uppercase text-muted fw-semibold">Appointment</small><div class="tracking-code">${esc(a.appointment_id)}</div><p class="mb-0 text-muted">${esc(serviceLabel(a))}</p></div><span class="track-status ${a.status==="cancelled"?"cancelled":""}">${esc(labels[a.status]||a.status)}</span></div></section><div class="track-grid"><section class="tracking-card"><h1 class="h5 mb-3">Appointment summary</h1><div class="track-summary"><div><small>Scheduled date</small><strong>${esc(date(a.appointment_date))}</strong></div><div><small>Scheduled time</small><strong>${esc(time(a.appointment_time))}</strong></div><div><small>Customer</small><strong>${esc(a.customer_name)}</strong></div><div><small>Service location</small><strong>${esc(({service_centre:"Service Centre",home_office:"Home / Office",pickup_delivery:"Pickup / Delivery"})[a.service_location_type])}</strong></div></div>${a.status==="cancelled"?'<div class="alert alert-danger mt-3 mb-0"><strong>Appointment cancelled</strong><br>Your appointment remains visible for reference.</div>':""}${a.job_code?`<div class="alert alert-info mt-3 mb-0"><strong>Job ID Created</strong><br>${esc(a.job_code)}<br><small>For more information, please log in to your Customer Account.</small><br><a class="btn btn-sm btn-primary mt-2" href="https://clickandfix.site/admin/customer-login.html">Visit Customer Portal</a></div>`:""}</section><section class="tracking-card"><h2 class="h5">Service progress</h2><ol class="timeline">${stages.map((s,i)=>`<li class="${i<at||a.status==="completed"?"done":i===at?"current":""}"><strong>${esc(labels[s])}</strong></li>`).join("")}</ol>${["cancelled","rescheduled","no_show"].includes(a.status)?`<small class="text-muted">Latest update: ${esc(labels[a.status])}</small>`:""}</section></div><section class="tracking-card mt-3">
+async function load() {
+
+    if (!out) {
+        return;
+    }
+
+    try {
+
+        const part =
+            location.pathname
+                .split("/")
+                .filter(Boolean)
+                .at(-1);
+
+
+        /*
+         * If the URL itself contains a secure tracking token,
+         * always fetch fresh appointment data from Supabase.
+         */
+
+        if (
+            part &&
+            /^[0-9a-f-]{36}$/i.test(part)
+        ) {
+
+            const fresh =
+                await api(
+                    "customer-tracking",
+                    {
+                        token: part
+                    }
+                );
+
+            sessionStorage.setItem(
+                "cfx-tracking",
+                JSON.stringify(fresh)
+            );
+
+            render(fresh);
+
+            return;
+        }
+
+
+        /*
+         * Normal /track/ page.
+         *
+         * The previous implementation only rendered the
+         * sessionStorage copy here.
+         *
+         * Now we use the saved secure tracking token to
+         * fetch the latest appointment data from Supabase.
+         */
+
+        const saved =
+            JSON.parse(
+                sessionStorage.getItem(
+                    "cfx-tracking"
+                ) || "null"
+            );
+
+
+        if (
+            saved &&
+            saved.appointment &&
+            saved.appointment.tracking_token
+        ) {
+
+            const fresh =
+                await api(
+                    "customer-tracking",
+                    {
+                        token:
+                            saved.appointment
+                                .tracking_token
+                    }
+                );
+
+
+            /*
+             * Replace the cached data with the
+             * latest server response.
+             */
+
+            sessionStorage.setItem(
+                "cfx-tracking",
+                JSON.stringify(fresh)
+            );
+
+
+            render(fresh);
+
+            return;
+        }
+
+
+        /*
+         * No saved tracking session available.
+         */
+
+        throw new Error(
+            "Tracking session not found."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Tracking load failed:",
+            error
+        );
+
+        out.className =
+            "tracking-card mt-4 text-center";
+
+        out.innerHTML =
+            "<h1 class='h4'>We could not verify this appointment</h1>" +
+            "<p class='text-muted mb-0'>" +
+            "Please return to tracking and check the details you entered." +
+            "</p>";
+    }
+}
+
+function render(r){if(!r?.appointment)throw Error();result=r;let a=r.appointment;token=a.tracking_token;let stages=a.job_code?[...flow.slice(0,-1),"job_id_created","completed"]:flow,at=stages.indexOf(a.status);out.className="";out.innerHTML=`<section class="tracking-hero"><div class="d-flex justify-content-between align-items-start gap-3 flex-wrap"><div><small class="text-uppercase text-muted fw-semibold">Appointment</small><div class="tracking-code">${esc(a.appointment_id)}</div><p class="mb-0 text-muted">${esc(serviceLabel(a))}</p></div><span class="track-status ${a.status==="cancelled"?"cancelled":""}">${esc(labels[a.status]||a.status)}</span></div></section><div class="track-grid"><section class="tracking-card"><h1 class="h5 mb-3">Appointment summary</h1><div class="track-summary"><div><small>Scheduled date</small><strong>${esc(date(a.appointment_date))}</strong></div><div><small>Scheduled time</small><strong>${esc(time(a.appointment_time))}</strong></div><div><small>Customer</small><strong>${esc(a.customer_name)}</strong></div><div><small>Service location</small><strong>${esc(({service_centre:"Service Centre",home_office:"Home / Office",pickup_delivery:"Pickup / Delivery"})[a.service_location_type])}</strong></div></div>${a.status==="cancelled"?'<div class="alert alert-danger mt-3 mb-0"><strong>Appointment cancelled</strong><br>Your appointment remains visible for reference.</div>':""}${a.job_code?`<div class="alert alert-info mt-3 mb-0"><strong>Job ID Created</strong><br>${esc(a.job_code)}<br><small>For more information, please log in to your Customer Account.</small><br><a class="btn btn-sm btn-primary mt-2" href="https://clickandfix.site/admin/customer-login.html">Visit Customer Portal</a></div>`:""}</section><section class="tracking-card"><h2 class="h5">Service progress</h2><ol class="timeline">${stages.map((s,i)=>`<li class="${i<at||a.status==="completed"?"done":i===at?"current":""}"><strong>${esc(labels[s])}</strong></li>`).join("")}</ol>${["cancelled","rescheduled","no_show"].includes(a.status)?`<small class="text-muted">Latest update: ${esc(labels[a.status])}</small>`:""}</section></div><section class="tracking-card mt-3">
 <h2 class="h5">Manage appointment</h2>
 <p class="text-muted">
 ${a.job_code

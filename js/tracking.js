@@ -9,6 +9,42 @@ printer_peripheral:"Printer / Peripheral Service",
 other:"Other Service"
 };
 
+function showTrackingAlert(title, message) {
+  if (!toast) return;
+
+  toast.innerHTML = `
+    <div class="tracking-alert-content">
+      <div class="tracking-alert-icon">!</div>
+
+      <div class="tracking-alert-text">
+        <strong>${esc(title)}</strong>
+        <span>${esc(message)}</span>
+      </div>
+
+      <button type="button" class="tracking-alert-close" aria-label="Close">
+        &times;
+      </button>
+    </div>
+  `;
+
+  toast.className = "track-toast error";
+  toast.hidden = false;
+
+  const closeButton = toast.querySelector(".tracking-alert-close");
+
+  if (closeButton) {
+    closeButton.onclick = () => {
+      toast.hidden = true;
+    };
+  }
+
+  clearTimeout(showTrackingAlert.timer);
+
+  showTrackingAlert.timer = setTimeout(() => {
+    toast.hidden = true;
+  }, 5000);
+}
+
 const SERVICE_TYPE_LABELS={
 laptop_repair:"Laptop Repair",
 desktop_repair:"Desktop / Computer Repair",
@@ -56,7 +92,28 @@ return a.service||"—";
 
 async function api(name,body){if(!base||!c.supabaseAnonKey)throw Error("Tracking is not configured.");let r=await fetch(`${base}/functions/v1/${name}`,{method:"POST",headers:{"Content-Type":"application/json",apikey:c.supabaseAnonKey,Authorization:`Bearer ${c.supabaseAnonKey}`},body:JSON.stringify(body)}),d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||"Appointment details could not be verified.");return d}function date(v){return new Date(`${v}T12:00:00`).toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"long",year:"numeric"})}function time(v){let[h,m]=v.slice(0,5).split(":").map(Number);return`${h%12||12}:${String(m).padStart(2,"0")} ${h>=12?"PM":"AM"}`}function notice(x,error){if(!toast)return;toast.textContent=x;toast.className=`track-toast${error?" error":""}`;toast.hidden=false;clearTimeout(notice.t);notice.t=setTimeout(()=>toast.hidden=true,4200)}function close(){if(modal){modal.hidden=true;modal.innerHTML=""}}function dialog(html){modal.innerHTML=`<section class="track-dialog" role="dialog" aria-modal="true">${html}</section>`;modal.hidden=false;modal.querySelectorAll("[data-close]").forEach(b=>b.onclick=close)}if(modal){modal.onclick=e=>e.target===modal&&close();document.addEventListener("keydown",e=>e.key==="Escape"&&close())}
 
-if(form)form.onsubmit=async e=>{e.preventDefault();let y=String(new Date().getFullYear()),k=code.value.trim(),m=mobile.value.replace(/\D/g,""),err=trackingError;if(!/^\d{5}$/.test(k)||!/^[6-9]\d{9}$/.test(m))return err.textContent="Enter the final five digits and registered 10-digit mobile number.";trackSubmit.disabled=true;trackSubmit.textContent="Checking…";try{sessionStorage.setItem("cfx-tracking",JSON.stringify(await api("customer-tracking",{year:y,code:k,mobile:m})));location.href="../track/"}catch(x){err.textContent=x.message;trackSubmit.disabled=false;trackSubmit.textContent="Track appointment"}};
+if(form)form.onsubmit=async e=>{e.preventDefault();let y=String(new Date().getFullYear()),k=code.value.trim(),m=mobile.value.replace(/\D/g,""),err=trackingError;
+    
+    if (!/^\d{5}$/.test(k) || !/^[6-9]\d{9}$/.test(m)) {
+  showTrackingAlert(
+    "Check Your Details",
+    "Please enter the final five digits of your Appointment Code and your registered 10-digit mobile number."
+  );
+
+  err.textContent = "";
+  return;
+}
+    
+    trackSubmit.disabled=true;trackSubmit.textContent="Checking…";try{sessionStorage.setItem("cfx-tracking",JSON.stringify(await api("customer-tracking",{year:y,code:k,mobile:m})));location.href="../track/"}catch(x){
+  showTrackingAlert(
+    "Appointment Not Found",
+    "We couldn't find an appointment with the details you entered. Please check your Appointment Code and registered Mobile Number and try again."
+  );
+
+  err.textContent = "";
+  trackSubmit.disabled = false;
+  trackSubmit.textContent = "Track appointment";
+}};
 
 async function load() {
 

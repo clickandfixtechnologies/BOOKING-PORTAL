@@ -13,20 +13,13 @@ document.addEventListener("DOMContentLoaded", function () {
         submitting = true; submit.disabled = true; submit.classList.add("btn-loading");
         try { const photo = document.getElementById("servicePhoto").files[0];
 
-if (photo) {
-    showPhotoUploadProgress(0);
+if (window.CFX_uploadedPhotoPath) {
+    data.photo_references = [
+        window.CFX_uploadedPhotoPath
+    ];
+}
 
-    const upload = await window.BookingApi.uploadPhoto(
-        photo,
-        function (percent) {
-            showPhotoUploadProgress(percent);
-        }
-    );
-
-    showPhotoUploadProgress(100, true);
-
-    data.photo_references = [upload.path];
-} const result = await window.BookingApi.createAppointment(data); result.appointment.service = selectedText("serviceCategory") + (data.service_type ? " — " + selectedText("serviceType") : ""); result.appointment.location = document.querySelector('input[name="serviceLocationType"]:checked').nextElementSibling.textContent.trim(); sessionStorage.setItem("cfx-booking-confirmation", JSON.stringify(result.appointment)); window.location.assign("success.html"); }
+const result = await window.BookingApi.createAppointment(data); result.appointment.service = selectedText("serviceCategory") + (data.service_type ? " — " + selectedText("serviceType") : ""); result.appointment.location = document.querySelector('input[name="serviceLocationType"]:checked').nextElementSibling.textContent.trim(); sessionStorage.setItem("cfx-booking-confirmation", JSON.stringify(result.appointment)); window.location.assign("success.html"); }
         catch (error) { showSubmissionError(error.message || "We could not create your appointment. Please try again."); }
         finally { submitting = false; submit.disabled = false; submit.classList.remove("btn-loading"); }
     });

@@ -16,4 +16,36 @@ Deno.serve(async (request) => {
     return corsResponse({ appointment: publicAppointment(appointment, appointment.tracking_token), history: (history || []).filter((item) => permittedStatuses.has(item.new_status)) });
   } catch (_) { return corsResponse({ error: "Appointment details could not be verified." }, 404); }
 });
-function publicAppointment(a: Record<string, unknown>, token: string | null) { const cutoff = new Date(`${a.appointment_date}T${String(a.appointment_time).slice(0,5)}:00`).getTime() - 3600000; const mutable = !["cancelled","completed","no_show"].includes(a.status as string) && Date.now() < cutoff; return { appointment_id:a.appointment_id, customer_name:a.customer_name, service:[a.service_category,a.service_type].filter(Boolean).join(" — "), service_location_type:a.service_location_type, appointment_date:a.appointment_date, appointment_time:String(a.appointment_time).slice(0,5), status:a.status, job_code:a.job_code, can_cancel:mutable, can_reschedule:mutable, tracking_token:token }; }
+function publicAppointment(a: Record<string, unknown>, token: string | null) {
+  const cutoff =
+    new Date(
+      `${a.appointment_date}T${String(a.appointment_time).slice(0, 5)}:00`
+    ).getTime() - 3600000;
+
+  const mutable =
+    !["cancelled", "completed", "no_show"].includes(a.status as string) &&
+    Date.now() < cutoff;
+
+  return {
+    appointment_id: a.appointment_id,
+    customer_name: a.customer_name,
+
+    // Keep raw values for frontend label mapping
+    service_category: a.service_category,
+    service_type: a.service_type,
+
+    // Keep existing service field for backward compatibility
+    service: [a.service_category, a.service_type]
+      .filter(Boolean)
+      .join(" — "),
+
+    service_location_type: a.service_location_type,
+    appointment_date: a.appointment_date,
+    appointment_time: String(a.appointment_time).slice(0, 5),
+    status: a.status,
+    job_code: a.job_code,
+    can_cancel: mutable,
+    can_reschedule: mutable,
+    tracking_token: token
+  };
+}

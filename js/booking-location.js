@@ -1,5 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const locationChoices = document.querySelectorAll('input[name="serviceLocationType"]');
+    const locationChoices = document.querySelectorAll(
+        'input[name="serviceLocationType"]'
+    );
+
     const gpsSection = document.getElementById("gpsSection");
     const addressSection = document.getElementById("addressSection");
     const address = document.getElementById("serviceAddress");
@@ -20,49 +23,165 @@ document.addEventListener("DOMContentLoaded", function () {
         mapsUrl.value = "";
     }
 
+    function isHomeOfficeSelected() {
+        const type = document.querySelector(
+            'input[name="serviceLocationType"]:checked'
+        );
+
+        return type && type.value === "home_office";
+    }
+
+    function hasValidCoordinates() {
+        const lat = Number(latitude.value);
+        const lng = Number(longitude.value);
+
+        return (
+            latitude.value.trim() !== "" &&
+            longitude.value.trim() !== "" &&
+            Number.isFinite(lat) &&
+            Number.isFinite(lng)
+        );
+    }
+
     function updateLocationRequirements() {
-        const type = document.querySelector('input[name="serviceLocationType"]:checked');
-        const homeOffice = type && type.value === "home_office";
+        const homeOffice = isHomeOfficeSelected();
+
         gpsSection.classList.toggle("d-none", !homeOffice);
         addressSection.classList.toggle("d-none", !homeOffice);
+
         address.required = Boolean(homeOffice);
         latitude.required = Boolean(homeOffice);
         longitude.required = Boolean(homeOffice);
+
         if (!homeOffice) {
             clearCoordinates();
             setStatus("", "");
         }
     }
 
-    locationChoices.forEach(function (choice) { choice.addEventListener("change", updateLocationRequirements); });
-    capture.addEventListener("click", function () {
-        if (!navigator.geolocation) {
-            setStatus("Location is not supported by this browser. Please use a supported browser to book a Home / Office visit.", "error");
-            return;
-        }
-        capture.disabled = true;
-        setStatus("Getting your current location…", "loading");
-        navigator.geolocation.getCurrentPosition(function (position) {
-            const lat = Number(position.coords.latitude);
-            const lng = Number(position.coords.longitude);
-            if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-                setStatus("We could not verify your location. Please try again.", "error");
+    locationChoices.forEach(function (choice) {
+        choice.addEventListener("change", updateLocationRequirements);
+    });
+
+    /*
+     * Home / Office Visit-এর জন্য GPS capture বাধ্যতামূলক।
+     * Step 2-এর Continue button-এ click করার সময় validation হবে।
+     *
+     * Capture phase ব্যবহার করা হয়েছে যাতে booking-steps.js
+     * আগে next step-এ নিয়ে যেতে না পারে।
+     */
+    document.addEventListener(
+        "click",
+        function (event) {
+            const continueButton = event.target.closest(
+                '.next-step[data-next="3"]'
+            );
+
+            if (!continueButton) return;
+
+            if (!isHomeOfficeSelected()) {
                 return;
             }
-            latitude.value = lat.toFixed(7);
-            longitude.value = lng.toFixed(7);
-            mapsUrl.value = "https://www.google.com/maps/dir/?api=1&destination=" + latitude.value + "," + longitude.value;
-            setStatus("Location captured successfully.", "success");
-            capture.disabled = false;
-        }, function (error) {
-            clearCoordinates();
-            const messages = {
-                1: "Location permission was denied. Location is required for a Home / Office visit.",
-                2: "Your location is unavailable. Please move to an area with GPS/network access and try again.",
-                3: "Location request timed out. Please try again."
-            };
-            setStatus(messages[error.code] || "We could not get your location. Please try again.", "error");
-            capture.disabled = false;
-        }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 300000 });
+
+            if (!hasValidCoordinates()) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                setStatus(
+                    "Please capture your current location before continuing.",
+                    "error"
+                );
+
+                if (capture) {
+                    capture.focus();
+                }
+
+                return;
+            }
+        },
+        true
+    );
+
+    capture.addEventListener("click", function () {
+        if (!navigator.geolocation) {
+            setStatus(
+                "Location is not supported by this browser. Please use a supported browser to book a Home / Office visit.",
+                "error"
+            );
+            return;
+        }
+
+        capture.disabled = true;
+
+        setStatus(
+            "Getting your current location…",
+            "loading"
+        );
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                const lat = Number(position.coords.latitude);
+                const lng = Number(position.coords.longitude);
+
+                if (
+                    !Number.isFinite(lat) ||
+                    !Number.isFinite(lng)
+                ) {
+                    clearCoordinates();
+
+                    capture.disabled = false;
+
+                    setStatus(
+                        "We could not verify your location. Please try again.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+                latitude.value = lat.toFixed(7);
+                longitude.value = lng.toFixed(7);
+
+                mapsUrl.value =
+                    "https://www.google.com/maps/dir/?api=1&destination=" +
+                    latitude.value +
+                    "," +
+                    longitude.value;
+
+                setStatus(
+                    "Location captured successfully.",
+                    "success"
+                );
+
+                capture.disabled = false;
+            },
+            function (error) {
+                clearCoordinates();
+
+                const messages = {
+                    1: "Location permission was denied. Location is required for a Home / Office visit.",
+                    2: "Your location is unavailable. Please move to an area with GPS/network access and try again.",
+                    3: "Location request timed out. Please try again."
+                };
+
+                setStatus(
+                    messages[error.code] ||
+                        "We could not get your location. Please try again.",
+                    "error"
+                );
+
+                capture.disabled = false;
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 300000
+            }
+        );
     });
+
+    /*
+     * Page load-এর সময়ও requirements ঠিক করে দেওয়া হচ্ছে।
+     */
+    updateLocationRequirements();
 });

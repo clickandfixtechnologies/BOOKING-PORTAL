@@ -133,8 +133,46 @@ function filters(){return`<div class="row g-2 mb-3"><div class="col-md-4"><input
   ? `<button class="btn btn-sm btn-primary" data-set="confirmed" data-id="${x.id}">
       Confirm
      </button>`
-  : ""}${!["completed","cancelled","no_show"].includes(x.status)?`<button class="btn btn-sm btn-outline-success" data-set="completed" data-id="${x.id}">Complete</button>`:""}</td></tr>`).join("")||'<tr><td colspan="8" class="text-center text-muted">No appointments match these filters.</td></tr>'}</tbody></table></div>`}
-function bind(){document.querySelectorAll("[data-status]").forEach(b=>b.onclick=()=>{filter.status=b.dataset.status;dashboard()});search.onchange=()=>{filter.search=search.value;dashboard()};dateFilter.onchange=()=>{filter.date=dateFilter.value;dashboard()};statusFilter.onchange=()=>{filter.status=statusFilter.value;dashboard()};clear.onclick=()=>{filter={};dashboard()};document.querySelectorAll("[data-view-id]").forEach(b=>b.onclick=()=>detail(b.dataset.viewId));document.querySelectorAll("[data-set]").forEach(b=>b.onclick=()=>set(b.dataset.id,b.dataset.set))}async function set(id,status,extra={}){try{await api("update_appointment",{id,status,...extra});flash(`Appointment ${L(status)} successfully.`);dashboard()}catch(x){flash(x.message,false)}}
+  : ""}
+  
+
+  
+  </td></tr>`).join("")||'<tr><td colspan="8" class="text-center text-muted">No appointments match these filters.</td></tr>'}</tbody></table></div>`}
+function bind(){document.querySelectorAll("[data-status]").forEach(b=>b.onclick=()=>{filter.status=b.dataset.status;dashboard()});search.onchange=()=>{filter.search=search.value;dashboard()};dateFilter.onchange=()=>{filter.date=dateFilter.value;dashboard()};statusFilter.onchange=()=>{filter.status=statusFilter.value;dashboard()};clear.onclick=()=>{filter={};dashboard()};document.querySelectorAll("[data-view-id]").forEach(b=>b.onclick=()=>detail(b.dataset.viewId));document.querySelectorAll("[data-set]").forEach(b=>b.onclick=()=>set(b.dataset.id,b.dataset.set))}
+
+async function set(id, status, extra = {}) {
+
+    /*
+     * Direct "completed" calls through the generic action handler
+     * are permanently blocked.
+     *
+     * Completion must only happen through the dedicated
+     * Mark Completed button inside appointment details.
+     */
+    if (status === "completed" && extra.__completionFlow !== true) {
+        flash(
+            "Appointment completion must be done from the appointment details.",
+            false
+        );
+        return;
+    }
+
+    try {
+        const payload = { id, status, ...extra };
+
+        // Internal frontend-only flag must never be sent to the API
+        delete payload.__completionFlow;
+
+        await api("update_appointment", payload);
+
+        flash(`Appointment ${L(status)} successfully.`);
+        dashboard();
+
+    } catch (x) {
+        flash(x.message, false);
+    }
+}
+
 signIn.onclick=async()=>{try{let{error:x}=await s.auth.signInWithPassword({email:email.value,password:password.value});if(x)throw x;login.hidden=true;panel.hidden=false;dashboard()}catch(x){error.textContent=x.message}};signOut.onclick=()=>s.auth.signOut().then(()=>location.reload());document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav-link").forEach(x=>x.classList.remove("active"));b.classList.add("active");({dashboard,appointments:dashboard,calendar:calendarView,availability:availabilityView,technicians:techniciansView,notifications:notificationsView}[b.dataset.view]||dashboard)()});menuToggle.onclick=()=>document.querySelector(".admin-sidebar").classList.toggle("open");s?.auth.getSession().then(({data:{session}})=>{if(session){login.hidden=true;panel.hidden=false;dashboard()}});
 async function calendarView(){pageTitle.textContent="Calendar";let a=(await api("appointments",{filters:{}})).appointments;q.innerHTML=`<div class="admin-card"><h2 class="h6">Appointments by date</h2>${a.map(x=>`<button class="btn btn-light w-100 text-start mb-1" data-view-id="${x.id}">${e(formatAppointmentDateTime(x.appointment_date, x.appointment_time))} · ${e(x.customer_name)} · ${L(x.status)}</button>`).join("")||"No appointments."}</div>`;document.querySelectorAll("[data-view-id]").forEach(b=>b.onclick=()=>detail(b.dataset.viewId))}
 async function availabilityView(){pageTitle.textContent="Availability";let x=await api("availability");let z=x.settings;q.innerHTML=`<div class="admin-card"><h2 class="h6">Business settings</h2><div class="row g-2"><div class="col-12"><label>Business days (1=Mon … 7=Sun)</label><input id="days" class="form-control" value="${z.business_days.join(",")}"></div>${[["open","Opening time",z.opening_time],["close","Closing time",z.closing_time],["duration","Slot minutes",z.slot_duration_minutes],["buffer","Buffer minutes",z.buffer_minutes],["capacity","Maximum appointments",z.max_appointments_per_slot],["advance","Minimum advance minutes",z.minimum_advance_minutes],["future","Maximum future days",z.maximum_future_days]].map(v=>`<div class="col-md-4"><label>${v[1]}</label><input id="${v[0]}" class="form-control" value="${v[2]}"></div>`).join("")}</div><button id="saveAvailability" class="btn btn-primary mt-3">Save settings</button></div><div class="admin-card mt-3"><h2 class="h6">Holiday / blocked date or slot</h2><input id="blockDate" type="date" class="form-control mb-2"><input id="blockStart" type="time" class="form-control mb-2"><input id="blockEnd" type="time" class="form-control mb-2"><input id="blockReason" class="form-control mb-2" placeholder="Reason"><button id="addBlock" class="btn btn-outline-primary">Save block</button><ul class="mt-3">${x.blocks.map(b=>`<li>${e(b.block_date)} ${e(b.starts_at||"All day")} ${e(b.reason)} <button class="btn btn-sm btn-link" data-delete-block="${b.id}">Delete</button></li>`).join("")}</ul></div>`;saveAvailability.onclick=async()=>{await api("save_availability",{settings:{business_days:days.value.split(",").map(Number),opening_time:open.value,closing_time:close.value,slot_duration_minutes:duration.value,buffer_minutes:buffer.value,max_appointments_per_slot:capacity.value,minimum_advance_minutes:advance.value,maximum_future_days:future.value}});flash("Availability saved");availabilityView()};addBlock.onclick=async()=>{await api("save_block",{block:{block_date:blockDate.value,starts_at:blockStart.value||null,ends_at:blockEnd.value||null,reason:blockReason.value}});availabilityView()};document.querySelectorAll("[data-delete-block]").forEach(b=>b.onclick=async()=>{await api("delete_block",{id:b.dataset.deleteBlock});availabilityView()})}
@@ -246,7 +284,9 @@ progress.onclick = () =>
     set(id, "in_progress");
 
 complete.onclick = () =>
-    set(id, "completed");
+    set(id, "completed", {
+        __completionFlow: true
+    });
 
 cancel.onclick = () =>
     set(id, "cancelled");
@@ -280,7 +320,11 @@ jobSave.onclick = async () => {
 
 
 renderTechForm=function(t={}){const needsAccount=Boolean(t.id&&!t.auth_user_id);return`<form id="techForm" class="row g-2"><div class="col-md-4"><input name="technician_code" class="form-control" required placeholder="CFX-TECH-2026-0001" value="${e(t.technician_code||"")}" ${t.id?"readonly":""}></div><div class="col-md-4"><input name="full_name" class="form-control" required placeholder="Name" value="${e(t.full_name||"")}"></div><div class="col-md-4"><input name="mobile" class="form-control" required inputmode="tel" placeholder="10-digit mobile" value="${e(t.mobile||"")}"></div><div class="col-md-4"><input name="username" class="form-control" required placeholder="Username" value="${e(t.username||"")}"></div><div class="col-md-4"><input name="email" class="form-control" type="email" placeholder="Login email" ${t.id&&!needsAccount?"disabled":"required"}></div><div class="col-md-4"><input name="password" class="form-control" type="password" ${t.id&&!needsAccount?"disabled":"required minlength=12"} placeholder="${needsAccount?"Create 12+ character password":t.id?"Password managed separately":"12+ character password"}"></div>${needsAccount?'<div class="col-12"><small class="text-warning">This older technician has no portal account. Saving creates and links one securely.</small></div>':""}<div class="col-md-4"><input name="specialization" class="form-control" placeholder="Specializations, comma separated" value="${e((t.specialization||[]).join(","))}"></div><div class="col-md-4"><input name="working_days" class="form-control" required value="${days(t.working_days)}" placeholder="1,2,3,4,5,6"></div><div class="col-md-2"><input name="working_start" type="time" class="form-control" value="${e(t.working_start||"10:00")}"></div><div class="col-md-2"><input name="working_end" type="time" class="form-control" value="${e(t.working_end||"19:00")}"></div><div class="col-12"><button class="btn btn-primary">${t.id?"Save technician":"Create technician"}</button></div></form>`};const sidebar=document.querySelector(".admin-sidebar"),sidebarOverlay=document.createElement("div"),menuClose=document.createElement("button"),closeSidebar=()=>{sidebar.classList.remove("open");sidebarOverlay.hidden=true;document.body.classList.remove("sidebar-open")},openSidebar=()=>{sidebar.classList.add("open");sidebarOverlay.hidden=false;document.body.classList.add("sidebar-open")};sidebarOverlay.id="sidebarOverlay";sidebarOverlay.className="sidebar-overlay";sidebarOverlay.hidden=true;document.querySelector(".admin-shell").prepend(sidebarOverlay);menuClose.type="button";menuClose.id="menuClose";menuClose.className="btn btn-sm btn-outline-light d-md-none";menuClose.setAttribute("aria-label","Close menu");menuClose.textContent="×";sidebar.prepend(menuClose);menuToggle.onclick=()=>sidebar.classList.contains("open")?closeSidebar():openSidebar();menuClose.onclick=closeSidebar;sidebarOverlay.onclick=closeSidebar;document.addEventListener("keydown",event=>{if(event.key==="Escape")closeSidebar()});document.querySelectorAll("[data-view]").forEach(button=>button.addEventListener("click",()=>{if(matchMedia("(max-width: 767px)").matches)closeSidebar()}));
-const existingDetail=detail;table=function(rows){return`<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Appointment</th><th>Customer</th><th>Service</th><th>Date / Time</th><th>Technician</th><th>Job</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows.map(item=>`<tr><td>${e(item.appointment_id)}</td><td>${e(item.customer_name)}<br><small>${e(item.mobile)} · ${e(item.email)}</small></td><td>${e(serviceCategoryLabel(item.service_category))}<br><small>${e(serviceTypeLabel(item.service_type))}</small></td><td>${e(formatAppointmentDateTime(item.appointment_date, item.appointment_time))}</td><td>${e(item.technicians?.full_name)}</td><td>${e(item.job_code)}</td><td><span class="badge status-badge">${L(item.status)}</span></td><td class="actions"><button class="btn btn-sm btn-outline-primary" data-view-id="${item.id}">View</button>${item.status==="pending"?`<button class="btn btn-sm btn-primary" data-set="confirmed" data-id="${item.id}">Confirm</button>`:""}${!["completed","cancelled","no_show"].includes(item.status)?`<button class="btn btn-sm btn-outline-success" data-set="completed" data-id="${item.id}">Complete</button>`:""}${item.status !== "completed"
+const existingDetail=detail;table=function(rows){return`<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Appointment</th><th>Customer</th><th>Service</th><th>Date / Time</th><th>Technician</th><th>Job</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows.map(item=>`<tr><td>${e(item.appointment_id)}</td><td>${e(item.customer_name)}<br><small>${e(item.mobile)} · ${e(item.email)}</small></td><td>${e(serviceCategoryLabel(item.service_category))}<br><small>${e(serviceTypeLabel(item.service_type))}</small></td><td>${e(formatAppointmentDateTime(item.appointment_date, item.appointment_time))}</td><td>${e(item.technicians?.full_name)}</td><td>${e(item.job_code)}</td><td><span class="badge status-badge">${L(item.status)}</span></td><td class="actions"><button class="btn btn-sm btn-outline-primary" data-view-id="${item.id}">View</button>${item.status==="pending"?`<button class="btn btn-sm btn-primary" data-set="confirmed" data-id="${item.id}">Confirm</button>`:""}
+
+
+
+${item.status !== "completed"
     ? `<button class="btn btn-sm btn-outline-danger" data-delete-id="${item.id}">Delete</button>`
     : ""}
     

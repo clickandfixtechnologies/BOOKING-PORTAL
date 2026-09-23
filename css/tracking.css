@@ -210,13 +210,10 @@
   cursor:default;
   user-select:none;
 
-  transition:
-    transform .2s ease,
-    background-color .2s ease,
-    box-shadow .2s ease;
+  animation:liveTrackingPulse 2.2s ease-in-out infinite;
 }
 
-/* Green status dot */
+/* Green live dot */
 .tracking-live::before{
   content:"";
 
@@ -229,21 +226,33 @@
 
   box-shadow:0 0 0 4px rgba(25,135,84,.10);
 
-  transition:
-    transform .2s ease,
-    box-shadow .2s ease;
+  animation:liveTrackingDot 1.8s ease-in-out infinite;
 }
 
-/* Hover effect */
-.tracking-live:hover{
-  transform:translateY(-2px);
-  background:#eaf8ef;
-  box-shadow:0 5px 14px rgba(25,135,84,.18);
+/* Main continuous animation */
+@keyframes liveTrackingPulse{
+  0%,100%{
+    transform:translateY(0);
+    box-shadow:0 2px 6px rgba(25,135,84,.08);
+  }
+
+  50%{
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(25,135,84,.18);
+  }
 }
 
-.tracking-live:hover::before{
-  transform:scale(1.25);
-  box-shadow:0 0 0 6px rgba(25,135,84,.12);
+/* Green dot animation */
+@keyframes liveTrackingDot{
+  0%,100%{
+    transform:scale(1);
+    box-shadow:0 0 0 4px rgba(25,135,84,.10);
+  }
+
+  50%{
+    transform:scale(1.25);
+    box-shadow:0 0 0 6px rgba(25,135,84,.14);
+  }
 }
 
 /* Mobile */

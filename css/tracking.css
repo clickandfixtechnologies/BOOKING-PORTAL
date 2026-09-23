@@ -1776,15 +1776,43 @@
   align-items:center;
   gap:4px;
 
+  padding:3px 6px;
+  border-radius:5px;
+
   font-size:10px;
   font-weight:700;
   line-height:1;
 
   color:#0d6efd;
+  background:#f1f7ff;
+
   white-space:nowrap;
+  cursor:default;
+
+  transition:
+    background-color .2s ease,
+    color .2s ease,
+    transform .2s ease,
+    box-shadow .2s ease;
 }
 
 .appointment-verified i{
   font-size:10px;
   color:#0d6efd;
+
+  transition:
+    transform .2s ease;
+}
+
+/* Hover effect */
+.appointment-verified:hover{
+  color:#0a58ca;
+  background:#e7f1ff;
+  transform:translateY(-1px);
+  box-shadow:0 3px 8px rgba(13,110,253,.14);
+}
+
+.appointment-verified:hover i{
+  color:#0a58ca;
+  transform:scale(1.15);
 }

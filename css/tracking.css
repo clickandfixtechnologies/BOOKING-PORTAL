@@ -1242,12 +1242,21 @@
     }
 
 
-    .tracking-mark {
-        width: 38px;
-        height: 38px;
-
-        border-radius: 11px;
-    }
+    .tracking-mark{
+  width:42px;
+  height:42px;
+  min-width:42px;
+  border-radius:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#2f8cff,#0d6efd);
+  color:#fff;
+  font-size:16px;
+  font-weight:800;
+  line-height:1;
+  box-shadow:0 4px 10px rgba(13,110,253,.22);
+}
 
 
     .tracking-code {

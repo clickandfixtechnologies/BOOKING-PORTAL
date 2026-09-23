@@ -23,3 +23,318 @@
 .admin-main .table td.actions .btn:last-child {
     margin-right: 0;
 }
+
+/* =========================================================
+   PREMIUM GLASSMORPHISM - ADMIN DASHBOARD
+   ========================================================= */
+
+/* Main dashboard background */
+.admin-shell {
+    background:
+        radial-gradient(circle at 10% 10%, rgba(13, 110, 253, 0.08), transparent 30%),
+        radial-gradient(circle at 90% 20%, rgba(99, 102, 241, 0.07), transparent 30%),
+        linear-gradient(135deg, #eef3f9 0%, #f8fafc 50%, #edf2f8 100%);
+}
+
+
+/* Sidebar - dark glass */
+.admin-sidebar {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(19, 35, 59, 0.96),
+            rgba(15, 32, 55, 0.88)
+        );
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+
+    box-shadow:
+        8px 0 30px rgba(15, 23, 42, 0.08);
+}
+
+
+/* Main content */
+.admin-main {
+    position: relative;
+}
+
+
+/* Top bar */
+.admin-topbar {
+    position: relative;
+}
+
+
+/* KPI Cards */
+.kpi {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.82),
+            rgba(255, 255, 255, 0.58)
+        );
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    border: 1px solid rgba(255, 255, 255, 0.75);
+
+    box-shadow:
+        0 8px 25px rgba(15, 23, 42, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.kpi:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 12px 30px rgba(15, 23, 42, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+
+/* All admin cards */
+.admin-card {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.82),
+            rgba(255, 255, 255, 0.60)
+        );
+
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    border: 1px solid rgba(255, 255, 255, 0.78);
+
+    box-shadow:
+        0 8px 28px rgba(15, 23, 42, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+
+/* Search / filter card area */
+.admin-main .table-responsive,
+.admin-main .table-responsive > table {
+    background: transparent;
+}
+
+
+/* Table glass surface */
+.admin-main .table-responsive {
+    border-radius: 14px;
+}
+
+
+/* Table header */
+.admin-main .table thead th {
+    background: rgba(255, 255, 255, 0.32);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+
+/* Table rows */
+.admin-main .table tbody tr {
+    transition:
+        background 0.2s ease;
+}
+
+.admin-main .table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.38);
+}
+
+
+/* Table action buttons */
+.admin-main .table td.actions {
+    display: table-cell;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.admin-main .table td.actions .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-right: 5px;
+
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.58);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    box-shadow:
+        0 3px 10px rgba(15, 23, 42, 0.07);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.admin-main .table td.actions .btn:hover {
+    transform: translateY(-1px);
+
+    background: rgba(255, 255, 255, 0.88);
+
+    box-shadow:
+        0 6px 16px rgba(15, 23, 42, 0.11);
+}
+
+.admin-main .table td.actions .btn:last-child {
+    margin-right: 0;
+}
+
+
+/* Form controls - glass */
+.admin-main .form-control,
+.admin-main .form-select {
+    background: rgba(255, 255, 255, 0.68);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border: 1px solid rgba(148, 163, 184, 0.30);
+
+    box-shadow:
+        inset 0 1px 2px rgba(15, 23, 42, 0.025);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.admin-main .form-control:focus,
+.admin-main .form-select:focus {
+    background: rgba(255, 255, 255, 0.88);
+
+    border-color: rgba(13, 110, 253, 0.45);
+
+    box-shadow:
+        0 0 0 3px rgba(13, 110, 253, 0.10),
+        0 5px 15px rgba(15, 23, 42, 0.05);
+}
+
+
+/* Status tabs */
+.status-tabs button {
+    background: rgba(255, 255, 255, 0.58);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border-color: rgba(148, 163, 184, 0.28);
+
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, 0.04);
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.status-tabs button:hover {
+    transform: translateY(-1px);
+
+    background: rgba(255, 255, 255, 0.82);
+
+    box-shadow:
+        0 5px 12px rgba(15, 23, 42, 0.07);
+}
+
+
+/* Status badge glass */
+.status-badge {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    box-shadow:
+        0 2px 6px rgba(15, 23, 42, 0.05);
+}
+
+
+/* Buttons */
+.admin-main .btn {
+    box-shadow:
+        0 2px 7px rgba(15, 23, 42, 0.05);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.admin-main .btn:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 13px rgba(15, 23, 42, 0.10);
+}
+
+
+/* Sidebar active item */
+.admin-sidebar .nav-link.active {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(61, 115, 177, 0.75),
+            rgba(39, 72, 111, 0.75)
+        );
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        0 5px 15px rgba(0, 0, 0, 0.10);
+}
+
+
+/* Sidebar hover */
+.admin-sidebar .nav-link:hover {
+    background: rgba(39, 72, 111, 0.70);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+
+/* Sign out button */
+.admin-sidebar .btn {
+    background: rgba(255, 255, 255, 0.06);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border-color: rgba(255, 255, 255, 0.55);
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.10);
+}
+
+.admin-sidebar .btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+
+/* Mobile overlay */
+.sidebar-overlay {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
+    background: rgba(19, 35, 59, 0.42);
+}

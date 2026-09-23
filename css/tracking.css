@@ -186,20 +186,27 @@
   color:#6c757d;
 }
 
-/* Live Tracking */
+/* =========================================================
+   LIVE TRACKING
+   ========================================================= */
+
 .tracking-live{
   display:inline-flex;
   align-items:center;
   gap:7px;
   margin-left:auto;
   padding:7px 11px;
+
   border:1px solid #d7eadf;
   border-radius:999px;
+
   background:#f3fbf6;
   color:#198754;
+
   font-size:12px;
   font-weight:700;
   line-height:1;
+
   white-space:nowrap;
   cursor:default;
   user-select:none;
@@ -210,14 +217,17 @@
     box-shadow .2s ease;
 }
 
-/* Green live dot */
+/* Green status dot */
 .tracking-live::before{
   content:"";
+
   width:7px;
   height:7px;
   min-width:7px;
+
   border-radius:50%;
   background:#198754;
+
   box-shadow:0 0 0 4px rgba(25,135,84,.10);
 
   transition:
@@ -225,7 +235,7 @@
     box-shadow .2s ease;
 }
 
-/* Hover animation */
+/* Hover effect */
 .tracking-live:hover{
   transform:translateY(-2px);
   background:#eaf8ef;

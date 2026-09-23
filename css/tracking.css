@@ -209,11 +209,9 @@
   white-space:nowrap;
   cursor:default;
   user-select:none;
-
-  animation:liveTrackingPulse 2.2s ease-in-out infinite;
 }
 
-/* Green live dot */
+/* Animated Green Live Dot */
 .tracking-live::before{
   content:"";
 
@@ -224,29 +222,14 @@
   border-radius:50%;
   background:#198754;
 
-  box-shadow:0 0 0 4px rgba(25,135,84,.10);
-
   animation:liveTrackingDot 1.8s ease-in-out infinite;
 }
 
-/* Main continuous animation */
-@keyframes liveTrackingPulse{
-  0%,100%{
-    transform:translateY(0);
-    box-shadow:0 2px 6px rgba(25,135,84,.08);
-  }
-
-  50%{
-    transform:translateY(-2px);
-    box-shadow:0 6px 16px rgba(25,135,84,.18);
-  }
-}
-
-/* Green dot animation */
+/* Continuous Dot Pulse */
 @keyframes liveTrackingDot{
   0%,100%{
     transform:scale(1);
-    box-shadow:0 0 0 4px rgba(25,135,84,.10);
+    box-shadow:0 0 0 3px rgba(25,135,84,.10);
   }
 
   50%{

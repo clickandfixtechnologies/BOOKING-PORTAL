@@ -1822,22 +1822,40 @@
    ========================================================= */
 
 .rate-service-link{
-  display:inline-flex;
+  position:relative;
+  display:flex;
   align-items:center;
+  justify-content:center;
   gap:7px;
-
-  margin-top:18px;
-
+  width:100%;
+  margin-top:20px;
+  padding:12px 0;
   color:#0d6efd;
   font-size:13px;
   font-weight:700;
-
   text-decoration:none;
   cursor:pointer;
+  transition:color .2s ease;
+}
 
+.rate-service-link::before,
+.rate-service-link::after{
+  content:"";
+  flex:1;
+  height:2px;
+  background:#0d6efd;
+  opacity:.28;
   transition:
-    color .2s ease,
-    transform .2s ease;
+    opacity .25s ease,
+    transform .25s ease;
+}
+
+.rate-service-link::before{
+  margin-right:4px;
+}
+
+.rate-service-link::after{
+  margin-left:4px;
 }
 
 .rate-service-link i{
@@ -1848,7 +1866,11 @@
 .rate-service-link:hover{
   color:#0a58ca;
   text-decoration:none;
-  transform:translateY(-1px);
+}
+
+.rate-service-link:hover::before,
+.rate-service-link:hover::after{
+  opacity:.65;
 }
 
 .rate-service-link:hover i{

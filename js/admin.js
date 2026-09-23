@@ -154,19 +154,131 @@ function days(v){return(v||[1,2,3,4,5,6]).join(",")}function renderTechForm(t={}
 
 </section><section><h2 class="h6">Technician</h2><p>${e(a.technicians?.full_name)}</p><select id="techAssign" class="form-select mb-2"><option value="">Select active technician</option>${active.map(x=>`<option value="${x.id}" ${a.technician_id===x.id?"selected":""}>${e(x.full_name)} — ${e(x.technician_code)}</option>`).join("")}</select><button id="assignTech" class="btn btn-sm btn-primary" ${a.status==="confirmed"?"":"disabled"}>Assign technician</button></section>
 
-<section><h2 class="h6">Job</h2><input id="job" class="form-control mb-2" value="${e(a.job_code||"")}" placeholder="CFX-JOB-2026-00452"><button id="jobSave" class="btn btn-sm btn-primary">Save Job ID</button></section></div>
+<section>
+    <h2 class="h6">Job</h2>
 
-<div class="admin-card mt-3"><div class="actions">${["pending", "rescheduled"].includes(a.status)
-  ? '<button id="confirm" class="btn btn-primary">Confirm Appointment</button>'
-  : ""}<button id="way" class="btn btn-outline-primary" ${a.status==="technician_assigned"?"":"disabled"}>On The Way</button><button id="progress" class="btn btn-outline-primary" ${a.status==="on_the_way"?"":"disabled"}>In Progress</button><button id="jobCreated" class="btn btn-outline-primary" ${a.status==="in_progress"?"":"disabled"}>Job ID Created</button><button id="complete" class="btn btn-success" ${a.status==="job_id_created"?"":"disabled"}>Mark Completed</button><button id="cancel" class="btn btn-outline-danger" ${["completed","cancelled","no_show"].includes(a.status)?"disabled":""}>Cancel</button></div></div>
+    <input
+        id="job"
+        class="form-control mb-2"
+        value="${e(a.job_code || "")}"
+        placeholder="CFX-JOB-2026-00452"
+        ${a.status === "in_progress" ? "" : "disabled"}
+    >
 
-<div class="admin-card mt-3"><h2 class="h6">Status History</h2><ol>${(a.appointment_status_history||[]).map(h=>`<li>${L(h.old_status||"Created")} → <b>${L(h.new_status)}</b><br><small>${new Date(h.changed_at).toLocaleString()} ${e(h.note||"")}</small></li>`).join("")}</ol></div>`;back.onclick=dashboard;assignTech.onclick=()=>set(id,"technician_assigned",{technician_id:techAssign.value});const confirmButton = document.getElementById("confirm");
+    <button
+        id="jobSave"
+        class="btn btn-sm btn-primary"
+        ${a.status === "in_progress" ? "" : "disabled"}
+    >
+        Save Job ID
+    </button>
+</section></div>
 
-if (confirmButton) {
-    confirmButton.onclick = function () {
+<div class="admin-card mt-3">
+    <div class="actions">
+
+        ${["pending", "rescheduled"].includes(a.status)
+            ? '<button id="confirmAppointment" class="btn btn-primary">Confirm Appointment</button>'
+            : ""}
+
+        <button
+            id="way"
+            class="btn btn-outline-primary"
+            ${a.status === "technician_assigned" ? "" : "disabled"}
+        >
+            On The Way
+        </button>
+
+        <button
+            id="progress"
+            class="btn btn-outline-primary"
+            ${a.status === "on_the_way" ? "" : "disabled"}
+        >
+            In Progress
+        </button>
+
+        <button
+            id="complete"
+            class="btn btn-success"
+            ${(
+                a.status === "job_id_created" ||
+                (a.status === "in_progress" && !a.job_code)
+            ) ? "" : "disabled"}
+        >
+            Mark Completed
+        </button>
+
+        <button
+            id="cancel"
+            class="btn btn-outline-danger"
+            ${["completed", "cancelled", "no_show"].includes(a.status) ? "disabled" : ""}
+        >
+            Cancel
+        </button>
+
+    </div>
+</div>
+
+<div class="admin-card mt-3"><h2 class="h6">Status History</h2><ol>${(a.appointment_status_history||[]).map(h=>`<li>${L(h.old_status||"Created")} → <b>${L(h.new_status)}</b><br><small>${new Date(h.changed_at).toLocaleString()} ${e(h.note||"")}</small></li>`).join("")}</ol>
+
+</div>`;
+
+back.onclick = dashboard;
+
+assignTech.onclick = () =>
+    set(id, "technician_assigned", {
+        technician_id: techAssign.value
+    });
+
+const confirmAppointmentButton =
+    document.getElementById("confirm");
+
+if (confirmAppointmentButton) {
+    confirmAppointmentButton.onclick = function () {
         set(id, "confirmed");
     };
-}way.onclick=()=>set(id,"on_the_way");progress.onclick=()=>set(id,"in_progress");jobCreated.onclick=()=>set(id,"job_id_created",{job_code:job.value});complete.onclick=()=>set(id,"completed");cancel.onclick=()=>set(id,"cancelled");jobSave.onclick=()=>set(id,a.status,{job_code:job.value})}
+}
+
+way.onclick = () =>
+    set(id, "on_the_way");
+
+progress.onclick = () =>
+    set(id, "in_progress");
+
+complete.onclick = () =>
+    set(id, "completed");
+
+cancel.onclick = () =>
+    set(id, "cancelled");
+
+jobSave.onclick = async () => {
+
+    const jobCode = String(job.value || "").trim();
+
+    // Job ID না দিলে কিছু করবে না
+    if (!jobCode) {
+        return;
+    }
+
+    // Job ID format check
+    if (!/^CFX-JOB-[0-9]{4}-[0-9]{5}$/.test(jobCode)) {
+
+        flash(
+            "Please enter a valid Job ID. Example: CFX-JOB-2026-00452",
+            false
+        );
+
+        job.focus();
+        return;
+    }
+
+    // Job ID save হলেই automatically Job ID Created হবে
+    await set(id, "job_id_created", {
+        job_code: jobCode
+    });
+}}
+
+
 renderTechForm=function(t={}){const needsAccount=Boolean(t.id&&!t.auth_user_id);return`<form id="techForm" class="row g-2"><div class="col-md-4"><input name="technician_code" class="form-control" required placeholder="CFX-TECH-2026-0001" value="${e(t.technician_code||"")}" ${t.id?"readonly":""}></div><div class="col-md-4"><input name="full_name" class="form-control" required placeholder="Name" value="${e(t.full_name||"")}"></div><div class="col-md-4"><input name="mobile" class="form-control" required inputmode="tel" placeholder="10-digit mobile" value="${e(t.mobile||"")}"></div><div class="col-md-4"><input name="username" class="form-control" required placeholder="Username" value="${e(t.username||"")}"></div><div class="col-md-4"><input name="email" class="form-control" type="email" placeholder="Login email" ${t.id&&!needsAccount?"disabled":"required"}></div><div class="col-md-4"><input name="password" class="form-control" type="password" ${t.id&&!needsAccount?"disabled":"required minlength=12"} placeholder="${needsAccount?"Create 12+ character password":t.id?"Password managed separately":"12+ character password"}"></div>${needsAccount?'<div class="col-12"><small class="text-warning">This older technician has no portal account. Saving creates and links one securely.</small></div>':""}<div class="col-md-4"><input name="specialization" class="form-control" placeholder="Specializations, comma separated" value="${e((t.specialization||[]).join(","))}"></div><div class="col-md-4"><input name="working_days" class="form-control" required value="${days(t.working_days)}" placeholder="1,2,3,4,5,6"></div><div class="col-md-2"><input name="working_start" type="time" class="form-control" value="${e(t.working_start||"10:00")}"></div><div class="col-md-2"><input name="working_end" type="time" class="form-control" value="${e(t.working_end||"19:00")}"></div><div class="col-12"><button class="btn btn-primary">${t.id?"Save technician":"Create technician"}</button></div></form>`};const sidebar=document.querySelector(".admin-sidebar"),sidebarOverlay=document.createElement("div"),menuClose=document.createElement("button"),closeSidebar=()=>{sidebar.classList.remove("open");sidebarOverlay.hidden=true;document.body.classList.remove("sidebar-open")},openSidebar=()=>{sidebar.classList.add("open");sidebarOverlay.hidden=false;document.body.classList.add("sidebar-open")};sidebarOverlay.id="sidebarOverlay";sidebarOverlay.className="sidebar-overlay";sidebarOverlay.hidden=true;document.querySelector(".admin-shell").prepend(sidebarOverlay);menuClose.type="button";menuClose.id="menuClose";menuClose.className="btn btn-sm btn-outline-light d-md-none";menuClose.setAttribute("aria-label","Close menu");menuClose.textContent="×";sidebar.prepend(menuClose);menuToggle.onclick=()=>sidebar.classList.contains("open")?closeSidebar():openSidebar();menuClose.onclick=closeSidebar;sidebarOverlay.onclick=closeSidebar;document.addEventListener("keydown",event=>{if(event.key==="Escape")closeSidebar()});document.querySelectorAll("[data-view]").forEach(button=>button.addEventListener("click",()=>{if(matchMedia("(max-width: 767px)").matches)closeSidebar()}));
 const existingDetail=detail;table=function(rows){return`<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Appointment</th><th>Customer</th><th>Service</th><th>Date / Time</th><th>Technician</th><th>Job</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows.map(item=>`<tr><td>${e(item.appointment_id)}</td><td>${e(item.customer_name)}<br><small>${e(item.mobile)} · ${e(item.email)}</small></td><td>${e(serviceCategoryLabel(item.service_category))}<br><small>${e(serviceTypeLabel(item.service_type))}</small></td><td>${e(formatAppointmentDateTime(item.appointment_date, item.appointment_time))}</td><td>${e(item.technicians?.full_name)}</td><td>${e(item.job_code)}</td><td><span class="badge status-badge">${L(item.status)}</span></td><td class="actions"><button class="btn btn-sm btn-outline-primary" data-view-id="${item.id}">View</button>${item.status==="pending"?`<button class="btn btn-sm btn-primary" data-set="confirmed" data-id="${item.id}">Confirm</button>`:""}${!["completed","cancelled","no_show"].includes(item.status)?`<button class="btn btn-sm btn-outline-success" data-set="completed" data-id="${item.id}">Complete</button>`:""}${item.status !== "completed"
     ? `<button class="btn btn-sm btn-outline-danger" data-delete-id="${item.id}">Delete</button>`

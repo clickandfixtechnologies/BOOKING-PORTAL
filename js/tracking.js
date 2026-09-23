@@ -1,3 +1,13 @@
+(function () {
+    if (!document.querySelector('link[data-cfx-fontawesome]')) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css";
+        link.setAttribute("data-cfx-fontawesome", "true");
+        document.head.appendChild(link);
+    }
+})();
+
 (function(){const c=window.CFX_CONFIG||{},base=(c.supabaseUrl||"").replace(/\/$/,""),form=document.getElementById("trackingForm"),out=document.getElementById("trackingResult"),modal=document.getElementById("trackingModal"),toast=document.getElementById("trackingToast");let result,token,busy=false;const labels={pending:"Booking Received",confirmed:"Confirmed",technician_assigned:"Technician Assigned",on_the_way:"Technician On The Way",in_progress:"Work In Progress",job_id_created:"Job ID Created",completed:"Completed",cancelled:"Cancelled",rescheduled:"Rescheduled",no_show:"No Show"},flow=["pending","confirmed","technician_assigned","on_the_way","in_progress","completed"],esc=v=>{let x=document.createElement("div");x.textContent=v??"—";return x.innerHTML};
 
 const SERVICE_CATEGORY_LABELS={

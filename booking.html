@@ -897,7 +897,6 @@
             "problemDescription",
             "serviceAddress",
             "landmark",
-            "customerName",
             "additionalNotes"
         ];
 
@@ -919,6 +918,34 @@
                 field.value = field.value.toUpperCase();
             });
         });
+
+
+        /* Customer Name → Title Case */
+        const customerName = document.getElementById("customerName");
+
+        if (customerName) {
+
+            function formatCustomerName(value) {
+                return value
+                    .toLowerCase()
+                    .replace(/\b\w/g, function (char) {
+                        return char.toUpperCase();
+                    });
+            }
+
+            customerName.addEventListener("input", function () {
+                const start = customerName.selectionStart;
+                const end = customerName.selectionEnd;
+
+                customerName.value = formatCustomerName(customerName.value);
+
+                customerName.setSelectionRange(start, end);
+            });
+
+            customerName.addEventListener("blur", function () {
+                customerName.value = formatCustomerName(customerName.value);
+            });
+        }
     });
 </script>
 

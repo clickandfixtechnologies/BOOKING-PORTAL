@@ -8,7 +8,45 @@
     }
 })();
 
-(function(){const c=window.CFX_CONFIG||{},base=(c.supabaseUrl||"").replace(/\/$/,""),form=document.getElementById("trackingForm"),out=document.getElementById("trackingResult"),modal=document.getElementById("trackingModal"),toast=document.getElementById("trackingToast");let result,token,busy=false;const labels={pending:"Booking Received",confirmed:"Confirmed",technician_assigned:"Technician Assigned",on_the_way:"Technician On The Way",in_progress:"Work In Progress",job_id_created:"Job ID Created",completed:"Completed",cancelled:"Cancelled",rescheduled:"Rescheduled",no_show:"No Show"},flow=["pending","confirmed","technician_assigned","on_the_way","in_progress","completed"],esc=v=>{let x=document.createElement("div");x.textContent=v??"—";return x.innerHTML};
+(function(){const c=window.CFX_CONFIG||{},base=(c.supabaseUrl||"").replace(/\/$/,""),form=document.getElementById("trackingForm"),out=document.getElementById("trackingResult"),modal=document.getElementById("trackingModal"),toast=document.getElementById("trackingToast");let result,token,busy=false
+
+const labels={pending:"Booking Received",confirmed:"Confirmed",technician_assigned:"Technician Assigned",on_the_way:"Technician On The Way",in_progress:"Work In Progress",job_id_created:"Job ID Created",completed:"Completed",cancelled:"Cancelled",rescheduled:"Rescheduled",no_show:"No Show"},flow=["pending","confirmed","technician_assigned","on_the_way","in_progress","completed"],esc=v=>{let x=document.createElement("div");x.textContent=v??"—";return x.innerHTML};
+
+function formatStatusDateTime(value) {
+  if (!value) return "";
+
+  const d = new Date(value);
+
+  if (Number.isNaN(d.getTime())) {
+    return "";
+  }
+
+  return d.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  });
+}
+
+function getStatusHistoryMap(history) {
+  const map = {};
+
+  (Array.isArray(history) ? history : []).forEach(function (item) {
+    if (!item || !item.new_status || !item.changed_at) return;
+
+    /*
+     * If the same status appears more than once,
+     * keep the latest status-change time.
+     */
+    map[item.new_status] = item.changed_at;
+  });
+
+  return map;
+}
 
 const SERVICE_CATEGORY_LABELS={
 computer_laptop:"Computer / Laptop Service",
@@ -257,7 +295,9 @@ function render(r){
 
   result=r;
   let a=r.appointment;
-    
+   
+    const statusHistory = getStatusHistoryMap(r.history);
+
     token=a.tracking_token;let stages=a.job_code?[...flow.slice(0,-1),"job_id_created","completed"]:flow,at=stages.indexOf(a.status);out.className="";out.innerHTML=`
     
     <div class="tracking-brand">
@@ -282,7 +322,28 @@ function render(r){
 </span>
 </span>
     
-    <div class="tracking-code-row"><div class="tracking-code">${esc(a.appointment_id)}</div><button type="button" class="tracking-copy-btn" id="copyAppointmentId" title="Copy Appointment ID" aria-label="Copy Appointment ID"><i class="fa-regular fa-copy"></i></button></div><p class="tracking-service">${esc(serviceLabel(a))}</p></div><span class="track-status ${a.status==="cancelled"?"cancelled":""}">${esc(labels[a.status]||a.status)}</span></div></section><div class="track-grid"><section class="tracking-card"><h1 class="h5 mb-3">Appointment summary</h1><div class="track-summary"><div><small>Scheduled date</small><strong>${esc(date(a.appointment_date))}</strong></div><div><small>Scheduled time</small><strong>${esc(time(a.appointment_time))}</strong></div><div><small>Customer</small><strong>${esc(a.customer_name)}</strong></div><div><small>Service location</small><strong>${esc(({service_centre:"Service Centre",home_office:"Home / Office",pickup_delivery:"Pickup / Delivery"})[a.service_location_type])}</strong></div></div>${a.status==="cancelled"?'<div class="alert alert-danger mt-3 mb-0"><strong>Appointment cancelled</strong><br>Your appointment remains visible for reference.</div>':""}${a.job_code?`<div class="alert alert-info mt-3 mb-0"><strong>Job ID Created</strong><br>${esc(a.job_code)}<br><small>For more information, please log in to your Customer Account.</small><br><a class="btn btn-sm btn-primary mt-2" href="https://clickandfix.site/admin/customer-login.html">Visit Customer Portal</a></div>`:""}</section><section class="tracking-card"><h2 class="h5">Service progress</h2><ol class="timeline">${stages.map((s,i)=>`<li class="${i<at||a.status==="completed"?"done":i===at?"current":""}"><strong>${esc(labels[s])}</strong></li>`).join("")}</ol>${["cancelled","rescheduled","no_show"].includes(a.status)?`<small class="text-muted">Latest update: ${esc(labels[a.status])}</small>`:""}${a.status==="completed"?`<a href="https://g.page/r/CbpofLP45D6_EBM/review" target="_blank" rel="noopener noreferrer" class="rate-service-link"><i class="fa-regular fa-star"></i>Rate Service Experience</a>`:""}</section>
+    <div class="tracking-code-row"><div class="tracking-code">${esc(a.appointment_id)}</div><button type="button" class="tracking-copy-btn" id="copyAppointmentId" title="Copy Appointment ID" aria-label="Copy Appointment ID"><i class="fa-regular fa-copy"></i></button></div><p class="tracking-service">${esc(serviceLabel(a))}</p></div><span class="track-status ${a.status==="cancelled"?"cancelled":""}">${esc(labels[a.status]||a.status)}</span></div></section><div class="track-grid"><section class="tracking-card"><h1 class="h5 mb-3">Appointment summary</h1><div class="track-summary"><div><small>Scheduled date</small><strong>${esc(date(a.appointment_date))}</strong></div><div><small>Scheduled time</small><strong>${esc(time(a.appointment_time))}</strong></div><div><small>Customer</small><strong>${esc(a.customer_name)}</strong></div><div><small>Service location</small><strong>${esc(({service_centre:"Service Centre",home_office:"Home / Office",pickup_delivery:"Pickup / Delivery"})[a.service_location_type])}</strong></div></div>${a.status==="cancelled"?'<div class="alert alert-danger mt-3 mb-0"><strong>Appointment cancelled</strong><br>Your appointment remains visible for reference.</div>':""}${a.job_code?`<div class="alert alert-info mt-3 mb-0"><strong>Job ID Created</strong><br>${esc(a.job_code)}<br><small>For more information, please log in to your Customer Account.</small><br><a class="btn btn-sm btn-primary mt-2" href="https://clickandfix.site/admin/customer-login.html">Visit Customer Portal</a></div>`:""}</section><section class="tracking-card"><h2 class="h5">Service progress</h2>
+    
+    <ol class="timeline">
+  ${stages.map((s,i)=>{
+    const statusTime = statusHistory[s];
+    const reached = Boolean(statusTime);
+    const isCurrent = s === a.status;
+
+    return `
+      <li class="${reached ? "done" : ""}${isCurrent ? " current" : ""}">
+        <strong>${esc(labels[s])}</strong>
+        ${
+          reached
+            ? `<span class="timeline-date">${esc(formatStatusDateTime(statusTime))}</span>`
+            : ""
+        }
+      </li>
+    `;
+  }).join("")}
+</ol>
+    
+    ${["cancelled","rescheduled","no_show"].includes(a.status)?`<small class="text-muted">Latest update: ${esc(labels[a.status])}</small>`:""}${a.status==="completed"?`<a href="https://g.page/r/CbpofLP45D6_EBM/review" target="_blank" rel="noopener noreferrer" class="rate-service-link"><i class="fa-regular fa-star"></i>Rate Service Experience</a>`:""}</section>
     
     </div><section class="tracking-card mt-3"><h2 class="h5">Manage appointment</h2><p class="text-muted">${a.job_code?"Your Job ID has been created. Reschedule and cancellation are no longer available for this appointment.":"Availability and the service cutoff are checked again when you confirm."}</p><div class="track-actions"><button id="reschedule" class="btn btn-outline-primary" ${a.job_code||!a.can_reschedule?"disabled":""}>Reschedule appointment</button><button id="cancel" class="btn btn-outline-danger" ${a.job_code||!a.can_cancel?"disabled":""}>Cancel appointment</button></div></section>`;const copyAppointmentId=document.getElementById("copyAppointmentId");if(copyAppointmentId){copyAppointmentId.onclick=async()=>{try{await navigator.clipboard.writeText(String(a.appointment_id||""));const original=copyAppointmentId.innerHTML;copyAppointmentId.innerHTML='<i class="fa-solid fa-check"></i>';copyAppointmentId.classList.add("copied");setTimeout(()=>{copyAppointmentId.innerHTML=original;copyAppointmentId.classList.remove("copied")},1500)}catch(x){notice("Unable to copy Appointment ID.",true)}}}reschedule?.addEventListener("click",openReschedule);cancel?.addEventListener("click",openCancel)}
 

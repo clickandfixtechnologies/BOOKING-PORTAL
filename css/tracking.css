@@ -128,43 +128,34 @@
    ========================================================= */
 
 .tracking-brand {
-    display: inline-flex;
-    align-items: center;
-
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
     gap: 0.75rem;
 
     text-decoration: none;
-
     color: var(--track-ink);
-
     font-weight: 750;
-
-    transition:
-        transform 0.2s ease,
-        opacity 0.2s ease;
 }
+
 
 .tracking-brand:hover {
     color: var(--track-ink);
-
-    transform: translateY(-1px);
-
-    opacity: 0.9;
+    opacity: 0.95;
 }
 
 
-.tracking-mark,
-.admin-login-mark {
+.tracking-mark {
     display: grid;
     place-items: center;
 
     width: 42px;
     height: 42px;
+    flex: 0 0 42px;
 
     border-radius: 13px;
 
     color: #fff;
-
     font-weight: 800;
 
     background:
@@ -176,11 +167,100 @@
 
     box-shadow:
         0 8px 20px rgba(23, 105, 216, 0.25),
-
-        inset 0 1px 0
-        rgba(255, 255, 255, 0.35);
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
+
+.tracking-brand-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    padding-top: 1px;
+}
+
+
+.tracking-brand-text strong {
+    display: block;
+
+    color: var(--track-ink);
+
+    font-size: 1rem;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.tracking-brand-text small {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #718096;
+
+    font-size: 0.78rem;
+    font-weight: 500;
+
+    line-height: 1.2;
+}
+
+
+.tracking-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    margin-left: auto;
+
+    padding: 0.48rem 0.8rem;
+
+    border-radius: 999px;
+
+    border: 1px solid rgba(25, 135, 84, 0.16);
+
+    background: rgba(236, 253, 245, 0.72);
+
+    color: #198754;
+
+    font-size: 0.76rem;
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    box-shadow:
+        0 4px 12px rgba(25, 135, 84, 0.07);
+}
+
+
+.tracking-live::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+
+    box-shadow:
+        0 0 0 4px rgba(34, 197, 94, 0.10);
+
+    animation: tracking-live-pulse 1.8s infinite;
+}
+
+
+@keyframes tracking-live-pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.55;
+        transform: scale(0.82);
+    }
+}
 
 /* =========================================================
    HERO

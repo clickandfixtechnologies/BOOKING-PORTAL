@@ -1760,3 +1760,31 @@
     }
 
 }
+
+/* =========================================================
+   APPOINTMENT VERIFIED
+   ========================================================= */
+
+.appointment-label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.appointment-verified{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+
+  font-size:10px;
+  font-weight:700;
+  line-height:1;
+
+  color:#0d6efd;
+  white-space:nowrap;
+}
+
+.appointment-verified i{
+  font-size:10px;
+  color:#0d6efd;
+}

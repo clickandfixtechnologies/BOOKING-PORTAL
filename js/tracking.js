@@ -1160,12 +1160,476 @@ function render(r){
         openReschedule
     );
 
-    cancelButton?.addEventListener(
+        cancelButton?.addEventListener(
         "click",
         openCancel
     );
 }
 
+
+/*
+ * Reschedule date helper.
+ */
+function istDate(n){
+
+    let p =
+        new Intl.DateTimeFormat(
+            "en-CA",
+            {
+                timeZone:"Asia/Kolkata",
+                year:"numeric",
+                month:"2-digit",
+                day:"2-digit"
+            }
+        ).formatToParts(new Date());
+
+    let g =
+        t => p.find(x => x.type === t).value;
+
+    let d =
+        new Date(
+            `${g("year")}-${g("month")}-${g("day")}T12:00:00Z`
+        );
+
+    d.setUTCDate(
+        d.getUTCDate() + n
+    );
+
+    return d.toISOString().slice(0,10);
+}
+
+
+/*
+ * Open reschedule dialog.
+ */
+function openReschedule(){
+
+    let selectedDate,
+        selectedTime,
+        dates =
+            Array.from(
+                {length:28},
+                (_,i) => istDate(i + 1)
+            );
+
+    dialog(`
+
+        <div class="d-flex justify-content-between">
+
+            <div>
+
+                <h2 class="h4">
+                    Reschedule appointment
+                </h2>
+
+                <p class="text-muted">
+                    Current:
+                    ${esc(
+                        date(
+                            result.appointment.appointment_date
+                        )
+                    )}
+                    at
+                    ${esc(
+                        time(
+                            result.appointment.appointment_time
+                        )
+                    )}
+                </p>
+
+            </div>
+
+            <button
+                class="btn-close"
+                data-close
+            ></button>
+
+        </div>
+
+
+        <h3 class="h6">
+            Choose a new date
+        </h3>
+
+
+        <div
+            id="dates"
+            class="calendar-grid"
+        >
+
+            ${dates.map(d => `
+
+                <button data-date="${d}">
+
+                    <small>
+                        ${
+                            new Date(
+                                `${d}T12:00:00`
+                            ).toLocaleDateString(
+                                "en-IN",
+                                {
+                                    weekday:"short"
+                                }
+                            )
+                        }
+                    </small>
+
+                    <br>
+
+                    ${
+                        new Date(
+                            `${d}T12:00:00`
+                        ).getDate()
+                    }
+
+                </button>
+
+            `).join("")}
+
+        </div>
+
+
+        <h3 class="h6 mt-4">
+            Available time slots
+        </h3>
+
+
+        <div
+            id="slots"
+            class="slot-grid"
+        >
+
+            <span class="text-muted small">
+                Choose a date to check availability.
+            </span>
+
+        </div>
+
+
+        <p
+            id="actionError"
+            class="text-danger small mt-3"
+        ></p>
+
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+
+            <button
+                class="btn btn-outline-secondary"
+                data-close
+            >
+                Cancel
+            </button>
+
+            <button
+                id="continueReschedule"
+                disabled
+                class="btn btn-primary"
+            >
+                Continue
+            </button>
+
+        </div>
+
+    `);
+
+
+    datesEl.onclick = async e => {
+
+        let b =
+            e.target.closest("[data-date]");
+
+        if(!b) return;
+
+
+        selectedDate =
+            b.dataset.date;
+
+        selectedTime = null;
+
+
+        datesEl
+            .querySelectorAll("button")
+            .forEach(
+                x =>
+                    x.classList.toggle(
+                        "selected",
+                        x === b
+                    )
+            );
+
+
+        slots.innerHTML =
+            "<span class='text-muted small'>" +
+            "Checking availability…" +
+            "</span>";
+
+
+        continueReschedule.disabled = true;
+
+
+        try{
+
+            let d =
+                await api(
+                    "availability",
+                    {
+                        date:selectedDate
+                    }
+                );
+
+
+            slots.innerHTML =
+                (d.slots || []).length
+
+                    ? d.slots.map(
+                        s => `
+                            <button
+                                data-time="${s.value}"
+                            >
+                                ${esc(s.label)}
+                            </button>
+                        `
+                    ).join("")
+
+                    : `
+                        <span class="text-muted small">
+                            ${
+                                esc(
+                                    d.message ||
+                                    "No time slots are available for this date."
+                                )
+                            }
+                        </span>
+                    `;
+
+
+        }catch(x){
+
+            actionError.textContent =
+                x.message;
+
+            slots.innerHTML = "";
+
+        }
+
+    };
+
+
+    slots.onclick = e => {
+
+        let b =
+            e.target.closest("[data-time]");
+
+        if(!b) return;
+
+
+        selectedTime =
+            b.dataset.time;
+
+
+        slots
+            .querySelectorAll("button")
+            .forEach(
+                x =>
+                    x.classList.toggle(
+                        "selected",
+                        x === b
+                    )
+            );
+
+
+        continueReschedule.disabled = false;
+
+    };
+
+
+    continueReschedule.onclick =
+        () =>
+            confirmReschedule(
+                selectedDate,
+                selectedTime
+            );
+
+}
+
+
+/*
+ * Confirm reschedule.
+ */
+function confirmReschedule(d,t){
+
+    dialog(`
+
+        <h2 class="h4">
+            Confirm reschedule
+        </h2>
+
+        <p>
+            Reschedule this appointment to
+            <strong>
+                ${esc(date(d))}
+                at
+                ${esc(time(t))}
+            </strong>?
+        </p>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+
+            <button
+                data-close
+                class="btn btn-outline-secondary"
+            >
+                Cancel
+            </button>
+
+            <button
+                id="doReschedule"
+                class="btn btn-primary"
+            >
+                Confirm reschedule
+            </button>
+
+        </div>
+
+    `);
+
+
+    doReschedule.onclick =
+        () =>
+            action(
+                "reschedule",
+                d,
+                t
+            );
+
+}
+
+
+/*
+ * Open cancellation dialog.
+ */
+function openCancel(){
+
+    dialog(`
+
+        <h2 class="h4">
+            Cancel appointment?
+        </h2>
+
+        <p>
+            Are you sure you want to cancel this appointment?
+            <br>
+            This action cannot be undone.
+        </p>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+
+            <button
+                data-close
+                class="btn btn-outline-secondary"
+            >
+                Keep appointment
+            </button>
+
+            <button
+                id="doCancel"
+                class="btn btn-danger"
+            >
+                Cancel appointment
+            </button>
+
+        </div>
+
+    `);
+
+
+    doCancel.onclick =
+        () =>
+            action("cancel");
+
+}
+
+
+/*
+ * Appointment action handler.
+ */
+async function action(type,d,t){
+
+    if(busy) return;
+
+    busy = true;
+
+
+    let b =
+        document.getElementById(
+            type === "cancel"
+                ? "doCancel"
+                : "doReschedule"
+        );
+
+
+    if(b){
+
+        b.disabled = true;
+        b.textContent = "Saving…";
+
+    }
+
+
+    try{
+
+        await api(
+            "customer-appointment-action",
+            {
+                token,
+                action:type,
+                new_date:d,
+                new_time:t
+            }
+        );
+
+
+        close();
+
+
+        notice(
+            type === "cancel"
+                ? "Appointment Cancelled Successfully"
+                : "Appointment rescheduled successfully"
+        );
+
+
+        render(
+            await api(
+                "customer-tracking",
+                {
+                    token
+                }
+            )
+        );
+
+
+    }catch(x){
+
+        notice(
+            x.message,
+            true
+        );
+
+
+    }finally{
+
+        busy = false;
+
+    }
+
+}
+
+
+/*
+ * Start tracking page.
+ */
 load();
 
 }());

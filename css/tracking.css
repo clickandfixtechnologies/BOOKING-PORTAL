@@ -1,67 +1,1261 @@
-:root{--track-ink:#142640;--track-blue:#1769d8;--track-sky:#edf5ff;--track-border:#d9e3ef}.tracking-page{background:#f5f8fc;color:var(--track-ink);min-height:100vh}.tracking-wrap{max-width:960px;margin:auto;padding:2rem 1rem 4rem}.tracking-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none;color:var(--track-ink);font-weight:750}.tracking-mark,.admin-login-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--track-blue);color:#fff;font-weight:800}.tracking-hero,.tracking-card{background:#fff;border:1px solid var(--track-border);border-radius:20px;box-shadow:0 12px 35px #1426400d}.tracking-hero{padding:2rem;margin:1.5rem 0}.tracking-hero h1{font-size:clamp(1.75rem,4vw,2.5rem);margin:0 0 .5rem}.tracking-card{padding:1.25rem}.tracking-code{font-size:clamp(1.25rem,4vw,1.8rem);font-weight:800;letter-spacing:.04em;color:var(--track-blue)}.track-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:1rem}.track-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}.track-summary div{padding:.8rem;border-radius:12px;background:#f7faff}.track-summary small{display:block;color:#657386}.track-status{display:inline-flex;align-items:center;gap:.4rem;border-radius:99px;padding:.45rem .7rem;background:#e8f2ff;color:#075ac7;font-weight:700}.track-status.cancelled{background:#ffeaec;color:#ae2332}.timeline{list-style:none;padding:0;margin:1.2rem 0}.timeline li{position:relative;padding:0 0 1.2rem 2.1rem;color:#778597}.timeline li:before{content:"";position:absolute;left:.5rem;top:.25rem;width:.75rem;height:.75rem;border:3px solid #d5deea;background:#fff;border-radius:50%}.timeline li:after{content:"";position:absolute;left:.82rem;top:1rem;width:2px;height:calc(100% - .45rem);background:#dce4ef}.timeline li:last-child:after{display:none}.timeline li.done,.timeline li.current{color:var(--track-ink)}.timeline li.done:before{border-color:#2d9d63;background:#2d9d63}.timeline li.current:before{border-color:var(--track-blue);background:var(--track-blue);box-shadow:0 0 0 5px #1769d822}.track-actions{display:flex;gap:.75rem;flex-wrap:wrap}.track-toast{position:fixed;z-index:1070;right:1rem;bottom:1rem;max-width:min(420px,calc(100vw - 2rem));padding:1rem 1.2rem;border-radius:14px;background:#17345a;color:#fff;box-shadow:0 12px 30px #14264044}.track-toast.error{background:#a72c3c}.track-modal[hidden]{display:none}.track-modal{position:fixed;inset:0;z-index:1060;display:grid;place-items:center;padding:1rem;background:#10243a99}.track-dialog{width:min(640px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:20px;padding:1.25rem;box-shadow:0 18px 50px #10243a55}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem}.calendar-grid button{min-height:46px;border:1px solid var(--track-border);border-radius:10px;background:#fff;font-size:.85rem}.calendar-grid button.selected{background:var(--track-blue);color:#fff;border-color:var(--track-blue)}.calendar-grid button:disabled{opacity:.4}.slot-grid{display:flex;gap:.5rem;flex-wrap:wrap}.slot-grid button{border:1px solid #9fb8d8;border-radius:10px;padding:.55rem .75rem;background:#fff}.slot-grid button.selected{background:var(--track-blue);color:#fff;border-color:var(--track-blue)}.skeleton{min-height:220px;background:linear-gradient(90deg,#edf2f7 25%,#f8fafc 37%,#edf2f7 63%);background-size:400% 100%;border-radius:20px;animation:track-shimmer 1.2s linear infinite}@keyframes track-shimmer{to{background-position:-400% 0}}@media(max-width:700px){.tracking-wrap{padding-top:1rem}.tracking-hero{padding:1.4rem}.track-grid{grid-template-columns:1fr}.track-summary{grid-template-columns:1fr}.tracking-code{word-break:break-word}.calendar-grid button{min-height:42px;font-size:.78rem}}
+/* =========================================================
+   CLICK & FIX TECHNOLOGIES
+   CUSTOMER APPOINTMENT TRACKING
+   PREMIUM GLASSMORPHISM DESIGN
+   ========================================================= */
+
+
+/* =========================================================
+   ROOT
+   ========================================================= */
+
+:root {
+    --track-ink: #142640;
+    --track-blue: #1769d8;
+    --track-blue-dark: #0d55b5;
+    --track-sky: #edf5ff;
+
+    --track-success: #198754;
+    --track-danger: #dc3545;
+
+    --track-border: rgba(255, 255, 255, 0.72);
+
+    --glass-white: rgba(255, 255, 255, 0.68);
+    --glass-white-strong: rgba(255, 255, 255, 0.82);
+
+    --glass-shadow:
+        0 18px 45px rgba(20, 38, 64, 0.08);
+
+    --glass-shadow-hover:
+        0 22px 55px rgba(20, 38, 64, 0.12);
+}
+
+
+/* =========================================================
+   PAGE BACKGROUND
+   ========================================================= */
+
+.tracking-page {
+    position: relative;
+
+    min-height: 100vh;
+
+    color: var(--track-ink);
+
+    background:
+        radial-gradient(
+            circle at 8% 8%,
+            rgba(23, 105, 216, 0.13),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 92% 18%,
+            rgba(99, 102, 241, 0.10),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 50% 100%,
+            rgba(23, 105, 216, 0.07),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #eef5fc 0%,
+            #f8fbff 48%,
+            #edf4fb 100%
+        );
+
+    overflow-x: hidden;
+}
+
+
+/* Decorative background glow */
+
+.tracking-page::before,
+.tracking-page::after {
+    content: "";
+
+    position: fixed;
+
+    width: 280px;
+    height: 280px;
+
+    border-radius: 50%;
+
+    pointer-events: none;
+
+    filter: blur(70px);
+
+    opacity: 0.35;
+
+    z-index: 0;
+}
+
+.tracking-page::before {
+    top: 12%;
+    left: -140px;
+
+    background: rgba(23, 105, 216, 0.18);
+}
+
+.tracking-page::after {
+    right: -140px;
+    bottom: 10%;
+
+    background: rgba(99, 102, 241, 0.14);
+}
+
+
+/* =========================================================
+   MAIN WRAPPER
+   ========================================================= */
+
+.tracking-wrap {
+    position: relative;
+    z-index: 1;
+
+    width: min(960px, 100%);
+
+    margin: auto;
+
+    padding:
+        1.5rem 1rem 4rem;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.tracking-brand {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 0.75rem;
+
+    text-decoration: none;
+
+    color: var(--track-ink);
+
+    font-weight: 750;
+
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.tracking-brand:hover {
+    color: var(--track-ink);
+
+    transform: translateY(-1px);
+
+    opacity: 0.9;
+}
+
+
+.tracking-mark,
+.admin-login-mark {
+    display: grid;
+    place-items: center;
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 13px;
+
+    color: #fff;
+
+    font-weight: 800;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2784ef,
+            #125bc1
+        );
+
+    box-shadow:
+        0 8px 20px rgba(23, 105, 216, 0.25),
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.35);
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.tracking-hero {
+    position: relative;
+
+    margin: 1.5rem 0;
+
+    padding: 2.2rem;
+
+    overflow: hidden;
+
+    border-radius: 24px;
+
+    border: 1px solid var(--track-border);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.84),
+            rgba(255, 255, 255, 0.58)
+        );
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    box-shadow:
+        var(--glass-shadow),
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.85);
+}
+
+
+.tracking-hero::before {
+    content: "";
+
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    right: -70px;
+    top: -80px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(23, 105, 216, 0.16),
+            transparent 70%
+        );
+
+    pointer-events: none;
+}
+
+
+.tracking-hero h1 {
+    position: relative;
+
+    margin: 0 0 0.55rem;
+
+    color: var(--track-ink);
+
+    font-size:
+        clamp(1.75rem, 4vw, 2.65rem);
+
+    font-weight: 800;
+
+    letter-spacing: -0.025em;
+
+    line-height: 1.15;
+}
+
+
+.tracking-hero p {
+    position: relative;
+
+    max-width: 650px;
+
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 0.96rem;
+
+    line-height: 1.65;
+}
+
+
+/* =========================================================
+   GLASS CARDS
+   ========================================================= */
+
+.tracking-card {
+    position: relative;
+
+    padding: 1.35rem;
+
+    border-radius: 20px;
+
+    border: 1px solid var(--track-border);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.80),
+            rgba(255, 255, 255, 0.56)
+        );
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    box-shadow:
+        var(--glass-shadow),
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.85);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+
+.tracking-card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        var(--glass-shadow-hover),
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.9);
+}
+
+
+/* =========================================================
+   TRACKING CODE
+   ========================================================= */
+
+.tracking-code {
+    display: inline-block;
+
+    margin-top: 0.15rem;
+
+    color: var(--track-blue);
+
+    font-size:
+        clamp(1.25rem, 4vw, 1.85rem);
+
+    font-weight: 850;
+
+    letter-spacing: 0.045em;
+
+    line-height: 1.2;
+
+    text-shadow:
+        0 2px 10px rgba(23, 105, 216, 0.12);
+}
+
+
+/* =========================================================
+   GRID
+   ========================================================= */
+
+.track-grid {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.2fr)
+        minmax(280px, 0.8fr);
+
+    gap: 1rem;
+
+    align-items: start;
+}
+
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.track-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 0.75rem;
+}
+
+
+.track-summary div {
+    position: relative;
+
+    padding: 0.9rem;
+
+    border-radius: 14px;
+
+    border: 1px solid
+        rgba(255, 255, 255, 0.7);
+
+    background:
+        rgba(255, 255, 255, 0.48);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    box-shadow:
+        0 5px 15px
+        rgba(20, 38, 64, 0.035);
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.track-summary div:hover {
+    transform: translateY(-2px);
+
+    background:
+        rgba(255, 255, 255, 0.72);
+}
+
+
+.track-summary small {
+    display: block;
+
+    margin-bottom: 0.18rem;
+
+    color: #718096;
+
+    font-size: 0.72rem;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.04em;
+}
+
+
+.track-summary strong {
+    color: var(--track-ink);
+
+    font-size: 0.92rem;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.track-status {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 0.45rem;
+
+    padding:
+        0.5rem 0.8rem;
+
+    border-radius: 999px;
+
+    border: 1px solid
+        rgba(23, 105, 216, 0.16);
+
+    background:
+        rgba(232, 242, 255, 0.72);
+
+    color: #075ac7;
+
+    font-size: 0.78rem;
+
+    font-weight: 750;
+
+    box-shadow:
+        0 4px 12px
+        rgba(23, 105, 216, 0.08);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+
+.track-status::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: currentColor;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(23, 105, 216, 0.10);
+}
+
+
+.track-status.cancelled {
+    background:
+        rgba(255, 234, 236, 0.82);
+
+    color: #ae2332;
+
+    border-color:
+        rgba(174, 35, 50, 0.15);
+}
+
+
+.track-status.cancelled::before {
+    box-shadow:
+        0 0 0 4px
+        rgba(174, 35, 50, 0.10);
+}
+
+
+/* =========================================================
+   TIMELINE
+   ========================================================= */
+
+.timeline {
+    position: relative;
+
+    list-style: none;
+
+    padding: 0;
+
+    margin: 1.35rem 0 0;
+}
+
+
+.timeline li {
+    position: relative;
+
+    padding:
+        0 0 1.35rem 2.35rem;
+
+    color: #8a97a8;
+
+    font-size: 0.9rem;
+
+    transition:
+        color 0.2s ease;
+}
+
+
+.timeline li:last-child {
+    padding-bottom: 0;
+}
+
+
+.timeline li::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0.43rem;
+    top: 0.22rem;
+
+    width: 0.82rem;
+    height: 0.82rem;
+
+    border-radius: 50%;
+
+    border: 3px solid #d5deea;
+
+    background:
+        rgba(255, 255, 255, 0.85);
+
+    z-index: 2;
+
+    box-shadow:
+        0 2px 8px
+        rgba(20, 38, 64, 0.06);
+}
+
+
+.timeline li::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0.77rem;
+
+    top: 1rem;
+
+    width: 2px;
+
+    height:
+        calc(100% - 0.45rem);
+
+    background:
+        linear-gradient(
+            to bottom,
+            #dce5ef,
+            #e8eef5
+        );
+}
+
+
+.timeline li:last-child::after {
+    display: none;
+}
+
+
+.timeline li.done,
+.timeline li.current {
+    color: var(--track-ink);
+
+    font-weight: 600;
+}
+
+
+.timeline li.done::before {
+    border-color: var(--track-success);
+
+    background:
+        var(--track-success);
+
+    box-shadow:
+        0 0 0 5px
+        rgba(25, 135, 84, 0.10);
+}
+
+
+.timeline li.current::before {
+    border-color: var(--track-blue);
+
+    background:
+        var(--track-blue);
+
+    box-shadow:
+        0 0 0 5px
+        rgba(23, 105, 216, 0.12),
+
+        0 0 16px
+        rgba(23, 105, 216, 0.25);
+}
+
+
+.timeline li.current {
+    color: var(--track-blue);
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
+
+.track-actions {
+    display: flex;
+
+    gap: 0.7rem;
+
+    flex-wrap: wrap;
+
+    margin-top: 1rem;
+}
+
+
+.track-actions .btn {
+    min-height: 44px;
+
+    padding:
+        0.55rem 1rem;
+
+    border-radius: 11px;
+
+    font-weight: 650;
+
+    border-width: 1px;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.track-actions .btn:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 20px
+        rgba(20, 38, 64, 0.10);
+}
+
+
+.track-actions .btn-primary {
+    background:
+        linear-gradient(
+            135deg,
+            #2581ec,
+            #125bc1
+        );
+
+    border-color: #1769d8;
+
+    box-shadow:
+        0 6px 18px
+        rgba(23, 105, 216, 0.20);
+}
+
+
+/* =========================================================
+   TRACKING TOAST
+   ========================================================= */
+
+.track-toast {
+    position: fixed;
+
+    z-index: 1070;
+
+    right: 1rem;
+    bottom: 1rem;
+
+    width: min(420px, calc(100vw - 2rem));
+
+    padding: 1rem 1.15rem;
+
+    border-radius: 16px;
+
+    color: #fff;
+
+    background:
+        rgba(23, 52, 90, 0.88);
+
+    border: 1px solid
+        rgba(255, 255, 255, 0.18);
+
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    box-shadow:
+        0 18px 45px
+        rgba(20, 38, 64, 0.22);
+}
+
 
 .track-toast.error {
+    position: relative;
+
     width: 100%;
+
     margin-top: 14px;
+
     padding: 0;
-    background: #fff;
-    border: 1px solid #f1b8b8;
-    border-left: 4px solid #dc3545;
-    border-radius: 10px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+
+    color: inherit;
+
+    background:
+        rgba(255, 255, 255, 0.70);
+
+    border:
+        1px solid rgba(220, 53, 69, 0.20);
+
+    border-left:
+        4px solid #dc3545;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 8px 22px
+        rgba(20, 38, 64, 0.08);
+
     overflow: hidden;
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
 }
+
 
 .tracking-alert-content {
     display: flex;
+
     align-items: center;
+
     gap: 10px;
+
     padding: 12px 14px;
 }
 
+
 .tracking-alert-icon {
-    width: 30px;
-    height: 30px;
-    min-width: 30px;
-    border-radius: 50%;
-    background: #fde8e8;
-    color: #dc3545;
     display: flex;
+
     align-items: center;
     justify-content: center;
+
+    width: 31px;
+    min-width: 31px;
+    height: 31px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(220, 53, 69, 0.10);
+
+    color: #dc3545;
+
     font-size: 16px;
-    font-weight: 700;
+
+    font-weight: 800;
 }
+
 
 .tracking-alert-text {
     flex: 1;
+
     display: flex;
+
     flex-direction: column;
+
     gap: 2px;
 }
 
+
 .tracking-alert-text strong {
     color: #212529;
+
     font-size: 14px;
-    font-weight: 700;
+
+    font-weight: 750;
 }
+
 
 .tracking-alert-text span {
     color: #6c757d;
+
     font-size: 13px;
+
     line-height: 1.4;
 }
 
+
 .tracking-alert-close {
     border: 0;
+
     background: transparent;
+
     color: #6c757d;
+
     font-size: 20px;
+
     line-height: 1;
+
     cursor: pointer;
+
     padding: 0 2px;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
 }
+
 
 .tracking-alert-close:hover {
     color: #212529;
+
+    transform: scale(1.1);
+}
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.track-modal[hidden] {
+    display: none;
+}
+
+
+.track-modal {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1060;
+
+    display: grid;
+
+    place-items: center;
+
+    padding: 1rem;
+
+    background:
+        rgba(15, 32, 55, 0.42);
+
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+}
+
+
+.track-dialog {
+    width: min(640px, 100%);
+
+    max-height: 92vh;
+
+    overflow: auto;
+
+    padding: 1.35rem;
+
+    border-radius: 22px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.78);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.90),
+            rgba(255, 255, 255, 0.72)
+        );
+
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+
+    box-shadow:
+        0 25px 70px
+        rgba(15, 32, 55, 0.24),
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.9);
+
+    animation:
+        track-modal-in 0.22s ease-out;
+}
+
+
+@keyframes track-modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+/* =========================================================
+   CALENDAR
+   ========================================================= */
+
+.calendar-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, 1fr);
+
+    gap: 0.4rem;
+}
+
+
+.calendar-grid button {
+    min-height: 46px;
+
+    border:
+        1px solid
+        rgba(148, 163, 184, 0.28);
+
+    border-radius: 11px;
+
+    background:
+        rgba(255, 255, 255, 0.62);
+
+    color: var(--track-ink);
+
+    font-size: 0.85rem;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+
+.calendar-grid button:hover:not(:disabled) {
+    transform: translateY(-1px);
+
+    background:
+        rgba(255, 255, 255, 0.88);
+
+    box-shadow:
+        0 5px 12px
+        rgba(20, 38, 64, 0.07);
+}
+
+
+.calendar-grid button.selected {
+    color: #fff;
+
+    border-color:
+        var(--track-blue);
+
+    background:
+        linear-gradient(
+            135deg,
+            #2581ec,
+            #125bc1
+        );
+
+    box-shadow:
+        0 6px 16px
+        rgba(23, 105, 216, 0.20);
+}
+
+
+.calendar-grid button:disabled {
+    opacity: 0.4;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   TIME SLOTS
+   ========================================================= */
+
+.slot-grid {
+    display: flex;
+
+    gap: 0.5rem;
+
+    flex-wrap: wrap;
+}
+
+
+.slot-grid button {
+    border:
+        1px solid
+        rgba(23, 105, 216, 0.25);
+
+    border-radius: 11px;
+
+    padding:
+        0.55rem 0.8rem;
+
+    background:
+        rgba(255, 255, 255, 0.62);
+
+    color: var(--track-ink);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+
+.slot-grid button:hover {
+    transform: translateY(-1px);
+
+    background:
+        rgba(255, 255, 255, 0.88);
+
+    box-shadow:
+        0 5px 12px
+        rgba(20, 38, 64, 0.07);
+}
+
+
+.slot-grid button.selected {
+    color: #fff;
+
+    border-color:
+        var(--track-blue);
+
+    background:
+        linear-gradient(
+            135deg,
+            #2581ec,
+            #125bc1
+        );
+
+    box-shadow:
+        0 6px 16px
+        rgba(23, 105, 216, 0.20);
+}
+
+
+/* =========================================================
+   SKELETON
+   ========================================================= */
+
+.skeleton {
+    min-height: 220px;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(226, 232, 240, 0.65) 25%,
+            rgba(248, 250, 252, 0.9) 37%,
+            rgba(226, 232, 240, 0.65) 63%
+        );
+
+    background-size: 400% 100%;
+
+    animation:
+        track-shimmer 1.2s linear infinite;
+}
+
+
+@keyframes track-shimmer {
+    to {
+        background-position: -400% 0;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .tracking-wrap {
+        padding:
+            1rem 0.8rem 3rem;
+    }
+
+
+    .tracking-hero {
+        margin-top: 1rem;
+
+        padding: 1.45rem;
+
+        border-radius: 20px;
+    }
+
+
+    .tracking-card {
+        padding: 1rem;
+
+        border-radius: 18px;
+    }
+
+
+    .track-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .track-summary {
+        grid-template-columns: 1fr;
+    }
+
+
+    .tracking-code {
+        word-break: break-word;
+    }
+
+
+    .calendar-grid {
+        gap: 0.3rem;
+    }
+
+
+    .calendar-grid button {
+        min-height: 42px;
+
+        padding: 0.25rem;
+
+        font-size: 0.78rem;
+    }
+
+
+    .track-actions {
+        flex-direction: column;
+    }
+
+
+    .track-actions .btn {
+        width: 100%;
+    }
+
+
+    .track-toast {
+        right: 0.75rem;
+        bottom: 0.75rem;
+
+        width:
+            calc(100vw - 1.5rem);
+    }
+
+
+    .tracking-alert-content {
+        padding: 11px 12px;
+    }
+
+
+    .track-dialog {
+        max-height: 94vh;
+
+        padding: 1rem;
+
+        border-radius: 18px;
+    }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+    .tracking-hero h1 {
+        font-size: 1.65rem;
+    }
+
+
+    .tracking-hero p {
+        font-size: 0.88rem;
+    }
+
+
+    .tracking-mark {
+        width: 38px;
+        height: 38px;
+
+        border-radius: 11px;
+    }
+
+
+    .tracking-code {
+        font-size: 1.2rem;
+    }
+
+
+    .track-summary div {
+        padding: 0.8rem;
+    }
+
+
+    .timeline li {
+        padding-left: 2.15rem;
+
+        font-size: 0.86rem;
+    }
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+
+        animation-iteration-count: 1 !important;
+
+        transition-duration: 0.01ms !important;
+    }
 }

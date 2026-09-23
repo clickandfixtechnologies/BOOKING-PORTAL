@@ -239,16 +239,933 @@ async function load() {
     }
 }
 
-function render(r){if(!r?.appointment)throw Error();result=r;let a=r.appointment;token=a.tracking_token;let stages=a.job_code?[...flow.slice(0,-1),"job_id_created","completed"]:flow,at=stages.indexOf(a.status);out.className="";out.innerHTML=`<section class="tracking-hero"><div class="d-flex justify-content-between align-items-start gap-3 flex-wrap"><div><small class="text-uppercase text-muted fw-semibold">Appointment</small><div class="tracking-code">${esc(a.appointment_id)}</div><p class="mb-0 text-muted">${esc(serviceLabel(a))}</p></div><span class="track-status ${a.status==="cancelled"?"cancelled":""}">${esc(labels[a.status]||a.status)}</span></div></section><div class="track-grid"><section class="tracking-card"><h1 class="h5 mb-3">Appointment summary</h1><div class="track-summary"><div><small>Scheduled date</small><strong>${esc(date(a.appointment_date))}</strong></div><div><small>Scheduled time</small><strong>${esc(time(a.appointment_time))}</strong></div><div><small>Customer</small><strong>${esc(a.customer_name)}</strong></div><div><small>Service location</small><strong>${esc(({service_centre:"Service Centre",home_office:"Home / Office",pickup_delivery:"Pickup / Delivery"})[a.service_location_type])}</strong></div></div>${a.status==="cancelled"?'<div class="alert alert-danger mt-3 mb-0"><strong>Appointment cancelled</strong><br>Your appointment remains visible for reference.</div>':""}${a.job_code?`<div class="alert alert-info mt-3 mb-0"><strong>Job ID Created</strong><br>${esc(a.job_code)}<br><small>For more information, please log in to your Customer Account.</small><br><a class="btn btn-sm btn-primary mt-2" href="https://clickandfix.site/admin/customer-login.html">Visit Customer Portal</a></div>`:""}</section><section class="tracking-card"><h2 class="h5">Service progress</h2><ol class="timeline">${stages.map((s,i)=>`<li class="${i<at||a.status==="completed"?"done":i===at?"current":""}"><strong>${esc(labels[s])}</strong></li>`).join("")}</ol>${["cancelled","rescheduled","no_show"].includes(a.status)?`<small class="text-muted">Latest update: ${esc(labels[a.status])}</small>`:""}</section></div><section class="tracking-card mt-3">
-<h2 class="h5">Manage appointment</h2>
-<p class="text-muted">
-${a.job_code
-  ? "Your Job ID has been created. Reschedule and cancellation are no longer available for this appointment."
-  : "Availability and the service cutoff are checked again when you confirm."
+function render(r){
+    if(!r?.appointment) throw Error();
+
+    result = r;
+
+    let a = r.appointment;
+
+    token = a.tracking_token;
+
+    /*
+     * Timeline
+     * Job ID থাকলে Job ID Created দেখাবে।
+     * Job ID না থাকলে সরাসরি In Progress → Completed থাকবে।
+     */
+    let stages = a.job_code
+        ? [...flow.slice(0,-1),"job_id_created","completed"]
+        : flow;
+
+    let at = stages.indexOf(a.status);
+
+    /*
+     * Technician data
+     *
+     * Supports:
+     * a.technicians
+     * a.technician
+     * flat technician fields
+     */
+    const technician =
+        a.technicians ||
+        a.technician ||
+        {};
+
+    const technicianName =
+        technician.full_name ||
+        technician.name ||
+        a.technician_name ||
+        "";
+
+    const technicianMobile =
+        technician.mobile ||
+        technician.phone ||
+        a.technician_mobile ||
+        "";
+
+    /*
+     * Status history
+     *
+     * Supports different possible response keys.
+     */
+    const history =
+        Array.isArray(a.appointment_status_history)
+            ? a.appointment_status_history
+            : Array.isArray(a.status_history)
+                ? a.status_history
+                : Array.isArray(r.status_history)
+                    ? r.status_history
+                    : [];
+
+    /*
+     * Find timestamp for a particular status.
+     */
+    function statusTime(status){
+
+        const item = history.find(
+            x =>
+                x.new_status === status ||
+                x.status === status
+        );
+
+        if(item){
+            return (
+                item.changed_at ||
+                item.created_at ||
+                item.updated_at ||
+                null
+            );
+        }
+
+        /*
+         * Booking received can use appointment creation time.
+         */
+        if(
+            status === "pending" &&
+            a.created_at
+        ){
+            return a.created_at;
+        }
+
+        /*
+         * Current status can use updated_at
+         * when status history is unavailable.
+         */
+        if(
+            status === a.status &&
+            a.updated_at
+        ){
+            return a.updated_at;
+        }
+
+        return null;
+    }
+
+    /*
+     * Format timeline date/time.
+     */
+    function statusDateTime(value){
+
+        if(!value) return "";
+
+        const d = new Date(value);
+
+        if(Number.isNaN(d.getTime())) return "";
+
+        return d.toLocaleString("en-IN",{
+            day:"numeric",
+            month:"short",
+            hour:"numeric",
+            minute:"2-digit",
+            hour12:true
+        });
+    }
+
+    /*
+     * Status icon.
+     */
+    function statusIcon(status){
+
+        if(status === "completed"){
+            return '<i class="fa-solid fa-check"></i>';
+        }
+
+        if(status === "cancelled"){
+            return '<i class="fa-solid fa-xmark"></i>';
+        }
+
+        if(status === "rescheduled"){
+            return '<i class="fa-solid fa-calendar-days"></i>';
+        }
+
+        if(status === "no_show"){
+            return '<i class="fa-solid fa-user-xmark"></i>';
+        }
+
+        if(status === "technician_assigned"){
+            return '<i class="fa-solid fa-user-gear"></i>';
+        }
+
+        if(status === "on_the_way"){
+            return '<i class="fa-solid fa-location-arrow"></i>';
+        }
+
+        if(status === "in_progress"){
+            return '<i class="fa-solid fa-screwdriver-wrench"></i>';
+        }
+
+        if(status === "job_id_created"){
+            return '<i class="fa-solid fa-ticket"></i>';
+        }
+
+        if(status === "confirmed"){
+            return '<i class="fa-solid fa-check"></i>';
+        }
+
+        return '<i class="fa-solid fa-check"></i>';
+    }
+
+    /*
+     * Service location label.
+     */
+    const locationLabel =
+        ({
+            service_centre:"Service Centre",
+            home_office:"Home / Office",
+            pickup_delivery:"Pickup / Delivery"
+        })[a.service_location_type] ||
+        a.service_location_type ||
+        "—";
+
+    /*
+     * Technician section.
+     */
+    const technicianHtml = technicianName
+        ? `
+            <div class="track-technician">
+
+                <div class="track-technician-avatar">
+                    <i class="fa-solid fa-user-gear"></i>
+                </div>
+
+                <div class="track-technician-info">
+
+                    <small>Assigned Technician</small>
+
+                    <strong>
+                        ${esc(technicianName)}
+                    </strong>
+
+                    ${
+                        technicianMobile
+                            ? `
+                                <span>
+                                    ${esc(technicianMobile)}
+                                </span>
+                              `
+                            : ""
+                    }
+
+                </div>
+
+                ${
+                    technicianMobile
+                        ? `
+                            <a
+                                class="track-technician-call"
+                                href="tel:${esc(
+                                    String(technicianMobile)
+                                        .replace(/\D/g,"")
+                                )}"
+                                aria-label="Call technician"
+                            >
+                                <i class="fa-solid fa-phone"></i>
+                            </a>
+                          `
+                        : ""
+                }
+
+            </div>
+          `
+        : `
+            <div class="track-technician track-technician-empty">
+
+                <div class="track-technician-avatar">
+                    <i class="fa-solid fa-user-clock"></i>
+                </div>
+
+                <div class="track-technician-info">
+                    <small>Assigned Technician</small>
+                    <strong>Technician will be assigned soon</strong>
+                </div>
+
+            </div>
+          `;
+
+    /*
+     * Timeline.
+     */
+    const timelineHtml = stages.map((s,i)=>{
+
+        const done =
+            i < at ||
+            a.status === "completed";
+
+        const current =
+            i === at &&
+            a.status !== "completed";
+
+        const timestamp =
+            statusDateTime(
+                statusTime(s)
+            );
+
+        return `
+            <li
+                class="
+                    ${done ? "done" : ""}
+                    ${current ? "current" : ""}
+                "
+            >
+
+                <div class="timeline-line"></div>
+
+                <div class="timeline-dot">
+                    ${statusIcon(s)}
+                </div>
+
+                <div class="timeline-content">
+
+                    <strong>
+                        ${esc(labels[s] || s)}
+                    </strong>
+
+                    ${
+                        timestamp
+                            ? `
+                                <small>
+                                    ${esc(timestamp)}
+                                </small>
+                              `
+                            : ""
+                    }
+
+                </div>
+
+            </li>
+        `;
+
+    }).join("");
+
+    /*
+     * Special status message.
+     */
+    const specialStatus =
+        ["cancelled","rescheduled","no_show"].includes(a.status)
+            ? `
+                <div class="track-status-note ${
+                    a.status === "cancelled"
+                        ? "danger"
+                        : ""
+                }">
+
+                    <i class="fa-solid fa-circle-info"></i>
+
+                    <span>
+                        Latest update:
+                        <strong>
+                            ${esc(labels[a.status] || a.status)}
+                        </strong>
+                    </span>
+
+                </div>
+              `
+            : "";
+
+    /*
+     * Job ID card.
+     */
+    const jobHtml = a.job_code
+        ? `
+            <div class="track-job-card">
+
+                <div class="track-job-icon">
+                    <i class="fa-solid fa-ticket"></i>
+                </div>
+
+                <div class="track-job-content">
+
+                    <small>Job ID Created</small>
+
+                    <strong>
+                        ${esc(a.job_code)}
+                    </strong>
+
+                    <p>
+                        For more information, please log in to your
+                        Customer Account.
+                    </p>
+
+                    <a
+                        class="track-job-button"
+                        href="https://clickandfix.site/admin/customer-login.html"
+                    >
+                        Visit Customer Portal
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                </div>
+
+            </div>
+          `
+        : "";
+
+    /*
+     * Render complete tracking page.
+     */
+    out.className = "";
+
+    out.innerHTML = `
+
+        <!-- Appointment Hero -->
+
+        <section class="tracking-hero">
+
+            <div class="tracking-live-pill">
+                <span class="tracking-live-dot"></span>
+                Live Tracking
+            </div>
+
+            <div class="tracking-hero-main">
+
+                <div class="tracking-hero-left">
+
+                    <div class="tracking-appointment-label">
+
+                        <span>
+                            Appointment
+                        </span>
+
+                        <span class="tracking-verified">
+                            <i class="fa-solid fa-check"></i>
+                            Verified
+                        </span>
+
+                    </div>
+
+                    <div class="tracking-id-row">
+
+                        <div class="tracking-code">
+                            ${esc(a.appointment_id)}
+                        </div>
+
+                        <button
+                            type="button"
+                            id="copyAppointmentId"
+                            class="tracking-copy-button"
+                            title="Copy Appointment ID"
+                        >
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+
+                    </div>
+
+                    <p class="tracking-service-name">
+                        ${esc(serviceLabel(a))}
+                    </p>
+
+                </div>
+
+                <span
+                    class="
+                        track-status
+                        ${a.status === "cancelled" ? "cancelled" : ""}
+                    "
+                >
+                    <i class="fa-solid fa-circle-check"></i>
+                    ${esc(labels[a.status] || a.status)}
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- Main Grid -->
+
+        <div class="track-grid">
+
+
+            <!-- Appointment Summary -->
+
+            <section class="tracking-card tracking-summary-card">
+
+                <div class="tracking-section-heading">
+
+                    <h2>
+                        <i class="fa-solid fa-file-lines"></i>
+                        Appointment summary
+                    </h2>
+
+                    <span>
+                        ID:
+                        #${esc(
+                            String(a.appointment_id || "")
+                                .split("-")
+                                .pop() || "—"
+                        )}
+                    </span>
+
+                </div>
+
+
+                <div class="track-summary">
+
+
+                    <!-- Date -->
+
+                    <div class="track-summary-item">
+
+                        <div class="track-summary-label">
+
+                            <i class="fa-regular fa-calendar-days"></i>
+
+                            <span>
+                                Scheduled date
+                            </span>
+
+                        </div>
+
+                        <strong>
+                            ${esc(
+                                date(a.appointment_date)
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Time -->
+
+                    <div class="track-summary-item">
+
+                        <div class="track-summary-label">
+
+                            <i class="fa-regular fa-clock"></i>
+
+                            <span>
+                                Scheduled time
+                            </span>
+
+                        </div>
+
+                        <strong>
+                            ${esc(
+                                time(a.appointment_time)
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Customer -->
+
+                    <div class="track-summary-item">
+
+                        <div class="track-summary-label">
+
+                            <i class="fa-regular fa-user"></i>
+
+                            <span>
+                                Customer
+                            </span>
+
+                        </div>
+
+                        <strong>
+                            ${esc(a.customer_name)}
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Location -->
+
+                    <div class="track-summary-item">
+
+                        <div class="track-summary-label">
+
+                            <i class="fa-solid fa-location-dot"></i>
+
+                            <span>
+                                Service location
+                            </span>
+
+                        </div>
+
+                        <strong>
+                            ${esc(locationLabel)}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                ${
+                    a.status === "cancelled"
+                        ? `
+                            <div class="track-cancelled-alert">
+
+                                <i class="fa-solid fa-circle-xmark"></i>
+
+                                <div>
+                                    <strong>
+                                        Appointment cancelled
+                                    </strong>
+
+                                    <span>
+                                        Your appointment remains visible
+                                        for reference.
+                                    </span>
+                                </div>
+
+                            </div>
+                          `
+                        : ""
+                }
+
+
+                ${jobHtml}
+
+
+                <!-- Technician -->
+
+                <div class="track-technician-wrapper">
+
+                    ${technicianHtml}
+
+                </div>
+
+            </section>
+
+
+            <!-- Service Progress -->
+
+            <section class="tracking-card tracking-progress-card">
+
+                <div class="tracking-section-heading">
+
+                    <h2>
+                        <i class="fa-solid fa-bars-progress"></i>
+                        Service progress
+                    </h2>
+
+                </div>
+
+
+                <ol class="timeline">
+
+                    ${timelineHtml}
+
+                </ol>
+
+
+                ${specialStatus}
+
+
+                <!-- Rate Service -->
+
+                ${
+                    a.status === "completed"
+                        ? `
+                            <div class="track-rate-wrapper">
+
+                                <button
+                                    id="rateService"
+                                    type="button"
+                                    class="track-rate-button"
+                                >
+                                    <i class="fa-solid fa-star"></i>
+                                    Rate Service Experience
+                                </button>
+
+                            </div>
+                          `
+                        : ""
+                }
+
+            </section>
+
+        </div>
+
+
+        <!-- Manage Appointment -->
+
+        <section class="tracking-card tracking-manage-card">
+
+            <div class="tracking-section-heading manage-heading">
+
+                <div>
+
+                    <h2>
+                        Manage appointment
+                    </h2>
+
+                    <p>
+                        ${
+                            a.job_code
+                                ? "Your Job ID has been created. Reschedule and cancellation are no longer available for this appointment."
+                                : "Availability and the service cutoff are checked again when you confirm."
+                        }
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="track-actions">
+
+                <button
+                    id="reschedule"
+                    class="btn btn-outline-primary"
+                    ${a.job_code || !a.can_reschedule ? "disabled" : ""}
+                >
+                    <i class="fa-regular fa-calendar-plus"></i>
+                    Reschedule appointment
+                </button>
+
+
+                <button
+                    id="cancel"
+                    class="btn btn-outline-danger"
+                    ${a.job_code || !a.can_cancel ? "disabled" : ""}
+                >
+                    <i class="fa-regular fa-circle-xmark"></i>
+                    Cancel appointment
+                </button>
+
+            </div>
+
+        </section>
+
+    `;
+
+
+    /*
+     * Copy Appointment ID.
+     */
+    const copyButton =
+        document.getElementById("copyAppointmentId");
+
+    if(copyButton){
+
+        copyButton.addEventListener(
+            "click",
+            async function(){
+
+                try{
+
+                    await navigator.clipboard.writeText(
+                        String(a.appointment_id || "")
+                    );
+
+                    notice(
+                        "Appointment ID copied successfully."
+                    );
+
+                }catch(_){
+
+                    notice(
+                        "Unable to copy Appointment ID.",
+                        true
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+     * Rate Service Experience.
+     */
+    const rateButton =
+        document.getElementById("rateService");
+
+    if(rateButton){
+
+        rateButton.addEventListener(
+            "click",
+            function(){
+
+                dialog(`
+
+                    <div class="tracking-feedback-modal">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+
+                            <div>
+
+                                <h2 class="h5 mb-1">
+                                    Rate Your Experience
+                                </h2>
+
+                                <p class="text-muted small mb-0">
+                                    How was your service experience?
+                                </p>
+
+                            </div>
+
+                            <button
+                                class="btn-close"
+                                data-close
+                            ></button>
+
+                        </div>
+
+
+                        <div
+                            class="tracking-rating-stars"
+                            id="trackingRatingStars"
+                        >
+
+                            <button data-rating="1">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+
+                            <button data-rating="2">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+
+                            <button data-rating="3">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+
+                            <button data-rating="4">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+
+                            <button data-rating="5">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+
+                        </div>
+
+
+                        <textarea
+                            id="trackingFeedbackText"
+                            class="form-control mt-3"
+                            rows="3"
+                            placeholder="Write a short feedback..."
+                        ></textarea>
+
+
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+
+                            <button
+                                class="btn btn-outline-secondary"
+                                data-close
+                            >
+                                Skip
+                            </button>
+
+                            <button
+                                id="submitTrackingFeedback"
+                                class="btn btn-primary"
+                            >
+                                Submit Feedback
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `);
+
+
+                let selectedRating = 0;
+
+                const stars =
+                    document.querySelectorAll(
+                        "#trackingRatingStars button"
+                    );
+
+                stars.forEach(
+                    function(star){
+
+                        star.addEventListener(
+                            "click",
+                            function(){
+
+                                selectedRating =
+                                    Number(
+                                        star.dataset.rating
+                                    );
+
+                                stars.forEach(
+                                    function(item){
+
+                                        item.classList.toggle(
+                                            "selected",
+                                            Number(
+                                                item.dataset.rating
+                                            ) <= selectedRating
+                                        );
+
+                                    }
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+
+                const submit =
+                    document.getElementById(
+                        "submitTrackingFeedback"
+                    );
+
+                if(submit){
+
+                    submit.addEventListener(
+                        "click",
+                        function(){
+
+                            if(!selectedRating){
+
+                                notice(
+                                    "Please select a rating first.",
+                                    true
+                                );
+
+                                return;
+                            }
+
+                            close();
+
+                            notice(
+                                "Thank you for your feedback!"
+                            );
+
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+       /*
+     * Existing appointment actions.
+     */
+    const rescheduleButton =
+        document.getElementById("reschedule");
+
+    const cancelButton =
+        document.getElementById("cancel");
+
+
+    rescheduleButton?.addEventListener(
+        "click",
+        openReschedule
+    );
+
+    cancelButton?.addEventListener(
+        "click",
+        openCancel
+    );
 }
-</p>
-<div class="track-actions">
-<button id="reschedule" class="btn btn-outline-primary" ${a.job_code || !a.can_reschedule ? "disabled" : ""}>Reschedule appointment</button>
-<button id="cancel" class="btn btn-outline-danger" ${a.job_code || !a.can_cancel ? "disabled" : ""}>Cancel appointment</button>
-</div></section>`;reschedule?.addEventListener("click",openReschedule);cancel?.addEventListener("click",openCancel)}function istDate(n){let p=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kolkata",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date()),g=t=>p.find(x=>x.type===t).value,d=new Date(`${g("year")}-${g("month")}-${g("day")}T12:00:00Z`);d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}function openReschedule(){let selectedDate,selectedTime,dates=Array.from({length:28},(_,i)=>istDate(i+1));dialog(`<div class="d-flex justify-content-between"><div><h2 class="h4">Reschedule appointment</h2><p class="text-muted">Current: ${esc(date(result.appointment.appointment_date))} at ${esc(time(result.appointment.appointment_time))}</p></div><button class="btn-close" data-close></button></div><h3 class="h6">Choose a new date</h3><div id="dates" class="calendar-grid">${dates.map(d=>`<button data-date="${d}"><small>${new Date(`${d}T12:00:00`).toLocaleDateString("en-IN",{weekday:"short"})}</small><br>${new Date(`${d}T12:00:00`).getDate()}</button>`).join("")}</div><h3 class="h6 mt-4">Available time slots</h3><div id="slots" class="slot-grid"><span class="text-muted small">Choose a date to check availability.</span></div><p id="actionError" class="text-danger small mt-3"></p><div class="d-flex justify-content-end gap-2 mt-3"><button class="btn btn-outline-secondary" data-close>Cancel</button><button id="continueReschedule" disabled class="btn btn-primary">Continue</button></div>`);datesEl.onclick=async e=>{let b=e.target.closest("[data-date]");if(!b)return;selectedDate=b.dataset.date;selectedTime=null;datesEl.querySelectorAll("button").forEach(x=>x.classList.toggle("selected",x===b));slots.innerHTML="<span class='text-muted small'>Checking availability…</span>";continueReschedule.disabled=true;try{let d=await api("availability",{date:selectedDate});slots.innerHTML=(d.slots||[]).length?d.slots.map(s=>`<button data-time="${s.value}">${esc(s.label)}</button>`).join(""):`<span class="text-muted small">${esc(d.message||"No time slots are available for this date.")}</span>`}catch(x){actionError.textContent=x.message;slots.innerHTML=""}};slots.onclick=e=>{let b=e.target.closest("[data-time]");if(!b)return;selectedTime=b.dataset.time;slots.querySelectorAll("button").forEach(x=>x.classList.toggle("selected",x===b));continueReschedule.disabled=false};continueReschedule.onclick=()=>confirmReschedule(selectedDate,selectedTime)}function confirmReschedule(d,t){dialog(`<h2 class="h4">Confirm reschedule</h2><p>Reschedule this appointment to <strong>${esc(date(d))} at ${esc(time(t))}</strong>?</p><div class="d-flex justify-content-end gap-2 mt-4"><button data-close class="btn btn-outline-secondary">Cancel</button><button id="doReschedule" class="btn btn-primary">Confirm reschedule</button></div>`);doReschedule.onclick=()=>action("reschedule",d,t)}function openCancel(){dialog(`<h2 class="h4">Cancel appointment?</h2><p>Are you sure you want to cancel this appointment?<br>This action cannot be undone.</p><div class="d-flex justify-content-end gap-2 mt-4"><button data-close class="btn btn-outline-secondary">Keep appointment</button><button id="doCancel" class="btn btn-danger">Cancel appointment</button></div>`);doCancel.onclick=()=>action("cancel")}async function action(type,d,t){if(busy)return;busy=true;let b=document.getElementById(type==="cancel"?"doCancel":"doReschedule");b.disabled=true;b.textContent="Saving…";try{await api("customer-appointment-action",{token,action:type,new_date:d,new_time:t});close();notice(type==="cancel"?"Appointment Cancelled Successfully":"Appointment rescheduled successfully");render(await api("customer-tracking",{token}))}catch(x){notice(x.message,true)}finally{busy=false}}load()}());
-(function () { [["datesEl", "dates"], ["slots", "slots"], ["continueReschedule", "continueReschedule"], ["actionError", "actionError"], ["doReschedule", "doReschedule"], ["doCancel", "doCancel"]].forEach(function (entry) { Object.defineProperty(window, entry[0], { configurable: true, get: function () { return document.getElementById(entry[1]); } }); }); }());
+
+load();
+
+}());

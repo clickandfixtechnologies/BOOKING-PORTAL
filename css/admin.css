@@ -4,11 +4,10 @@
 .status-badge{background:#fff3cd!important;color:#7a4b00!important;border:1px solid #e3b341;font-weight:700}
 
 /* =========================================================
-   ADMIN TABLE ACTIONS FIX
+   ADMIN TABLE ACTIONS
    ========================================================= */
 
 .admin-main .table td.actions {
-    display: table-cell;
     white-space: nowrap;
     vertical-align: middle;
 }
@@ -18,9 +17,9 @@
     align-items: center;
     justify-content: center;
     margin-right: 4px;
+    vertical-align: middle;
 }
 
 .admin-main .table td.actions .btn:last-child {
     margin-right: 0;
 }
-

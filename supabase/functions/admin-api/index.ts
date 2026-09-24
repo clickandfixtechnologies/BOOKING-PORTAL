@@ -155,7 +155,7 @@ async function technicians(db:any){
   };
 }
 
-async function createTechnician(db:any,input:any){if(!input||!/^CFX-TECH-\d{4}-\d{4,6}$/.test(input.technician_code||"")||!/^[6-9]\d{9}$/.test(String(input.mobile||"").replace(/\D/g,"")))throw new Error("Technician ID and mobile must be valid.");const email=clean(input.email,254),password=String(input.password||"");if(!email||!password)throw new Error("A technician login email and password are required.");if(password.length<12)throw new Error("Technician password must contain at least 12 characters.");const{data:authData,error:authError}=await db.auth.admin.createUser({email,password,email_confirm:true});if(authError)throw new Error(authError.message);const{data,error}=await db.from("technicians").insert({auth_user_id:authData.user.id,technician_code:input.technician_code,full_name:clean(input.full_name,120),mobile:String(input.mobile).replace(/\D/g,""),username:clean(input.username,80),specialization:Array.isArray(input.specialization)?input.specialization.slice(0,10):[],working_days:input.working_days||[1,2,3,4,5,6],working_start:input.working_start||"10:00",working_end:input.working_end||"19:00",is_active:input.is_active!==false}).select().single();if(error){await db.auth.admin.deleteUser(authData.user.id);throw error;}return{technician:data};}
+async function createTechnician(db:any,input:any){if(!input||!/^CFX-TECH-\d{4}-\d{4,6}$/.test(input.technician_code||"")||!/^[6-9]\d{9}$/.test(String(input.mobile||"").replace(/\D/g,"")))throw new Error("Technician ID and mobile must be valid.");const email=clean(input.email,254),password=String(input.password||"");if(!email||!password)throw new Error("A technician login email and password are required.");if(password.length<6)throw new Error("Technician password must contain at least 6 characters.");const{data:authData,error:authError}=await db.auth.admin.createUser({email,password,email_confirm:true});if(authError)throw new Error(authError.message);const{data,error}=await db.from("technicians").insert({auth_user_id:authData.user.id,technician_code:input.technician_code,full_name:clean(input.full_name,120),mobile:String(input.mobile).replace(/\D/g,""),username:clean(input.username,80),specialization:Array.isArray(input.specialization)?input.specialization.slice(0,10):[],working_days:input.working_days||[1,2,3,4,5,6],working_start:input.working_start||"10:00",working_end:input.working_end||"19:00",is_active:input.is_active!==false}).select().single();if(error){await db.auth.admin.deleteUser(authData.user.id);throw error;}return{technician:data};}
 async function updateTechnician(db:any,input:any){
 
   if(
@@ -240,9 +240,9 @@ async function updateTechnician(db:any,input:any){
      */
     if(password){
 
-      if(password.length<12){
+      if(password.length<6){
         throw new Error(
-          "Technician password must contain at least 12 characters."
+          "Technician password must contain at least 6 characters."
         );
       }
 

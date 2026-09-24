@@ -308,11 +308,11 @@ function renderTechForm(t={}){
           name="password"
           class="form-control"
           type="password"
-          ${t.id&&!needsAccount?"":"required minlength=12"}
+          ${t.id&&!needsAccount?"":"required minlength=6"}
           placeholder="${
             t.id&&!needsAccount
               ? "Leave blank to keep current password"
-              : "12+ character password"
+              : "6+ character password"
           }"
           autocomplete="new-password"
         >

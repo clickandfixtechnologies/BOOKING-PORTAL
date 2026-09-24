@@ -72,199 +72,173 @@ async function load() {
     }
 }
 
-function section(title, items, type = "") {
+function section(title,items){
 
-    const isToday = type === "today";
-    const isUpcoming = type === "upcoming";
-    const isCompleted = type === "completed";
+    const titleIcon =
+        title === "Today's Jobs"
+            ? '<i class="fa-regular fa-calendar-days"></i>'
+            : title === "Upcoming Jobs"
+                ? '<i class="fa-solid fa-clock"></i>'
+                : '';
 
-    if (isToday || isUpcoming) {
-
-        const icon = isToday
-            ? "fa-regular fa-calendar-days"
-            : "fa-solid fa-clock";
-
-        const iconClass = isToday
-            ? ""
-            : "indigo";
+    if(!items.length){
 
         return `
-            <section class="tech-panel">
+            <section class="tech-job-section ${title === "Completed Jobs" ? "tech-completed-section" : ""}">
 
-                <h2 class="tech-panel-title">
+                <h2 class="tech-section-title">
                     ${esc(title)}
                 </h2>
 
-                ${
-                    items.length
-                        ? `
-                            <div class="tech-job-list">
-                                ${items.map(jobCard).join("")}
-                            </div>
-                          `
-                        : `
-                            <div class="tech-empty">
+                <div class="tech-empty-job">
 
-                                <div class="tech-empty-icon ${iconClass}">
-                                    <i class="${icon}"></i>
+                    ${
+                        titleIcon
+                            ? `
+                                <div class="tech-empty-icon ${
+                                    title === "Today's Jobs"
+                                        ? "tech-empty-icon-blue"
+                                        : "tech-empty-icon-indigo"
+                                }">
+                                    ${titleIcon}
                                 </div>
+                              `
+                            : ""
+                    }
 
-                                <p class="tech-empty-text">
-                                    No jobs scheduled for this time
-                                </p>
+                    <p>No jobs scheduled for this time</p>
 
-                            </div>
-                          `
-                }
+                </div>
 
             </section>
         `;
     }
 
-
-    if (isCompleted) {
-
-        return `
-            <section class="tech-completed-section">
-
-                <h2 class="tech-completed-title">
-                    Completed Jobs
-                </h2>
-
-                ${
-                    items.length
-                        ? items.map(completedJobCard).join("")
-                        : `
-                            <div class="tech-empty">
-
-                                <div class="tech-empty-icon">
-                                    <i class="fa-solid fa-circle-check"></i>
-                                </div>
-
-                                <p class="tech-empty-text">
-                                    No completed jobs yet
-                                </p>
-
-                            </div>
-                          `
-                }
-
-            </section>
-        `;
-    }
-
-
-    return "";
-}
-
-function jobCard(a) {
 
     return `
-        <button
-            type="button"
-            class="tech-job-card tech-job-button"
-            data-id="${esc(a.id)}"
-        >
+        <section class="tech-job-section ${
+            title === "Completed Jobs"
+                ? "tech-completed-section"
+                : "tech-top-section"
+        }">
 
-            <div class="tech-job-header">
+            <h2 class="tech-section-title">
+                ${esc(title)}
+            </h2>
 
-                <span class="tech-job-id">
-                    ${esc(a.appointment_id)}
-                </span>
+            <div class="${
+                title === "Completed Jobs"
+                    ? "tech-completed-list"
+                    : "tech-job-grid"
+            }">
 
-                <span class="tech-job-date">
+                ${items.map(a => `
 
-                    <i class="fa-regular fa-calendar"></i>
+                    <button
+                        type="button"
+                        class="tech-job-card"
+                        data-id="${esc(a.id)}"
+                    >
 
-                    ${esc(a.appointment_date)}
-                    ${esc(a.appointment_time)}
+                        <div class="tech-job-card-header">
 
-                </span>
+                            <strong>
+                                ${esc(a.appointment_id)}
+                            </strong>
+
+                            <span class="tech-job-date">
+                                <i class="fa-regular fa-calendar"></i>
+                                ${esc(a.appointment_date)}
+                                ${esc(a.appointment_time)}
+                            </span>
+
+                        </div>
+
+
+                        <div class="tech-job-card-body">
+
+                            <div class="tech-job-customer">
+
+                                <p>
+                                    <strong>Client:</strong>
+                                    <span>
+                                        ${esc(a.customer_name)}
+                                    </span>
+                                </p>
+
+                                <p>
+                                    <strong>Phone:</strong>
+
+                                    <span>
+                                        <i class="fa-solid fa-phone"></i>
+                                        ${esc(a.mobile)}
+                                    </span>
+                                </p>
+
+                            </div>
+
+
+                            <div class="tech-job-divider"></div>
+
+
+                            <div class="tech-service-details">
+
+                                <p class="tech-service-label">
+                                    SERVICE DETAILS
+                                </p>
+
+                                <p class="tech-service-value">
+                                    ${esc(a.service_category)}
+
+                                    <span>/</span>
+
+                                    ${esc(a.service_type)}
+                                </p>
+
+                            </div>
+
+
+                            <div class="tech-job-footer">
+
+                                <span class="tech-status-badge ${
+                                    a.status === "completed"
+                                        ? "tech-status-completed"
+                                        : "tech-status-default"
+                                }">
+
+                                    ${
+                                        a.status === "completed"
+                                            ? '<i class="fa-solid fa-circle-check"></i> COMPLETED'
+                                            : esc(a.status)
+                                    }
+
+                                </span>
+
+
+                                ${
+                                    a.status === "completed"
+                                        ? `
+                                            <span class="tech-feedback-link">
+                                                <i class="fa-regular fa-comment-dots"></i>
+                                                Feedback/Notes
+                                            </span>
+                                          `
+                                        : ""
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </button>
+
+                `).join("")}
 
             </div>
 
-
-            <div class="tech-job-body">
-
-                <div class="tech-job-info">
-
-                    <p class="tech-job-line">
-                        Client:
-                        <span>
-                            ${esc(a.customer_name)}
-                        </span>
-                    </p>
-
-                    <p class="tech-job-line">
-                        Phone:
-
-                        <span>
-
-                            <i class="fa-solid fa-phone"></i>
-
-                            ${esc(a.mobile)}
-
-                        </span>
-                    </p>
-
-                </div>
-
-
-                <hr class="tech-job-divider">
-
-
-                <div>
-
-                    <p class="tech-service-label">
-                        Service Details
-                    </p>
-
-                    <p class="tech-service-value">
-
-                        ${esc(a.service_category)}
-
-                        <span class="tech-service-separator">
-                            /
-                        </span>
-
-                        ${esc(a.service_type)}
-
-                    </p>
-
-                </div>
-
-
-                <div class="tech-job-footer">
-
-                    <span class="tech-status">
-
-                        <i class="fa-solid fa-circle-check"></i>
-
-                        ${esc(
-                            String(a.status || "")
-                                .replaceAll("_", " ")
-                                .toUpperCase()
-                        )}
-
-                    </span>
-
-
-                    <span class="tech-feedback">
-
-                        <i class="fa-regular fa-comment-dots"></i>
-
-                        Feedback/Notes
-
-                    </span>
-
-                </div>
-
-            </div>
-
-        </button>
+        </section>
     `;
 }
-
 
 function completedJobCard(a) {
 
@@ -402,10 +376,431 @@ function completedJobCard(a) {
     `;
 }
 
-async function loadDetail(id){try{const {appointment:a}=await api("appointment",{id});const map=a.google_maps_url?`<a class="btn btn-outline-primary" target="_blank" rel="noopener" href="${esc(a.google_maps_url)}">Open in Google Maps</a>`:"";detail.innerHTML=`<div class="booking-card"><h2 class="h4">${esc(a.appointment_id)}</h2><p><strong>${esc(a.customer_name)}</strong> · ${esc(a.mobile)}<br>${esc(a.service_category)} ${esc(a.service_type)}<br>${esc(a.appointment_date)} ${esc(a.appointment_time)}<br>${esc(a.service_address)}<br>${esc(a.problem_description)}</p>${map}<hr><p>Current status: <strong>${esc(a.status)}</strong></p><div class="d-flex flex-wrap gap-2"><button class="btn btn-outline-primary action" data-status="on_the_way">Mark On The Way</button><button class="btn btn-outline-primary action" data-status="in_progress">Mark In Progress</button></div><div class="input-group mt-3"><input id="jobCode" class="form-control" value="${esc(a.job_code||"")}" placeholder="CFX-JOB-2026-00452"><button id="saveJob" class="btn btn-outline-primary">Save Job ID</button></div>${["in_progress","job_id_created"].includes(a.status)?`<button id="complete" class="btn btn-success mt-3">${a.status==="job_id_created"?"Complete Job":"Complete Service"}</button><div id="otpArea" class="mt-3"></div>`:""}<p id="techMessage" class="small mt-2"></p></div>`;document.querySelectorAll(".action").forEach(b=>b.onclick=()=>status(id,b.dataset.status));saveJob.onclick=()=>status(id,"job_id_created",jobCode.value);complete?.addEventListener("click",()=>startOtp(id))}catch(e){detail.innerHTML=`<p class="text-danger">${esc(e.message)}</p>`}}
+async function loadDetail(id){
+
+    try{
+
+        const {
+            appointment:a
+        } = await api(
+            "appointment",
+            {id}
+        );
+
+
+        const map = a.google_maps_url
+            ? `
+                <a
+                    class="tech-action-button tech-map-button"
+                    target="_blank"
+                    rel="noopener"
+                    href="${esc(a.google_maps_url)}"
+                >
+                    <i class="fa-solid fa-location-dot"></i>
+                    Open in Google Maps
+                </a>
+              `
+            : "";
+
+
+        detail.innerHTML = `
+
+            <div class="tech-detail-card">
+
+                <div class="tech-detail-header">
+
+                    <div>
+
+                        <p class="tech-detail-label">
+                            APPOINTMENT
+                        </p>
+
+                        <h2 class="tech-detail-title">
+                            ${esc(a.appointment_id)}
+                        </h2>
+
+                    </div>
+
+                    <span class="tech-status-badge tech-status-default">
+                        ${esc(a.status)}
+                    </span>
+
+                </div>
+
+
+                <div class="tech-detail-body">
+
+                    <div class="tech-detail-section">
+
+                        <h3>
+                            Customer Details
+                        </h3>
+
+                        <div class="tech-detail-info-grid">
+
+                            <div>
+                                <span>Customer</span>
+                                <strong>
+                                    ${esc(a.customer_name)}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Phone</span>
+                                <strong>
+                                    ${esc(a.mobile)}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Service</span>
+                                <strong>
+                                    ${esc(a.service_category)}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Service Type</span>
+                                <strong>
+                                    ${esc(a.service_type)}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Date</span>
+                                <strong>
+                                    ${esc(a.appointment_date)}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Time</span>
+                                <strong>
+                                    ${esc(a.appointment_time)}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="tech-detail-section">
+
+                        <h3>
+                            Service Address
+                        </h3>
+
+                        <p class="tech-detail-address">
+                            ${esc(a.service_address)}
+                        </p>
+
+                        ${map}
+
+                    </div>
+
+
+                    <div class="tech-detail-section">
+
+                        <h3>
+                            Problem Description
+                        </h3>
+
+                        <p class="tech-detail-description">
+                            ${esc(a.problem_description)}
+                        </p>
+
+                    </div>
+
+
+                    <div class="tech-detail-section">
+
+                        <h3>
+                            Update Job Status
+                        </h3>
+
+                        <div class="tech-detail-actions">
+
+                            <button
+                                type="button"
+                                class="tech-action-button"
+                                data-status="on_the_way"
+                            >
+                                <i class="fa-solid fa-route"></i>
+                                Mark On The Way
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="tech-action-button"
+                                data-status="in_progress"
+                            >
+                                <i class="fa-solid fa-screwdriver-wrench"></i>
+                                Mark In Progress
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="tech-detail-section">
+
+                        <h3>
+                            Job ID
+                        </h3>
+
+                        <div class="tech-job-id-row">
+
+                            <input
+                                id="jobCode"
+                                class="tech-input"
+                                value="${esc(a.job_code||"")}"
+                                placeholder="CFX-JOB-2026-00452"
+                            >
+
+                            <button
+                                id="saveJob"
+                                type="button"
+                                class="tech-action-button"
+                            >
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                Save Job ID
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    ${
+                        ["in_progress","job_id_created"].includes(a.status)
+                            ? `
+
+                                <div class="tech-detail-section">
+
+                                    <button
+                                        id="complete"
+                                        type="button"
+                                        class="tech-complete-button"
+                                    >
+                                        <i class="fa-solid fa-circle-check"></i>
+
+                                        ${
+                                            a.status === "job_id_created"
+                                                ? "Complete Job"
+                                                : "Complete Service"
+                                        }
+
+                                    </button>
+
+
+                                    <div
+                                        id="otpArea"
+                                        class="tech-otp-area"
+                                    ></div>
+
+                                </div>
+
+                              `
+                            : ""
+                    }
+
+
+                    <p
+                        id="techMessage"
+                        class="tech-message"
+                    ></p>
+
+                </div>
+
+            </div>
+        `;
+
+
+        document
+            .querySelectorAll(".tech-action-button[data-status]")
+            .forEach(b => {
+
+                b.onclick = () =>
+                    status(
+                        id,
+                        b.dataset.status
+                    );
+
+            });
+
+
+        const saveJobButton =
+            document.getElementById("saveJob");
+
+        const jobCode =
+            document.getElementById("jobCode");
+
+
+        saveJobButton?.addEventListener(
+            "click",
+            () =>
+                status(
+                    id,
+                    "job_id_created",
+                    jobCode.value
+                )
+        );
+
+
+        const completeButton =
+            document.getElementById("complete");
+
+
+        completeButton?.addEventListener(
+            "click",
+            () => startOtp(id)
+        );
+
+
+    }catch(e){
+
+        detail.innerHTML = `
+
+            <div class="tech-error-message">
+                ${esc(e.message)}
+            </div>
+
+        `;
+
+    }
+
+}
 async function status(id,status,job_code){try{await api("set_status",{id,status,job_code});await loadDetail(id);await load()}catch(e){techMessage.textContent=e.message}}
-async function startOtp(id){try{await api("start_completion",{id});otpArea.innerHTML=`<div class="alert alert-info">Customer Verification Required. A verification OTP has been sent to the customer's registered email.</div><div class="input-group"><input id="otp" class="form-control" inputmode="numeric" maxlength="6" placeholder="Enter OTP"><button id="verify" class="btn btn-success">Verify & Complete</button></div><button id="resend" class="btn btn-link btn-sm">Resend OTP</button>`;verify.onclick=()=>verifyOtp(id);resend.onclick=()=>startOtp(id)}catch(e){techMessage.textContent=e.message}}
-async function verifyOtp(id){try{await api("verify_completion",{id,otp:otp.value});detail.innerHTML=`<div class="alert alert-success">Appointment completed successfully.</div>`;load()}catch(e){techMessage.textContent=e.message}}
+async function startOtp(id){
+
+    try{
+
+        await api(
+            "start_completion",
+            {id}
+        );
+
+
+        otpArea.innerHTML = `
+
+            <div class="tech-otp-message">
+
+                <i class="fa-solid fa-envelope-circle-check"></i>
+
+                <div>
+
+                    <strong>
+                        Customer Verification Required
+                    </strong>
+
+                    <p>
+                        A verification OTP has been sent
+                        to the customer's registered email.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="tech-otp-row">
+
+                <input
+                    id="otp"
+                    class="tech-input"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="Enter 6-digit OTP"
+                >
+
+                <button
+                    id="verify"
+                    type="button"
+                    class="tech-complete-button"
+                >
+                    Verify &amp; Complete
+                </button>
+
+            </div>
+
+
+            <button
+                id="resend"
+                type="button"
+                class="tech-resend-button"
+            >
+                Resend OTP
+            </button>
+
+        `;
+
+
+        verify.onclick =
+            () => verifyOtp(id);
+
+
+        resend.onclick =
+            () => startOtp(id);
+
+
+    }catch(e){
+
+        techMessage.textContent =
+            e.message;
+
+    }
+
+}
+async function verifyOtp(id){
+
+    try{
+
+        await api(
+            "verify_completion",
+            {
+                id,
+                otp:otp.value
+            }
+        );
+
+
+        detail.innerHTML = `
+
+            <div class="tech-success-message">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                <div>
+
+                    <h3>
+                        Appointment completed successfully.
+                    </h3>
+
+                    <p>
+                        The job has been marked as completed.
+                    </p>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        load();
+
+
+    }catch(e){
+
+        techMessage.textContent =
+            e.message;
+
+    }
+
+}
 
 
 signOut.onclick = async () => {

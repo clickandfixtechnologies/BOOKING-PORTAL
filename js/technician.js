@@ -995,7 +995,7 @@ signOut.onclick = async () => {
     } finally {
 
         window.location.replace(
-            "./login.html"
+            "./technician/login.html"
         );
 
     }
@@ -1010,7 +1010,7 @@ signOut.onclick = async () => {
             if (!session) {
 
                 window.location.replace(
-                    "./login.html"
+                    "./technician/login.html"
                 );
 
                 return;
@@ -1022,7 +1022,7 @@ signOut.onclick = async () => {
         .catch(() => {
 
             window.location.replace(
-                "./login.html"
+                "./technician/login.html"
             );
 
         });

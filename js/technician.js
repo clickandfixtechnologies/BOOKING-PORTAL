@@ -530,14 +530,36 @@ async function loadDetail(id){
         id
     );
 
+    detail.innerHTML = `
+        <div class="tech-loading-message">
+            Loading appointment details...
+        </div>
+    `;
+
     try{
 
-        const {
-            appointment:a
-        } = await api(
-            "appointment",
-            {id}
+        console.log(
+            "Calling technician API for appointment:",
+            id
         );
+
+        const result = await api(
+            "appointment",
+            { id }
+        );
+
+        console.log(
+            "Appointment API response:",
+            result
+        );
+
+        const { appointment:a } = result;
+
+        if(!a){
+            throw new Error(
+                "Appointment details were not returned."
+            );
+        }
 
 
         const map = a.google_maps_url

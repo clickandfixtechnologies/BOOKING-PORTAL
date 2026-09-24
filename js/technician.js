@@ -801,6 +801,17 @@ console.log("Appointment object:", a);
             detail.innerHTML.length
         );
 
+        detail.style.display = "block";
+detail.style.visibility = "visible";
+detail.style.opacity = "1";
+detail.style.height = "auto";
+detail.style.overflow = "visible";
+
+detail.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+});
+
         document
             .querySelectorAll(".tech-action-button[data-status]")
             .forEach(b => {

@@ -81,7 +81,67 @@ function formatAppointmentDateTime(date, time) {
     return `${formattedDate} · ${formattedTime}`;
 }
 
-let filter={},refreshInFlight;async function getValidAccessToken(){let{data:{session}}=await s.auth.getSession();if(!session)throw Error("Sign in is required.");if(!session.expires_at||session.expires_at*1000-Date.now()>60000)return session.access_token;refreshInFlight??=s.auth.refreshSession().finally(()=>{refreshInFlight=null});let{data,error}=await refreshInFlight;if(error||!data.session)throw Error("Your session has expired. Please sign in again.");return data.session.access_token}async function api(action,more={}){let token=await getValidAccessToken(),r=await fetch(c.supabaseUrl.replace(/\/$/,"")+"/functions/v1/admin-api",{method:"POST",headers:{"Content-Type":"application/json",apikey:c.supabaseAnonKey,Authorization:"Bearer "+token},body:JSON.stringify({action,...more})}),d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||"Request failed.");return d}
+let filter={},refreshInFlight;async function getValidAccessToken(){let{data:{session}}=await s.auth.getSession();if(!session)throw Error("Sign in is required.");if(!session.expires_at||session.expires_at*1000-Date.now()>60000)return session.access_token;refreshInFlight??=s.auth.refreshSession().finally(()=>{refreshInFlight=null});let{data,error}=await refreshInFlight;if(error||!data.session)throw Error("Your session has expired. Please sign in again.");return data.session.access_token}
+
+async function api(action,more={}){
+  async function request(token){
+    const response=await fetch(
+      c.supabaseUrl.replace(/\/$/,"")+"/functions/v1/admin-api",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          apikey:c.supabaseAnonKey,
+          Authorization:"Bearer "+token
+        },
+        body:JSON.stringify({action,...more})
+      }
+    );
+
+    const data=await response.json().catch(()=>({}));
+
+    return {
+      response,
+      data
+    };
+  }
+
+  let token=await getValidAccessToken();
+  let {response,data}=await request(token);
+
+  /*
+   * Background tab / stale session protection:
+   * If admin-api returns 401, refresh the Supabase session once
+   * and retry the same request with the fresh access token.
+   */
+  if(response.status===401){
+    refreshInFlight??=s.auth.refreshSession().finally(()=>{
+      refreshInFlight=null;
+    });
+
+    const {
+      data:refreshData,
+      error:refreshError
+    }=await refreshInFlight;
+
+    if(refreshError||!refreshData?.session){
+      throw Error(
+        data?.error ||
+        "Your admin session has expired. Please sign in again."
+      );
+    }
+
+    token=refreshData.session.access_token;
+
+    ({response,data}=await request(token));
+  }
+
+  if(!response.ok){
+    throw Error(data?.error||"Request failed.");
+  }
+
+  return data;
+}
 
 function flash(message, ok = true) {
     if (!flashBox) return;

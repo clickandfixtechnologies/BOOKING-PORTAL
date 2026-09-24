@@ -904,6 +904,28 @@
     background: rgba(239, 246, 255, 0.9);
 }
 
+/* =========================================================
+   DISABLED TECHNICIAN ACTION BUTTONS
+   ========================================================= */
+
+.tech-action-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+    background: rgba(241, 245, 249, 0.75);
+    color: var(--tech-light-muted);
+    border-color: var(--tech-border);
+    box-shadow: none;
+    transform: none;
+}
+
+.tech-action-button:disabled:hover {
+    cursor: not-allowed;
+    background: rgba(241, 245, 249, 0.75);
+    color: var(--tech-light-muted);
+    border-color: var(--tech-border);
+    box-shadow: none;
+    transform: none;
+}
 
 /* =========================================================
    JOB ID

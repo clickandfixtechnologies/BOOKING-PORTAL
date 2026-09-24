@@ -59,6 +59,85 @@ const esc = value => {
     return e.innerHTML;
 };
 
+function formatStatus(status) {
+
+    if (!status) {
+        return "—";
+    }
+
+    return String(status)
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, char => char.toUpperCase());
+}
+
+
+function formatServiceType(value) {
+
+    if (!value) {
+        return "—";
+    }
+
+    return String(value)
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, char => char.toUpperCase())
+        .replace(/\bCctv\b/g, "CCTV")
+        .replace(/\bId\b/g, "ID")
+        .replace(/\bOtp\b/g, "OTP");
+}
+
+
+function formatDate(value) {
+
+    if (!value) {
+        return "—";
+    }
+
+    const date = new Date(`${value}T00:00:00`);
+
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+
+    return date.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    });
+}
+
+
+function formatTime(value) {
+
+    if (!value) {
+        return "—";
+    }
+
+    const parts = String(value).split(":");
+
+    if (parts.length < 2) {
+        return value;
+    }
+
+    const hours = Number(parts[0]);
+    const minutes = Number(parts[1]);
+
+    if (
+        Number.isNaN(hours) ||
+        Number.isNaN(minutes)
+    ) {
+        return value;
+    }
+
+    const date = new Date();
+
+    date.setHours(hours, minutes, 0, 0);
+
+    return date.toLocaleTimeString("en-IN", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+    });
+}
 
 async function getValidAccessToken(){
 
@@ -295,8 +374,9 @@ function section(title,items){
 
                             <span class="tech-job-date">
                                 <i class="fa-regular fa-calendar"></i>
-                                ${esc(a.appointment_date)}
-                                ${esc(a.appointment_time)}
+                                ${formatDate(a.appointment_date)}
+                                &nbsp;&nbsp;
+                                ${formatTime(a.appointment_time)}
                             </span>
 
                         </div>
@@ -335,11 +415,11 @@ function section(title,items){
                                 </p>
 
                                 <p class="tech-service-value">
-                                    ${esc(a.service_category)}
+                                    ${formatServiceType(a.service_category)}
 
                                     <span>/</span>
 
-                                    ${esc(a.service_type)}
+                                    ${formatServiceType(a.service_type)}
                                 </p>
 
                             </div>
@@ -356,7 +436,7 @@ function section(title,items){
                                     ${
                                         a.status === "completed"
                                             ? '<i class="fa-solid fa-circle-check"></i> COMPLETED'
-                                            : esc(a.status)
+                                            : formatStatus(a.status)
                                     }
 
                                 </span>
@@ -597,7 +677,7 @@ async function loadDetail(id){
                     </div>
 
                     <span class="tech-status-badge tech-status-default">
-                        ${esc(a.status)}
+                    ${formatStatus(a.status)}
                     </span>
 
                 </div>
@@ -630,30 +710,30 @@ async function loadDetail(id){
                             <div>
                                 <span>Service</span>
                                 <strong>
-                                    ${esc(a.service_category)}
+                                ${formatServiceType(a.service_category)}
                                 </strong>
                             </div>
 
                             <div>
                                 <span>Service Type</span>
                                 <strong>
-                                    ${esc(a.service_type)}
+                                ${formatServiceType(a.service_type)}
                                 </strong>
                             </div>
 
                             <div>
-                                <span>Date</span>
-                                <strong>
-                                    ${esc(a.appointment_date)}
-                                </strong>
-                            </div>
+    <span>Date</span>
+    <strong>
+        ${formatDate(a.appointment_date)}
+    </strong>
+</div>
 
-                            <div>
-                                <span>Time</span>
-                                <strong>
-                                    ${esc(a.appointment_time)}
-                                </strong>
-                            </div>
+<div>
+    <span>Time</span>
+    <strong>
+        ${formatTime(a.appointment_time)}
+    </strong>
+</div>
 
                         </div>
 
@@ -696,26 +776,28 @@ async function loadDetail(id){
 
                         <div class="tech-detail-actions">
 
-                            <button
-                                type="button"
-                                class="tech-action-button"
-                                data-status="on_the_way"
-                            >
-                                <i class="fa-solid fa-route"></i>
-                                Mark On The Way
-                            </button>
+    <button
+        type="button"
+        class="tech-action-button"
+        data-status="on_the_way"
+        ${a.status !== "technician_assigned" ? "disabled" : ""}
+    >
+        <i class="fa-solid fa-route"></i>
+        Mark On The Way
+    </button>
 
 
-                            <button
-                                type="button"
-                                class="tech-action-button"
-                                data-status="in_progress"
-                            >
-                                <i class="fa-solid fa-screwdriver-wrench"></i>
-                                Mark In Progress
-                            </button>
+    <button
+        type="button"
+        class="tech-action-button"
+        data-status="in_progress"
+        ${a.status !== "on_the_way" ? "disabled" : ""}
+    >
+        <i class="fa-solid fa-screwdriver-wrench"></i>
+        Mark In Progress
+    </button>
 
-                        </div>
+</div>
 
                     </div>
 
@@ -736,13 +818,14 @@ async function loadDetail(id){
                             >
 
                             <button
-                                id="saveJob"
-                                type="button"
-                                class="tech-action-button"
-                            >
-                                <i class="fa-solid fa-floppy-disk"></i>
-                                Save Job ID
-                            </button>
+    id="saveJob"
+    type="button"
+    class="tech-action-button"
+    ${a.status !== "in_progress" ? "disabled" : ""}
+>
+    <i class="fa-solid fa-floppy-disk"></i>
+    Save Job ID
+</button>
 
                         </div>
 
@@ -859,7 +942,39 @@ detail.scrollIntoView({
     }
 
 }
-async function status(id,status,job_code){try{await api("set_status",{id,status,job_code});await loadDetail(id);await load()}catch(e){techMessage.textContent=e.message}}
+async function status(id, status, job_code) {
+
+    try {
+
+        await api(
+            "set_status",
+            {
+                id,
+                status,
+                job_code
+            }
+        );
+
+        await loadDetail(id);
+
+        await load();
+
+    } catch (e) {
+
+        const message =
+            document.getElementById("techMessage");
+
+        if (message) {
+            message.textContent = e.message;
+        }
+
+        console.error(
+            "Technician status update failed:",
+            e
+        );
+    }
+}
+
 async function startOtp(id){
 
     try{

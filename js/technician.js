@@ -406,7 +406,7 @@ async function loadDetail(id){try{const {appointment:a}=await api("appointment",
 async function status(id,status,job_code){try{await api("set_status",{id,status,job_code});await loadDetail(id);await load()}catch(e){techMessage.textContent=e.message}}
 async function startOtp(id){try{await api("start_completion",{id});otpArea.innerHTML=`<div class="alert alert-info">Customer Verification Required. A verification OTP has been sent to the customer's registered email.</div><div class="input-group"><input id="otp" class="form-control" inputmode="numeric" maxlength="6" placeholder="Enter OTP"><button id="verify" class="btn btn-success">Verify & Complete</button></div><button id="resend" class="btn btn-link btn-sm">Resend OTP</button>`;verify.onclick=()=>verifyOtp(id);resend.onclick=()=>startOtp(id)}catch(e){techMessage.textContent=e.message}}
 async function verifyOtp(id){try{await api("verify_completion",{id,otp:otp.value});detail.innerHTML=`<div class="alert alert-success">Appointment completed successfully.</div>`;load()}catch(e){techMessage.textContent=e.message}}
-signIn.onclick=async()=>{if(!sb)return loginError.textContent="Technician portal is not configured.";const loginEmail=email.value.trim(),loginPassword=password.value;if(!loginEmail||!loginPassword)return loginError.textContent="Enter your technician email and password.";try{const{error}=await sb.auth.signInWithPassword({email:loginEmail,password:loginPassword});if(error)throw error;load()}catch(e){loginError.textContent=e.message}}
+
 
 signOut.onclick = async () => {
 

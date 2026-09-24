@@ -2096,3 +2096,190 @@
     }
 
 }
+
+/* =========================================================
+   TECHNICIAN GLASS MORPHISM HOVER EFFECT
+   ========================================================= */
+
+/* Dashboard cards */
+.tech-content .booking-card,
+.tech-content .job {
+    position: relative;
+    overflow: hidden;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease,
+        background 0.25s ease;
+}
+
+
+/* Glass shine layer */
+.tech-content .booking-card::before,
+.tech-content .job::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.32),
+            rgba(255, 255, 255, 0.08)
+        );
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.25s ease,
+        backdrop-filter 0.25s ease;
+}
+
+
+/* Hover glass effect */
+.tech-content .booking-card:hover,
+.tech-content .job:hover {
+
+    transform: translateY(-3px);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.88),
+            rgba(245, 249, 255, 0.72)
+        );
+
+    border-color: rgba(37, 99, 235, 0.20);
+
+    box-shadow:
+        0 12px 30px rgba(15, 23, 42, 0.10),
+        0 4px 12px rgba(37, 99, 235, 0.08);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+
+.tech-content .booking-card:hover::before,
+.tech-content .job:hover::before {
+    opacity: 1;
+
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+
+/* =========================================================
+   SIDEBAR NAV HOVER GLASS
+   ========================================================= */
+
+.tech-nav-item {
+    position: relative;
+    overflow: hidden;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.tech-nav-item:hover:not(.active) {
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(239, 246, 255, 0.90),
+            rgba(255, 255, 255, 0.70)
+        );
+
+    color: #2563eb;
+
+    box-shadow:
+        0 6px 18px rgba(37, 99, 235, 0.08);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    transform: translateX(2px);
+}
+
+
+/* =========================================================
+   SIGN OUT GLASS HOVER
+   ========================================================= */
+
+.tech-signout {
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.tech-signout:hover {
+
+    background:
+        rgba(255, 255, 255, 0.65);
+
+    border-color: rgba(37, 99, 235, 0.25);
+
+    color: #2563eb;
+
+    box-shadow:
+        0 6px 18px rgba(15, 23, 42, 0.08);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   MOBILE MENU BUTTON
+   ========================================================= */
+
+.tech-mobile-menu {
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.tech-mobile-menu:hover {
+
+    background: rgba(255, 255, 255, 0.70);
+
+    box-shadow:
+        0 5px 15px rgba(15, 23, 42, 0.08);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+
+/* =========================================================
+   REDUCE MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .tech-content .booking-card,
+    .tech-content .job,
+    .tech-nav-item,
+    .tech-signout,
+    .tech-mobile-menu {
+
+        transition: none !important;
+
+        transform: none !important;
+    }
+
+}

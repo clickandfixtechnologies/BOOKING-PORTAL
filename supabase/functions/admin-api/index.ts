@@ -1,6 +1,7 @@
 import { corsHeaders, corsResponse } from "../_shared/cors.ts";
 import { requireAdmin } from "../_shared/auth.ts";
 const statuses=["pending","confirmed","technician_assigned","on_the_way","in_progress","job_id_created","completed","cancelled","rescheduled","no_show"];
+
 Deno.serve(async(request)=>{
   if(request.method==="OPTIONS") return new Response("ok",{headers:corsHeaders});
   try { const {supabase,user}=await requireAdmin(request); const body=await request.json(); const output=await route(supabase,user.id,body); return corsResponse(output); }
@@ -24,13 +25,15 @@ Deno.serve(async(request)=>{
       ? 401
       : 400;
 
-  return corsResponse(
+    return corsResponse(
     { error: message },
     status
   );
-}
+  }
+});
 
 async function route(db:any, userId:string, body:any) {
+
   switch(body.action) {
     case "dashboard": return dashboard(db);
     case "appointments": return appointments(db,body);

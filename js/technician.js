@@ -21,9 +21,12 @@ const sb =
 const jobs = document.getElementById("jobs");
 const detail = document.getElementById("detail");
 
-let refreshInFlight = null;
+const esc = value => {
+    const e = document.createElement("div");
+    e.textContent = value ?? "—";
+    return e.innerHTML;
+};
 
-const esc=value=>{const e=document.createElement("div");e.textContent=value??"—";return e.innerHTML};
 
 async function getValidAccessToken(){
 
@@ -53,36 +56,6 @@ async function getValidAccessToken(){
     return session.access_token;
 }
 
-    /*
-     * Session is still comfortably valid.
-     */
-    if(remaining > 120000){
-        return session.access_token;
-    }
-
-    /*
-     * Session is close to expiry.
-     * Only one refresh request should run at a time.
-     */
-    refreshInFlight ??=
-        sb.auth
-            .refreshSession()
-            .finally(() => {
-                refreshInFlight = null;
-            });
-
-    const {
-        data,
-        error
-    } = await refreshInFlight;
-
-    if(error || !data?.session){
-        throw Error(
-            "Your session has expired. Please sign in again."
-        );
-    }
-
-    return data.session.access_token;
 
 async function api(action, body = {}){
 
@@ -124,69 +97,6 @@ async function api(action, body = {}){
 
     return data;
 }
-
-    /*
-     * First request
-     */
-    let token =
-        await getValidAccessToken();
-
-    let {
-        response,
-        data
-    } = await request(token);
-
-
-    /*
-     * If the access token has expired,
-     * refresh the session once and retry.
-     */
-    if(response.status === 401){
-
-        refreshInFlight ??=
-            sb.auth
-                .refreshSession()
-                .finally(() => {
-                    refreshInFlight = null;
-                });
-
-        const {
-            data: refreshData,
-            error: refreshError
-        } = await refreshInFlight;
-
-
-        if(
-            refreshError ||
-            !refreshData?.session
-        ){
-            throw Error(
-                "Your session has expired. Please sign in again."
-            );
-        }
-
-
-        token =
-            refreshData.session.access_token;
-
-
-        ({
-            response,
-            data
-        } = await request(token));
-    }
-
-
-    if(!response.ok){
-        throw Error(
-            data?.error ||
-            "Request failed."
-        );
-    }
-
-
-    return data;
-
 
 async function load() {
 

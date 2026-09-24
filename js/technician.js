@@ -997,7 +997,17 @@ signOut.onclick = async () => {
 
     try {
 
-        await sb.auth.signOut();
+        const { error } =
+            await sb.auth.signOut({
+                scope: "local"
+            });
+
+        if (error) {
+            console.error(
+                "Technician sign out error:",
+                error
+            );
+        }
 
     } finally {
 

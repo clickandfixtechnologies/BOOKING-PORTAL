@@ -239,7 +239,157 @@ async function availabilityView(){pageTitle.textContent="Availability";let x=awa
 async function notificationsView(){pageTitle.textContent="Notifications";let[n,l]=await Promise.all([api("notifications"),api("notification_logs")]);n=n.notifications;q.innerHTML=`<div class="admin-card"><h2 class="h6">Appointment notifications</h2><p>Permission: <b>${Notification.permission==="granted"?"Enabled":"Not Enabled"}</b></p><button id="enablePush" class="btn btn-primary">Enable Appointment Notifications</button></div><div class="admin-card mt-3"><h2 class="h6">Admin inbox</h2>${n.map(x=>`<div class="border rounded p-2 mb-2"><b>${e(x.title)}</b> · ${x.is_read?"Read":"Unread"}<br><small>${e(x.body)} · ${new Date(x.created_at).toLocaleString()}</small><div class="actions mt-1">${x.appointments?.appointment_id?`<button class="btn btn-sm btn-outline-primary" data-notification-appointment="${x.appointment_id}">View appointment</button>`:""}${!x.is_read?`<button class="btn btn-sm btn-outline-secondary" data-read="${x.id}">Mark as read</button>`:""}</div></div>`).join("")||"No notifications yet."}</div><div class="admin-card mt-3"><h2 class="h6">Delivery log</h2><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Type</th><th>Channel</th><th>Status</th><th>Appointment</th><th>Created</th><th>Sent</th><th>Error</th></tr></thead><tbody>${l.logs.map(x=>`<tr><td>${e(x.type)}</td><td>${e(x.channel)}</td><td>${e(x.status)}</td><td>${e(x.appointments?.appointment_id)}</td><td>${new Date(x.created_at).toLocaleString()}</td><td>${x.sent_at?new Date(x.sent_at).toLocaleString():"—"}</td><td>${e(x.error)}</td></tr>`).join("")||'<tr><td colspan="7" class="text-muted">No delivery attempts recorded.</td></tr>'}</tbody></table></div></div>`;document.getElementById("enablePush").onclick=enablePushNotifications;document.querySelectorAll("[data-read]").forEach(b=>b.onclick=async()=>{await api("mark_notification_read",{id:b.dataset.read});notificationsView()});document.querySelectorAll("[data-notification-appointment]").forEach(b=>b.onclick=()=>detail(b.dataset.notificationAppointment))}
 async function enablePush(){try{if(!("serviceWorker" in navigator)||!window.CFX_CONFIG.vapidPublicKey)throw Error("Push notifications are not configured for this deployment.");let p=await Notification.requestPermission();if(p!=="granted")throw Error("Notification permission was not granted.");let reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:base64(window.CFX_CONFIG.vapidPublicKey)}),token=await getValidAccessToken();let r=await fetch(c.supabaseUrl.replace(/\/$/,"")+"/functions/v1/register-push-subscription",{method:"POST",headers:{"Content-Type":"application/json",apikey:c.supabaseAnonKey,Authorization:"Bearer "+token},body:JSON.stringify({subscription:sub,device_name:navigator.platform,browser:navigator.userAgent})}),data=await r.json().catch(()=>({}));if(!r.ok)throw Error(data.error||"Subscription could not be saved.");flash("Appointment notifications enabled.");notificationsView()}catch(x){flash(x.message,false)}}function base64(v){let x=v.replace(/-/g,"+").replace(/_/g,"/");return Uint8Array.from(atob(x+"=".repeat((4-x.length%4)%4)),a=>a.charCodeAt(0))}
 
-function days(v){return(v||[1,2,3,4,5,6]).join(",")}function renderTechForm(t={}){return`<form id="techForm" class="row g-2"><div class="col-md-4"><input name="technician_code" class="form-control" required placeholder="CFX-TECH-2026-0001" value="${e(t.technician_code||"")}" ${t.id?"readonly":""}></div><div class="col-md-4"><input name="full_name" class="form-control" required placeholder="Name" value="${e(t.full_name||"")}"></div><div class="col-md-4"><input name="mobile" class="form-control" required inputmode="tel" placeholder="10-digit mobile" value="${e(t.mobile||"")}"></div><div class="col-md-4"><input name="username" class="form-control" required placeholder="Username" value="${e(t.username||"")}"></div><div class="col-md-4"><input name="email" class="form-control" type="email" placeholder="Login email" ${t.id?"disabled":""}></div><div class="col-md-4"><input name="password" class="form-control" type="password" ${t.id?"disabled":"required minlength=12"} placeholder="${t.id?"Password managed separately":"12+ character password"}"></div><div class="col-md-4"><input name="specialization" class="form-control" placeholder="Specializations, comma separated" value="${e((t.specialization||[]).join(","))}"></div><div class="col-md-4"><input name="working_days" class="form-control" required value="${days(t.working_days)}" placeholder="1,2,3,4,5,6"></div><div class="col-md-2"><input name="working_start" type="time" class="form-control" value="${e(t.working_start||"10:00")}"></div><div class="col-md-2"><input name="working_end" type="time" class="form-control" value="${e(t.working_end||"19:00")}"></div><div class="col-12"><button class="btn btn-primary">${t.id?"Save technician":"Create technician"}</button></div></form>`}async function techniciansView(){pageTitle.textContent="Technicians";let t=(await api("technicians")).technicians;q.innerHTML=`<div class="admin-card"><h2 class="h6">${window.editTech?"Edit technician":"Add technician"}</h2>${renderTechForm(window.editTech||{})}</div><div class="admin-card mt-3"><h2 class="h6">Technicians</h2>${t.map(x=>`<div class="border rounded p-2 mb-2"><b>${e(x.technician_code)}</b> ${e(x.full_name)} · ${e(x.mobile)} · ${x.is_active?"Active":"Inactive"}<div class="actions float-end"><button class="btn btn-sm btn-outline-primary" data-edit-tech="${x.id}">Edit</button><button class="btn btn-sm btn-outline-secondary" data-toggle-tech="${x.id}">${x.is_active?"Deactivate":"Activate"}</button></div></div>`).join("")||"No technicians yet."}</div>`
+function days(v){return(v||[1,2,3,4,5,6]).join(",")}
+
+function renderTechForm(t={}){
+
+  const needsAccount=Boolean(t.id&&!t.auth_user_id);
+
+  return`
+  <form id="techForm" class="row g-2">
+
+    <div class="col-md-4">
+      <input
+        name="technician_code"
+        class="form-control"
+        required
+        placeholder="CFX-TECH-2026-0001"
+        value="${e(t.technician_code||"")}"
+        ${t.id?"readonly":""}
+      >
+    </div>
+
+    <div class="col-md-4">
+      <input
+        name="full_name"
+        class="form-control"
+        required
+        placeholder="Name"
+        value="${e(t.full_name||"")}"
+      >
+    </div>
+
+    <div class="col-md-4">
+      <input
+        name="mobile"
+        class="form-control"
+        required
+        inputmode="tel"
+        placeholder="10-digit mobile"
+        value="${e(t.mobile||"")}"
+      >
+    </div>
+
+    <div class="col-md-4">
+      <input
+        name="username"
+        class="form-control"
+        required
+        placeholder="Username"
+        value="${e(t.username||"")}"
+      >
+    </div>
+
+    <div class="col-md-4">
+      <input
+        name="email"
+        class="form-control"
+        type="email"
+        placeholder="Login email"
+        value="${e(t.login_email||t.email||"")}"
+        ${needsAccount?"required":""}
+      >
+    </div>
+
+    <div class="col-md-4">
+      <div class="input-group">
+        <input
+          id="technicianPassword"
+          name="password"
+          class="form-control"
+          type="password"
+          ${t.id&&!needsAccount?"":"required minlength=12"}
+          placeholder="${
+            t.id&&!needsAccount
+              ? "Leave blank to keep current password"
+              : "12+ character password"
+          }"
+          autocomplete="new-password"
+        >
+
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          id="toggleTechnicianPassword"
+          aria-label="Show password"
+          title="Show password"
+        >
+          👁
+        </button>
+      </div>
+    </div>
+
+    ${
+      needsAccount
+        ? `
+          <div class="col-12">
+            <small class="text-warning">
+              This older technician has no portal account.
+              Enter a login email and password to create the portal login.
+            </small>
+          </div>
+        `
+        : ""
+    }
+
+    <div class="col-md-4">
+      <input
+        name="specialization"
+        class="form-control"
+        placeholder="Specializations, comma separated"
+        value="${e((t.specialization||[]).join(","))}"
+      >
+    </div>
+
+    <div class="col-md-4">
+      <input
+        name="working_days"
+        class="form-control"
+        required
+        value="${days(t.working_days)}"
+        placeholder="1,2,3,4,5,6"
+      >
+    </div>
+
+    <div class="col-md-2">
+      <input
+        name="working_start"
+        type="time"
+        class="form-control"
+        value="${e(t.working_start||"10:00")}"
+      >
+    </div>
+
+    <div class="col-md-2">
+      <input
+        name="working_end"
+        type="time"
+        class="form-control"
+        value="${e(t.working_end||"19:00")}"
+      >
+    </div>
+
+    <div class="col-12">
+      <button class="btn btn-primary">
+        ${t.id?"Save technician":"Create technician"}
+      </button>
+    </div>
+
+  </form>
+  `;
+}
+
+async function techniciansView(){pageTitle.textContent="Technicians";let t=(await api("technicians")).technicians;q.innerHTML=`<div class="admin-card"><h2 class="h6">${window.editTech?"Edit technician":"Add technician"}</h2>${renderTechForm(window.editTech||{})}</div><div class="admin-card mt-3"><h2 class="h6">Technicians</h2>${t.map(x=>`<div class="border rounded p-2 mb-2"><b>${e(x.technician_code)}</b> ${e(x.full_name)} · ${e(x.mobile)} · ${x.is_active?"Active":"Inactive"}<div class="actions float-end"><button class="btn btn-sm btn-outline-primary" data-edit-tech="${x.id}">Edit</button><button class="btn btn-sm btn-outline-secondary" data-toggle-tech="${x.id}">${x.is_active?"Deactivate":"Activate"}</button></div></div>`).join("")||"No technicians yet."}</div>`
 
 const technicianPassword=document.getElementById("technicianPassword");
 const toggleTechnicianPassword=document.getElementById("toggleTechnicianPassword");

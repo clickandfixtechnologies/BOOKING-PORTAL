@@ -931,12 +931,12 @@ signOut.onclick = async () => {
 
 };
     
-    if (sb) {
+    if(sb){
 
     sb.auth.getSession()
         .then(({ data: { session } }) => {
 
-            if (!session) {
+            if(!session){
 
                 window.location.replace(
                     "./login.html"
@@ -948,10 +948,11 @@ signOut.onclick = async () => {
             load();
 
         })
-        .catch(() => {
+        .catch(error => {
 
-            window.location.replace(
-                "./login.html"
+            console.error(
+                "Technician session check failed:",
+                error
             );
 
         });

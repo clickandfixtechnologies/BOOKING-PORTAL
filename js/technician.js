@@ -577,9 +577,6 @@ async function loadDetail(id){
               `
             : "";
 
-console.log("Rendering appointment details...");
-console.log("Appointment object:", a);
-
 
         detail.innerHTML = `
 
@@ -796,10 +793,6 @@ console.log("Appointment object:", a);
             </div>
         `;
 
-        console.log(
-            "Appointment details rendered.",
-            detail.innerHTML.length
-        );
 
         detail.style.display = "block";
 detail.style.visibility = "visible";
@@ -811,22 +804,6 @@ detail.scrollIntoView({
     behavior: "smooth",
     block: "start"
 });
-
-console.log(
-    "DETAIL RECT:",
-    detail.getBoundingClientRect()
-);
-
-console.log(
-    "DETAIL COMPUTED STYLE:",
-    {
-        display: getComputedStyle(detail).display,
-        visibility: getComputedStyle(detail).visibility,
-        opacity: getComputedStyle(detail).opacity,
-        height: getComputedStyle(detail).height,
-        overflow: getComputedStyle(detail).overflow
-    }
-);
 
         document
             .querySelectorAll(".tech-action-button[data-status]")

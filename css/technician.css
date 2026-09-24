@@ -697,3 +697,446 @@
         0 4px 12px rgba(217, 119, 6, 0.07),
         inset 0 1px 0 rgba(255, 255, 255, 0.92);
 }
+
+/* =========================================================
+   APPOINTMENT DETAIL PANEL
+   ========================================================= */
+
+.tech-detail {
+    width: 100%;
+    margin-top: 32px;
+    scroll-margin-top: 96px;
+}
+
+.tech-detail-card {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--tech-border);
+    border-radius: var(--tech-radius-lg);
+    box-shadow: var(--tech-shadow-md);
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   DETAIL HEADER
+   ========================================================= */
+
+.tech-detail-header {
+    min-height: 82px;
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(239, 246, 255, 0.92),
+            rgba(255, 255, 255, 0.72)
+        );
+
+    border-bottom: 1px solid var(--tech-border);
+}
+
+.tech-detail-label {
+    margin: 0 0 5px;
+    color: var(--tech-primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.tech-detail-title {
+    margin: 0;
+    color: var(--tech-dark);
+    font-size: 20px;
+    font-weight: 750;
+    line-height: 1.25;
+}
+
+.tech-detail-header .tech-status-badge {
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   DETAIL BODY
+   ========================================================= */
+
+.tech-detail-body {
+    padding: 28px;
+}
+
+.tech-detail-section {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--tech-border-light);
+}
+
+.tech-detail-section:first-child {
+    padding-top: 0;
+}
+
+.tech-detail-section:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.tech-detail-section h3 {
+    margin: 0 0 16px;
+    color: var(--tech-dark);
+    font-size: 14px;
+    font-weight: 750;
+}
+
+
+/* =========================================================
+   CUSTOMER INFORMATION GRID
+   ========================================================= */
+
+.tech-detail-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.tech-detail-info-grid > div {
+    min-width: 0;
+    padding: 15px 16px;
+    background: rgba(248, 250, 252, 0.78);
+    border: 1px solid var(--tech-border-light);
+    border-radius: var(--tech-radius-md);
+}
+
+.tech-detail-info-grid span {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--tech-muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.tech-detail-info-grid strong {
+    display: block;
+    color: var(--tech-dark);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   ADDRESS / DESCRIPTION
+   ========================================================= */
+
+.tech-detail-address,
+.tech-detail-description {
+    margin: 0;
+    padding: 16px 18px;
+    background: rgba(248, 250, 252, 0.78);
+    border: 1px solid var(--tech-border-light);
+    border-radius: var(--tech-radius-md);
+    color: var(--tech-text);
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.tech-detail-description {
+    white-space: pre-wrap;
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
+
+.tech-detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.tech-action-button {
+    min-height: 42px;
+    padding: 0 16px;
+
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    border-radius: var(--tech-radius-sm);
+
+    background: var(--tech-primary-light);
+    color: var(--tech-primary);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.tech-action-button:hover {
+    transform: translateY(-2px);
+    background: var(--tech-primary-soft);
+    border-color: rgba(37, 99, 235, 0.35);
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12);
+}
+
+.tech-action-button i {
+    font-size: 13px;
+}
+
+
+/* Google Maps button */
+
+.tech-map-button {
+    margin-top: 14px;
+    background: rgba(239, 246, 255, 0.9);
+}
+
+
+/* =========================================================
+   JOB ID
+   ========================================================= */
+
+.tech-job-id-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tech-job-id-row .tech-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.tech-input {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 14px;
+
+    border: 1px solid var(--tech-border);
+    border-radius: var(--tech-radius-sm);
+
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--tech-dark);
+
+    outline: none;
+
+    font-size: 13px;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.tech-input::placeholder {
+    color: var(--tech-light-muted);
+}
+
+.tech-input:focus {
+    background: #ffffff;
+    border-color: rgba(37, 99, 235, 0.5);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+
+/* =========================================================
+   COMPLETE BUTTON
+   ========================================================= */
+
+.tech-complete-button {
+    min-height: 44px;
+    padding: 0 18px;
+
+    border: 1px solid rgba(5, 150, 105, 0.2);
+    border-radius: var(--tech-radius-sm);
+
+    background: var(--tech-success-light);
+    color: var(--tech-success-text);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.tech-complete-button:hover {
+    transform: translateY(-2px);
+    background: #a7f3d0;
+    box-shadow: 0 8px 18px rgba(5, 150, 105, 0.12);
+}
+
+
+/* =========================================================
+   OTP AREA
+   ========================================================= */
+
+.tech-otp-area {
+    margin-top: 16px;
+}
+
+.tech-otp-message {
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    background: rgba(239, 246, 255, 0.8);
+    border: 1px solid rgba(147, 197, 253, 0.45);
+    border-radius: var(--tech-radius-md);
+}
+
+.tech-otp-message > i {
+    margin-top: 2px;
+    color: var(--tech-primary);
+    font-size: 18px;
+}
+
+.tech-otp-message strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--tech-dark);
+    font-size: 13px;
+}
+
+.tech-otp-message p {
+    margin: 0;
+    color: var(--tech-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.tech-otp-row {
+    margin-top: 14px;
+    display: flex;
+    gap: 12px;
+}
+
+.tech-otp-row .tech-input {
+    flex: 1;
+}
+
+.tech-resend-button {
+    margin-top: 10px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--tech-primary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tech-resend-button:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   MESSAGE / ERROR
+   ========================================================= */
+
+.tech-message {
+    margin: 14px 0 0;
+    color: var(--tech-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.tech-error-message {
+    padding: 18px 20px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--tech-radius-md);
+    color: #b91c1c;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   LOADING MESSAGE
+   ========================================================= */
+
+.tech-loading-message {
+    padding: 28px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--tech-border);
+    border-radius: var(--tech-radius-lg);
+    color: var(--tech-muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+
+/* =========================================================
+   DETAIL RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .tech-detail {
+        margin-top: 24px;
+    }
+
+    .tech-detail-header {
+        padding: 18px 20px;
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .tech-detail-title {
+        font-size: 17px;
+    }
+
+    .tech-detail-body {
+        padding: 20px;
+    }
+
+    .tech-detail-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tech-detail-actions {
+        flex-direction: column;
+    }
+
+    .tech-action-button {
+        width: 100%;
+    }
+
+    .tech-job-id-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tech-job-id-row .tech-action-button {
+        width: 100%;
+    }
+
+    .tech-otp-row {
+        flex-direction: column;
+    }
+
+    .tech-otp-row .tech-complete-button {
+        width: 100%;
+    }
+}

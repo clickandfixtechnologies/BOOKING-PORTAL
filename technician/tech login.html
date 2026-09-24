@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <meta
+        name="theme-color"
+        content="#2563eb"
+    >
+
+    <title>Technician Login | Click & Fix Technologies</title>
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+
+    <!-- Technician Login CSS -->
+    <link
+        rel="stylesheet"
+        href="../css/technician.css"
+    >
+
+    <link
+        rel="manifest"
+        href="../manifest.webmanifest"
+    >
+
+</head>
+
+
+<body class="tech-portal">
+
+
+    <main class="tech-login-screen">
+
+        <section class="tech-login-card">
+
+
+            <!-- Brand -->
+
+            <div class="tech-login-brand">
+
+                <div class="tech-login-logo">
+                    CF
+                </div>
+
+                <div>
+
+                    <h1 class="tech-login-title">
+                        Technician Portal
+                    </h1>
+
+                    <p class="tech-login-subtitle">
+                        Click &amp; Fix Technologies
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- Login -->
+
+            <h2 class="tech-login-heading">
+                Technician sign in
+            </h2>
+
+
+            <form id="techLoginForm">
+
+
+                <input
+                    id="email"
+                    type="email"
+                    class="tech-input"
+                    placeholder="Email"
+                    autocomplete="username"
+                    required
+                >
+
+
+                <input
+                    id="password"
+                    type="password"
+                    class="tech-input"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    required
+                >
+
+
+                <button
+                    id="signIn"
+                    type="submit"
+                    class="tech-login-button"
+                >
+                    Sign in
+                </button>
+
+
+                <p
+                    id="loginError"
+                    class="tech-login-error"
+                ></p>
+
+
+            </form>
+
+        </section>
+
+    </main>
+
+
+    <!-- Config -->
+
+    <script src="../js/runtime-config.js"></script>
+
+    <script src="../js/app-config.js"></script>
+
+    <!-- Login JS -->
+
+    <script
+        type="module"
+        src="../js/tech-login.js"
+    ></script>
+
+    <script src="../js/pwa.js"></script>
+
+</body>
+
+</html>

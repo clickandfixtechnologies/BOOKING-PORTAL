@@ -28,33 +28,30 @@ const esc=value=>{const e=document.createElement("div");e.textContent=value??"â€
 async function getValidAccessToken(){
 
     if(!sb){
-        throw Error("Technician portal is not configured.");
+        throw Error(
+            "Technician portal is not configured."
+        );
     }
 
     const {
-        data: {
-            session
-        },
-        error: sessionError
+        data,
+        error
     } = await sb.auth.getSession();
 
-    if(sessionError){
-        throw Error(sessionError.message);
+    if(error){
+        throw Error(error.message);
     }
+
+    const session = data?.session;
 
     if(!session){
-        throw Error("Sign in is required.");
+        throw Error(
+            "Sign in is required."
+        );
     }
 
-    const expiresAt =
-        session.expires_at
-            ? session.expires_at * 1000
-            : 0;
-
-    const remaining =
-        expiresAt
-            ? expiresAt - Date.now()
-            : 0;
+    return session.access_token;
+}
 
     /*
      * Session is still comfortably valid.
@@ -86,42 +83,47 @@ async function getValidAccessToken(){
     }
 
     return data.session.access_token;
-}
 
 async function api(action, body = {}){
 
-    async function request(token){
+    const token =
+        await getValidAccessToken();
 
-        const response =
-            await fetch(
-                `${c.supabaseUrl.replace(/\/$/, "")}/functions/v1/technician-api`,
-                {
-                    method: "POST",
+    const response =
+        await fetch(
+            `${c.supabaseUrl.replace(/\/$/, "")}/functions/v1/technician-api`,
+            {
+                method: "POST",
 
-                    headers: {
-                        "Content-Type": "application/json",
-                        apikey: c.supabaseAnonKey,
-                        Authorization: `Bearer ${token}`
-                    },
+                headers: {
+                    "Content-Type": "application/json",
+                    apikey: c.supabaseAnonKey,
+                    Authorization:
+                        `Bearer ${token}`
+                },
 
-                    body: JSON.stringify({
-                        action,
-                        ...body
-                    })
-                }
-            );
+                body: JSON.stringify({
+                    action,
+                    ...body
+                })
+            }
+        );
 
-        const data =
-            await response
-                .json()
-                .catch(() => ({}));
+    const data =
+        await response
+            .json()
+            .catch(() => ({}));
 
-        return {
-            response,
-            data
-        };
+    if(!response.ok){
+
+        throw Error(
+            data?.error ||
+            "Request failed."
+        );
     }
 
+    return data;
+}
 
     /*
      * First request
@@ -184,7 +186,7 @@ async function api(action, body = {}){
 
 
     return data;
-}
+
 
 async function load() {
 

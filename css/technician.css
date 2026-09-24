@@ -1,16 +1,16 @@
 /* =========================================================
    CLICK & FIX TECHNOLOGIES
-   TECHNICIAN PORTAL - MODERN GLASS & ALIGNMENT FIXED
+   TECHNICIAN PORTAL - GLASSMORPHISM & COLOR FIX
    ========================================================= */
 
 :root {
     --tech-primary: #2563eb;
-    --tech-primary-light: #eff6ff;
+    --tech-primary-light: rgba(239, 246, 255, 0.85);
     --tech-primary-soft: #dbeafe;
 
-    /* Upcoming Jobs Custom Orange/Amber Palette */
+    /* Upcoming Jobs Soft Orange/Amber Palette */
     --tech-warning: #d97706;
-    --tech-warning-light: #fffbeb;
+    --tech-warning-light: rgba(255, 251, 235, 0.9);
     --tech-warning-border: #fde68a;
 
     --tech-success: #059669;
@@ -22,16 +22,16 @@
     --tech-muted: #6b7280;
     --tech-light-muted: #9ca3af;
 
-    --tech-border: #e2e8f0;
-    --tech-border-light: #f1f5f9;
+    --tech-border: rgba(226, 232, 240, 0.8);
+    --tech-border-light: rgba(241, 245, 249, 0.6);
 
     --tech-bg: #f8fafc;
-    --tech-white: #ffffff;
+    --tech-white: rgba(255, 255, 255, 0.82);
 
     --tech-sidebar-width: 260px;
 
-    --tech-shadow-sm: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
-    --tech-shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+    --tech-shadow-sm: 0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+    --tech-shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.07), 0 8px 10px -6px rgba(15, 23, 42, 0.07);
     --tech-shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.1);
 
     --tech-radius-sm: 8px;
@@ -90,9 +90,9 @@
     width: var(--tech-sidebar-width);
     min-width: var(--tech-sidebar-width);
     min-height: 100vh;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-right: 1px solid var(--tech-border);
     display: flex;
     flex-direction: column;
@@ -173,7 +173,7 @@
 }
 
 .tech-nav-item:hover {
-    background: var(--tech-border-light);
+    background: rgba(241, 245, 249, 0.8);
     color: var(--tech-primary);
 }
 
@@ -207,9 +207,9 @@
 .tech-topbar {
     height: 72px;
     padding: 0 32px;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--tech-border);
     display: flex;
     align-items: center;
@@ -291,7 +291,7 @@
     padding: 0 14px;
     border: 1px solid var(--tech-border);
     border-radius: var(--tech-radius-sm);
-    background: white;
+    background: rgba(255, 255, 255, 0.8);
     color: var(--tech-text);
     display: inline-flex;
     align-items: center;
@@ -302,13 +302,13 @@
 }
 
 .tech-signout:hover {
-    background: var(--tech-border-light);
+    background: rgba(241, 245, 249, 0.9);
     color: #dc2626;
 }
 
 
 /* =========================================================
-   DASHBOARD CONTENT & ALIGNMENT FIX (START)
+   DASHBOARD CONTENT & GLASSMORPHISM CONTAINERS
    ========================================================= */
 
 .tech-content {
@@ -332,7 +332,7 @@
     font-weight: 700;
 }
 
-/* Fix grid alignment using align-items: start so cards don't stretch unevenly */
+/* Grid Alignment & Glass Effect */
 .tech-dashboard-grid,
 .tech-job-grid {
     display: grid;
@@ -346,27 +346,27 @@
 .tech-completed-section,
 .tech-detail-card,
 .tech-login-card {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--tech-border);
     border-radius: var(--tech-radius-lg);
-    box-shadow: var(--tech-shadow-sm);
+    box-shadow: var(--tech-shadow-md);
     width: 100%;
-    overflow: hidden; /* Fixes container overflow issues */
+    overflow: hidden;
 }
 
 
 /* =========================================================
-   JOB CARDS WITH GLASSMORPHISM & COLOR DIFFERENTIATION
+   JOB CARDS - COLOR DIFFERENTIATION & GLASSMORPHISM
    ========================================================= */
 
 .tech-job-card {
     width: 100%;
     margin-bottom: 16px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--tech-border);
     border-radius: var(--tech-radius-md);
     overflow: hidden;
@@ -384,25 +384,28 @@
     border-color: #93c5fd;
     box-shadow: var(--tech-shadow-md);
     transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.98);
+    background: rgba(255, 255, 255, 0.95);
 }
 
-/* Today's Jobs Card Styling (Blue Accent) */
-.tech-job-card.today-job, 
-.tech-dashboard-grid > div:first-child .tech-job-card {
+/* 1. Today's Jobs Cards (Blue Tone & Accent Border) */
+.tech-dashboard-grid > div:first-child .tech-job-card,
+.tech-job-card:has(.tech-status),
+.tech-job-card:has(.tech-status-completed) {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(239, 246, 255, 0.6));
     border-left: 4px solid var(--tech-primary);
 }
 
-/* Upcoming Jobs Card Styling (Soft Orange/Amber Accent) */
-.tech-job-card.upcoming-job,
+/* 2. Upcoming Jobs Cards (Soft Orange / Amber Tone & Accent Border) */
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card,
 .tech-job-grid > div:nth-child(2) .tech-job-card,
-.tech-portal [data-section="upcoming"] .tech-job-card {
-    background: linear-gradient(135deg, rgba(255, 251, 235, 0.8), rgba(255, 255, 255, 0.9));
+.tech-job-card:has(.tech-status-default),
+.tech-job-card:has(:contains("confirmed")) {
+    background: linear-gradient(135deg, rgba(255, 251, 235, 0.85), rgba(255, 255, 255, 0.9));
     border-color: var(--tech-warning-border);
     border-left: 4px solid var(--tech-warning);
 }
 
-.tech-job-card.upcoming-job:hover {
+.tech-job-card:has(.tech-status-default):hover {
     border-color: #f59e0b;
     box-shadow: 0 10px 25px -5px rgba(217, 119, 6, 0.12);
 }
@@ -411,7 +414,8 @@
 .tech-job-card-header {
     min-height: 46px;
     padding: 12px 24px;
-    background: rgba(248, 250, 252, 0.7);
+    background: rgba(248, 250, 252, 0.6);
+    backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--tech-border);
     display: flex;
     align-items: center;
@@ -419,8 +423,8 @@
     gap: 12px;
 }
 
-.tech-job-card.upcoming-job .tech-job-card-header {
-    background: rgba(254, 243, 199, 0.4);
+.tech-job-card:has(.tech-status-default) .tech-job-card-header {
+    background: rgba(254, 243, 199, 0.45);
 }
 
 .tech-job-id,

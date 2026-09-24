@@ -36,6 +36,45 @@ const signIn =
 const loginError =
     document.getElementById("loginError");
 
+    const togglePassword =
+    document.getElementById("togglePassword");
+
+
+togglePassword?.addEventListener(
+    "click",
+    () => {
+
+        const isHidden =
+            password.type === "password";
+
+
+        password.type =
+            isHidden
+                ? "text"
+                : "password";
+
+
+        togglePassword.innerHTML =
+            isHidden
+                ? '<i class="fa-regular fa-eye-slash"></i>'
+                : '<i class="fa-regular fa-eye"></i>';
+
+
+        togglePassword.setAttribute(
+            "aria-label",
+            isHidden
+                ? "Hide password"
+                : "Show password"
+        );
+
+
+        togglePassword.title =
+            isHidden
+                ? "Hide password"
+                : "Show password";
+
+    }
+);
 
 /*
  * If a valid technician session already exists,

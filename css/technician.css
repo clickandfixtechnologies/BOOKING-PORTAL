@@ -358,13 +358,9 @@
 
 /* =========================================================
    JOB CARDS
-   TODAY = SOFT BLUE GLASS
-   UPCOMING = SOFT ORANGE GLASS
+   TODAY = SOFT LIGHT BLUE
+   UPCOMING = SOFT LIGHT ORANGE
    ========================================================= */
-
-/* ---------------------------------------------------------
-   BASE JOB CARD
-   --------------------------------------------------------- */
 
 .tech-job-card {
     width: 100%;
@@ -378,12 +374,12 @@
     text-align: left;
     cursor: pointer;
 
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 
     box-shadow:
-        0 8px 24px rgba(15, 23, 42, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.75);
+        0 6px 20px rgba(15, 23, 42, 0.045),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
 
     transition:
         transform 0.25s ease,
@@ -397,9 +393,9 @@
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================================
    GLASS SHINE
-   --------------------------------------------------------- */
+   ========================================================= */
 
 .tech-job-card::before {
     content: "";
@@ -412,18 +408,15 @@
     background:
         linear-gradient(
             135deg,
-            rgba(255, 255, 255, 0.55),
-            rgba(255, 255, 255, 0.08) 45%,
+            rgba(255, 255, 255, 0.45),
+            rgba(255, 255, 255, 0.06) 55%,
             rgba(255, 255, 255, 0.18)
         );
 
-    opacity: 0.75;
+    opacity: 0.7;
 
     z-index: 0;
 }
-
-
-/* Keep card content above glass layer */
 
 .tech-job-card > * {
     position: relative;
@@ -433,138 +426,110 @@
 
 /* =========================================================
    TODAY'S JOBS
-   SOFT BLUE GLASS
+   LIGHT SOFT BLUE
    ========================================================= */
 
-/* Main card */
-
-.tech-dashboard-grid > div:first-child .tech-job-card,
-.tech-job-grid:first-of-type .tech-job-card {
+.tech-dashboard-grid > div:first-child .tech-job-card {
 
     background:
         linear-gradient(
             135deg,
-            rgba(239, 246, 255, 0.96),
-            rgba(219, 234, 254, 0.82)
+            rgba(248, 251, 255, 0.96),
+            rgba(239, 246, 255, 0.78)
         );
 
-    border: 1px solid rgba(147, 197, 253, 0.55);
+    border: 1px solid rgba(191, 219, 254, 0.55);
 
-    border-left: 4px solid #2563eb;
+    border-left: 4px solid rgba(96, 165, 250, 0.85);
 
     box-shadow:
-        0 10px 28px rgba(37, 99, 235, 0.10),
-        0 3px 10px rgba(37, 99, 235, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        0 7px 22px rgba(59, 130, 246, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 
 /* Today's header */
 
 .tech-dashboard-grid > div:first-child .tech-job-card .tech-job-card-header,
-.tech-dashboard-grid > div:first-child .tech-job-card .tech-job-header,
-.tech-job-grid:first-of-type .tech-job-card .tech-job-card-header,
-.tech-job-grid:first-of-type .tech-job-card .tech-job-header {
+.tech-dashboard-grid > div:first-child .tech-job-card .tech-job-header {
 
     background:
         linear-gradient(
             135deg,
-            rgba(219, 234, 254, 0.78),
-            rgba(239, 246, 255, 0.60)
+            rgba(239, 246, 255, 0.65),
+            rgba(248, 251, 255, 0.45)
         );
 
-    border-bottom-color: rgba(147, 197, 253, 0.35);
+    border-bottom-color: rgba(191, 219, 254, 0.35);
 }
 
 
 /* Today's hover */
 
-.tech-dashboard-grid > div:first-child .tech-job-card:hover,
-.tech-job-grid:first-of-type .tech-job-card:hover {
+.tech-dashboard-grid > div:first-child .tech-job-card:hover {
 
     transform: translateY(-3px);
 
-    background:
-        linear-gradient(
-            135deg,
-            rgba(239, 246, 255, 0.98),
-            rgba(219, 234, 254, 0.92)
-        );
-
-    border-color: rgba(37, 99, 235, 0.45);
+    border-color: rgba(96, 165, 250, 0.55);
 
     box-shadow:
-        0 16px 38px rgba(37, 99, 235, 0.16),
-        0 5px 14px rgba(37, 99, 235, 0.10),
+        0 12px 30px rgba(59, 130, 246, 0.11),
+        0 4px 12px rgba(59, 130, 246, 0.06),
         inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 
 /* =========================================================
    UPCOMING JOBS
-   SOFT ORANGE GLASS
+   SOFT LIGHT ORANGE
    ========================================================= */
 
-/* Main card */
-
-.tech-dashboard-grid > div:nth-child(2) .tech-job-card,
-.tech-job-grid:nth-of-type(2) .tech-job-card {
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card {
 
     background:
         linear-gradient(
             135deg,
-            rgba(255, 247, 237, 0.96),
-            rgba(254, 243, 199, 0.78)
+            rgba(255, 252, 245, 0.97),
+            rgba(255, 247, 237, 0.82)
         );
 
-    border: 1px solid rgba(251, 191, 36, 0.48);
+    border: 1px solid rgba(253, 186, 116, 0.50);
 
-    border-left: 4px solid #d97706;
+    border-left: 4px solid rgba(245, 158, 11, 0.85);
 
     box-shadow:
-        0 10px 28px rgba(217, 119, 6, 0.10),
-        0 3px 10px rgba(217, 119, 6, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        0 7px 22px rgba(217, 119, 6, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 
 /* Upcoming header */
 
 .tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-card-header,
-.tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-header,
-.tech-job-grid:nth-of-type(2) .tech-job-card .tech-job-card-header,
-.tech-job-grid:nth-of-type(2) .tech-job-card .tech-job-header {
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-header {
 
     background:
         linear-gradient(
             135deg,
-            rgba(254, 243, 199, 0.82),
-            rgba(255, 247, 237, 0.62)
+            rgba(255, 247, 237, 0.72),
+            rgba(255, 252, 245, 0.50)
         );
 
-    border-bottom-color: rgba(251, 191, 36, 0.35);
+    border-bottom-color: rgba(253, 186, 116, 0.35);
 }
 
 
 /* Upcoming hover */
 
-.tech-dashboard-grid > div:nth-child(2) .tech-job-card:hover,
-.tech-job-grid:nth-of-type(2) .tech-job-card:hover {
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card:hover {
 
     transform: translateY(-3px);
 
-    background:
-        linear-gradient(
-            135deg,
-            rgba(255, 247, 237, 0.99),
-            rgba(254, 243, 199, 0.92)
-        );
-
-    border-color: rgba(217, 119, 6, 0.45);
+    border-color: rgba(245, 158, 11, 0.55);
 
     box-shadow:
-        0 16px 38px rgba(217, 119, 6, 0.16),
-        0 5px 14px rgba(217, 119, 6, 0.10),
+        0 12px 30px rgba(217, 119, 6, 0.12),
+        0 4px 12px rgba(217, 119, 6, 0.07),
         inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
@@ -586,14 +551,13 @@
 
     gap: 12px;
 
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 
 .tech-job-id,
 .tech-job-card-header strong {
-
     color: var(--tech-dark);
 
     font-size: 13px;
@@ -602,7 +566,6 @@
 
 
 .tech-job-date {
-
     color: var(--tech-muted);
 
     display: flex;
@@ -623,7 +586,6 @@
 
 .tech-job-body,
 .tech-job-card-body {
-
     padding: 24px;
 
     width: 100%;
@@ -635,7 +597,6 @@
    ========================================================= */
 
 .tech-job-footer {
-
     margin-top: 20px;
 
     display: flex;
@@ -643,60 +604,6 @@
     justify-content: space-between;
 
     gap: 12px;
-}
-
-
-/* =========================================================
-   STATUS
-   ========================================================= */
-
-.tech-status,
-.tech-status-badge {
-
-    padding: 5px 12px;
-
-    border-radius: 999px;
-
-    display: inline-flex;
-    align-items: center;
-
-    gap: 6px;
-
-    font-size: 11px;
-    font-weight: 700;
-}
-
-
-.tech-status-completed {
-
-    background: var(--tech-success-light);
-
-    color: var(--tech-success-text);
-}
-
-
-.tech-status-default,
-.tech-status {
-
-    background: var(--tech-primary-light);
-
-    color: var(--tech-primary);
-}
-
-
-/* =========================================================
-   REDUCED MOTION
-   ========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-
-    .tech-job-card {
-
-        transition: none !important;
-
-        transform: none !important;
-    }
-
 }
 
 

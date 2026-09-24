@@ -170,13 +170,33 @@ async function load() {
 
 
         document
-            .querySelectorAll(".tech-job-button")
-            .forEach(x => {
+    .querySelectorAll(".tech-job-card")
+    .forEach(card => {
 
-                x.onclick = () =>
-                    loadDetail(x.dataset.id);
+        card.addEventListener("click", event => {
 
-            });
+            /*
+             * Completed job-এর ভিতরে যদি ভবিষ্যতে
+             * আলাদা কোনো button/link থাকে, সেগুলোর click
+             * যেন card click trigger না করে।
+             */
+            if (
+                event.target.closest("a, button:not(.tech-job-card)")
+            ) {
+                return;
+            }
+
+            const id = card.dataset.id;
+
+            if (!id) {
+                return;
+            }
+
+            loadDetail(id);
+
+        });
+
+    });
 
 
     } catch (e) {

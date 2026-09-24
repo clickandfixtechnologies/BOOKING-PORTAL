@@ -1,4 +1,568 @@
 /* =========================================================
+   CLICK & FIX TECHNOLOGIES
+   TECHNICIAN PORTAL - FIXED COLORS, STATUS & HOVER
+   ========================================================= */
+
+:root {
+    --tech-primary: #2563eb;
+    --tech-primary-light: #eff6ff;
+    --tech-primary-soft: #dbeafe;
+
+    /* Upcoming Jobs Soft Orange/Amber Palette */
+    --tech-warning: #d97706;
+    --tech-warning-light: #fffbeb;
+    --tech-warning-border: #fde68a;
+
+    --tech-success: #059669;
+    --tech-success-light: #d1fae5;
+    --tech-success-text: #065f46;
+
+    --tech-dark: #1f2937;
+    --tech-text: #374151;
+    --tech-muted: #6b7280;
+    --tech-light-muted: #9ca3af;
+
+    --tech-border: rgba(226, 232, 240, 0.8);
+    --tech-border-light: rgba(241, 245, 249, 0.6);
+
+    --tech-bg: #f8fafc;
+    --tech-white: rgba(255, 255, 255, 0.85);
+
+    --tech-sidebar-width: 260px;
+
+    --tech-shadow-sm: 0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+    --tech-shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+    --tech-shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.1);
+
+    --tech-radius-sm: 8px;
+    --tech-radius-md: 12px;
+    --tech-radius-lg: 18px;
+}
+
+
+/* =========================================================
+   RESET & BASE STYLES
+   ========================================================= */
+
+.tech-portal,
+.tech-portal *,
+.tech-portal *::before,
+.tech-portal *::after {
+    box-sizing: border-box;
+}
+
+.tech-portal {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--tech-bg);
+    color: var(--tech-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+.tech-portal button,
+.tech-portal input {
+    font: inherit;
+}
+
+.tech-portal button {
+    cursor: pointer;
+}
+
+.tech-portal a {
+    color: inherit;
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   APP LAYOUT & SIDEBAR
+   ========================================================= */
+
+.tech-app {
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+}
+
+.tech-sidebar {
+    width: var(--tech-sidebar-width);
+    min-width: var(--tech-sidebar-width);
+    min-height: 100vh;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-right: 1px solid var(--tech-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+}
+
+.tech-brand {
+    height: 72px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid var(--tech-border-light);
+}
+
+.tech-brand-logo {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: var(--tech-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--tech-primary), #4f46e5);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.tech-brand-title {
+    margin: 0;
+    color: var(--tech-dark);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.tech-brand-subtitle {
+    margin: 3px 0 0;
+    color: var(--tech-muted);
+    font-size: 11px;
+}
+
+.tech-nav {
+    padding: 24px 16px;
+    flex: 1;
+}
+
+.tech-nav-item {
+    width: 100%;
+    min-height: 42px;
+    margin-bottom: 6px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: var(--tech-radius-sm);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--tech-text);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.tech-nav-item i {
+    width: 18px;
+    color: var(--tech-muted);
+    font-size: 14px;
+    text-align: center;
+}
+
+.tech-nav-item:hover {
+    background: rgba(241, 245, 249, 0.9);
+    color: var(--tech-primary);
+}
+
+.tech-nav-item.active {
+    background: var(--tech-primary-light);
+    color: var(--tech-primary);
+}
+
+.tech-sidebar-footer {
+    padding: 18px 16px;
+    border-top: 1px solid var(--tech-border-light);
+    color: var(--tech-light-muted);
+    font-size: 11px;
+    text-align: center;
+}
+
+
+/* =========================================================
+   MAIN AREA & TOP BAR
+   ========================================================= */
+
+.tech-main {
+    min-width: 0;
+    margin-left: var(--tech-sidebar-width);
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.tech-topbar {
+    height: 72px;
+    padding: 0 32px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--tech-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.tech-mobile-menu {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--tech-border);
+    border-radius: var(--tech-radius-sm);
+    background: white;
+    color: var(--tech-text);
+    align-items: center;
+    justify-content: center;
+}
+
+.tech-mobile-brand {
+    display: none;
+    align-items: center;
+    gap: 10px;
+}
+
+.tech-mobile-brand-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--tech-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tech-mobile-brand-title {
+    color: var(--tech-dark);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.tech-user-area {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.tech-user {
+    padding-right: 16px;
+    border-right: 1px solid var(--tech-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tech-user-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--tech-border-light);
+}
+
+.tech-user-name {
+    color: var(--tech-dark);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.tech-signout {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid var(--tech-border);
+    border-radius: var(--tech-radius-sm);
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--tech-text);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.tech-signout:hover {
+    background: rgba(241, 245, 249, 0.95);
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   DASHBOARD CONTENT & GLASSMORPHISM CONTAINERS
+   ========================================================= */
+
+.tech-content {
+    width: 100%;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 32px;
+}
+
+.tech-job-section,
+.tech-top-section {
+    width: 100%;
+    margin-bottom: 32px;
+}
+
+.tech-section-title,
+.tech-panel-title {
+    margin: 0 0 20px;
+    color: var(--tech-dark);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.tech-dashboard-grid,
+.tech-job-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    align-items: start;
+    margin-bottom: 30px;
+}
+
+.tech-panel,
+.tech-completed-section,
+.tech-detail-card,
+.tech-login-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--tech-border);
+    border-radius: var(--tech-radius-lg);
+    box-shadow: var(--tech-shadow-md);
+    width: 100%;
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   JOB CARDS - SEPARATED BY COLUMN (TODAY = BLUE, UPCOMING = ORANGE)
+   ========================================================= */
+
+.tech-job-card {
+    width: 100%;
+    margin-bottom: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--tech-border);
+    border-radius: var(--tech-radius-md);
+    overflow: hidden;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: var(--tech-shadow-sm);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tech-job-card:last-child {
+    margin-bottom: 0;
+}
+
+/* Hover effect with lift and shadow */
+.tech-job-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1), 0 4px 12px rgba(37, 99, 235, 0.08);
+    border-color: var(--tech-primary);
+    background: rgba(255, 255, 255, 0.98);
+}
+
+/* 1. Today's Jobs Column (Left Column) -> Blue Tone */
+.tech-dashboard-grid > div:nth-child(1) .tech-job-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(239, 246, 255, 0.75));
+    border-left: 4px solid var(--tech-primary);
+}
+
+.tech-dashboard-grid > div:nth-child(1) .tech-job-card .tech-job-card-header,
+.tech-dashboard-grid > div:nth-child(1) .tech-job-header {
+    background: rgba(239, 246, 255, 0.6);
+}
+
+/* 2. Upcoming Jobs Column (Right Column) -> Soft Orange / Amber Tone */
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card,
+.tech-job-grid > div:nth-child(2) .tech-job-card {
+    background: linear-gradient(135deg, rgba(255, 251, 235, 0.9), rgba(255, 255, 255, 0.95));
+    border-color: var(--tech-warning-border);
+    border-left: 4px solid var(--tech-warning);
+}
+
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card:hover,
+.tech-job-grid > div:nth-child(2) .tech-job-card:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1), 0 4px 12px rgba(217, 119, 6, 0.1);
+}
+
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-card-header,
+.tech-job-grid > div:nth-child(2) .tech-job-card .tech-job-card-header,
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-header {
+    background: rgba(254, 243, 199, 0.6);
+}
+
+
+/* =========================================================
+   STATUS BADGES RESTORED
+   ========================================================= */
+
+.tech-status,
+.tech-status-badge {
+    padding: 5px 12px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.tech-status-completed {
+    background: var(--tech-success-light);
+    color: var(--tech-success-text);
+}
+
+.tech-status-default,
+.tech-status {
+    background: var(--tech-primary-light);
+    color: var(--tech-primary);
+}
+
+
+/* =========================================================
+   JOB CARD HEADERS & BODIES
+   ========================================================= */
+
+.tech-job-header,
+.tech-job-card-header {
+    min-height: 46px;
+    padding: 12px 24px;
+    background: rgba(248, 250, 252, 0.7);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--tech-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.tech-job-id,
+.tech-job-card-header strong {
+    color: var(--tech-dark);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.tech-job-date {
+    color: var(--tech-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.tech-job-body,
+.tech-job-card-body {
+    padding: 24px;
+    width: 100%;
+}
+
+.tech-job-footer {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.tech-completed-section {
+    padding: 24px;
+    width: 100%;
+}
+
+.tech-completed-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+
+/* =========================================================
+   RESPONSIVE DESIGN
+   ========================================================= */
+
+@media (max-width: 992px) {
+    .tech-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .tech-sidebar.open {
+        transform: translateX(0);
+        box-shadow: var(--tech-shadow-lg);
+    }
+
+    .tech-main {
+        margin-left: 0;
+    }
+
+    .tech-mobile-menu {
+        display: inline-flex;
+    }
+
+    .tech-mobile-brand {
+        display: flex;
+    }
+
+    .tech-dashboard-grid,
+    .tech-job-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .tech-topbar {
+        padding: 0 16px;
+        height: 64px;
+    }
+
+    .tech-content {
+        padding: 20px 16px;
+    }
+
+    .tech-user-name,
+    .tech-signout span {
+        display: none;
+    }
+
+    .tech-user {
+        padding-right: 8px;
+        border: none;
+    }
+}
+
+/* =========================================================
    TECHNICIAN JOB CARDS
    GLASSMORPHISM + BLUE TODAY + ORANGE UPCOMING
    ========================================================= */

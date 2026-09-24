@@ -45,15 +45,35 @@ async function getValidAccessToken(){
         throw Error(error.message);
     }
 
-    const session = data?.session;
-
-    if(!session){
-        throw Error(
-            "Sign in is required."
-        );
+    if(data?.session?.access_token){
+        return data.session.access_token;
     }
 
-    return session.access_token;
+    /*
+     * Supabase may still be restoring the persisted
+     * session immediately after a hard page refresh.
+     * Give the client a moment to finish hydration.
+     */
+    await new Promise(resolve =>
+        setTimeout(resolve, 300)
+    );
+
+    const {
+        data:retryData,
+        error:retryError
+    } = await sb.auth.getSession();
+
+    if(retryError){
+        throw Error(retryError.message);
+    }
+
+    if(retryData?.session?.access_token){
+        return retryData.session.access_token;
+    }
+
+    throw Error(
+        "Sign in is required."
+    );
 }
 
 
@@ -933,29 +953,29 @@ signOut.onclick = async () => {
     
     if(sb){
 
-    sb.auth.getSession()
-        .then(({ data: { session } }) => {
+    sb.auth.onAuthStateChange(
+        async (event, session) => {
 
-            if(!session){
+            if(
+                event === "INITIAL_SESSION" ||
+                event === "SIGNED_IN"
+            ){
 
-                window.location.replace(
-                    "./login.html"
-                );
+                if(!session){
 
-                return;
+                    window.location.replace(
+                        "./login.html"
+                    );
+
+                    return;
+                }
+
+                await load();
+
             }
 
-            load();
-
-        })
-        .catch(error => {
-
-            console.error(
-                "Technician session check failed:",
-                error
-            );
-
-        });
+        }
+    );
 
 }
 

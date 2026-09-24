@@ -249,10 +249,17 @@ async function load() {
 
     } catch (e) {
 
-        loginError.textContent =
-            e.message;
+    console.error("Technician dashboard load failed:", e);
 
+    if (detail) {
+        detail.innerHTML = `
+            <div class="tech-error-message">
+                ${esc(e.message)}
+            </div>
+        `;
     }
+
+}
 }
 
 function section(title,items){
@@ -995,7 +1002,7 @@ signOut.onclick = async () => {
     } finally {
 
         window.location.replace(
-            "./technician/login.html"
+            "./login.html"
         );
 
     }
@@ -1010,7 +1017,7 @@ signOut.onclick = async () => {
             if (!session) {
 
                 window.location.replace(
-                    "./technician/login.html"
+                    "./login.html"
                 );
 
                 return;
@@ -1022,7 +1029,7 @@ signOut.onclick = async () => {
         .catch(() => {
 
             window.location.replace(
-                "./technician/login.html"
+                "./login.html"
             );
 
         });

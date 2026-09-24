@@ -812,6 +812,22 @@ detail.scrollIntoView({
     block: "start"
 });
 
+console.log(
+    "DETAIL RECT:",
+    detail.getBoundingClientRect()
+);
+
+console.log(
+    "DETAIL COMPUTED STYLE:",
+    {
+        display: getComputedStyle(detail).display,
+        visibility: getComputedStyle(detail).visibility,
+        opacity: getComputedStyle(detail).opacity,
+        height: getComputedStyle(detail).height,
+        overflow: getComputedStyle(detail).overflow
+    }
+);
+
         document
             .querySelectorAll(".tech-action-button[data-status]")
             .forEach(b => {

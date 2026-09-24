@@ -156,65 +156,143 @@ async function technicians(db:any){
 }
 
 async function createTechnician(db:any,input:any){if(!input||!/^CFX-TECH-\d{4}-\d{4,6}$/.test(input.technician_code||"")||!/^[6-9]\d{9}$/.test(String(input.mobile||"").replace(/\D/g,"")))throw new Error("Technician ID and mobile must be valid.");const email=clean(input.email,254),password=String(input.password||"");if(!email||!password)throw new Error("A technician login email and password are required.");if(password.length<12)throw new Error("Technician password must contain at least 12 characters.");const{data:authData,error:authError}=await db.auth.admin.createUser({email,password,email_confirm:true});if(authError)throw new Error(authError.message);const{data,error}=await db.from("technicians").insert({auth_user_id:authData.user.id,technician_code:input.technician_code,full_name:clean(input.full_name,120),mobile:String(input.mobile).replace(/\D/g,""),username:clean(input.username,80),specialization:Array.isArray(input.specialization)?input.specialization.slice(0,10):[],working_days:input.working_days||[1,2,3,4,5,6],working_start:input.working_start||"10:00",working_end:input.working_end||"19:00",is_active:input.is_active!==false}).select().single();if(error){await db.auth.admin.deleteUser(authData.user.id);throw error;}return{technician:data};}
-async function updateTechnician(db:any,input:any){if(!input?.id||!/^[0-9a-f-]{36}$/i.test(input.id)||!/^[6-9]\d{9}$/.test(String(input.mobile||"").replace(/\D/g,"")))throw new Error("Technician details are invalid.");const{data:existing,error:existingError}=await db.from("technicians").select("auth_user_id").eq("id",input.id).single();if(existingError||!existing)throw new Error("Technician not found.")
-  
-  let authUserId=existing.auth_user_id;
+async function updateTechnician(db:any,input:any){
 
-const email=clean(input.email,254);
-
-if(!authUserId){
-
-  /*
-   * Existing technician has no portal account.
-   * Account creation/repair will be handled separately.
-   * Do not create an account during a normal profile edit.
-   */
-  if(input.is_active===true){
-    throw new Error(
-      "This technician has no linked portal login account. Create or repair the login account before activating this technician."
-    );
+  if(
+    !input?.id ||
+    !/^[0-9a-f-]{36}$/i.test(input.id) ||
+    !/^[6-9]\d{9}$/.test(String(input.mobile||"").replace(/\D/g,""))
+  ){
+    throw new Error("Technician details are invalid.");
   }
 
-}else{
+  const{
+    data:existing,
+    error:existingError
+  }=await db
+    .from("technicians")
+    .select("auth_user_id")
+    .eq("id",input.id)
+    .single();
+
+  if(existingError||!existing){
+    throw new Error("Technician not found.");
+  }
+
+  let authUserId=existing.auth_user_id;
+
+  const email=clean(input.email,254);
+  const password=String(input.password||"").trim();
 
   /*
-   * Existing portal account:
-   * Update login email only when a new email is supplied.
+   * Existing technician without a portal account.
+   * Account creation/repair will be handled separately.
    */
-  if(email){
+  if(!authUserId){
 
-    const{
-      data:authUserData,
-      error:authLookupError
-    }=await db.auth.admin.getUserById(authUserId);
-
-    if(authLookupError||!authUserData?.user){
+    if(input.is_active===true){
       throw new Error(
-        "Technician portal login account could not be found."
+        "This technician has no linked portal login account. Create or repair the login account before activating this technician."
       );
     }
 
-    if(email!==authUserData.user.email){
+  }else{
+
+    /*
+     * Existing portal account:
+     * Update login email when supplied.
+     */
+    if(email){
 
       const{
-        error:authUpdateError
+        data:authUserData,
+        error:authLookupError
+      }=await db.auth.admin.getUserById(authUserId);
+
+      if(authLookupError||!authUserData?.user){
+        throw new Error(
+          "Technician portal login account could not be found."
+        );
+      }
+
+      if(email!==authUserData.user.email){
+
+        const{
+          error:authUpdateError
+        }=await db.auth.admin.updateUserById(
+          authUserId,
+          {
+            email,
+            email_confirm:true
+          }
+        );
+
+        if(authUpdateError){
+          throw new Error(authUpdateError.message);
+        }
+      }
+    }
+
+    /*
+     * Password change:
+     * Only update the password when a new password
+     * has actually been entered.
+     */
+    if(password){
+
+      if(password.length<12){
+        throw new Error(
+          "Technician password must contain at least 12 characters."
+        );
+      }
+
+      const{
+        error:passwordUpdateError
       }=await db.auth.admin.updateUserById(
         authUserId,
         {
-          email,
-          email_confirm:true
+          password
         }
       );
 
-      if(authUpdateError){
-        throw new Error(authUpdateError.message);
+      if(passwordUpdateError){
+        throw new Error(passwordUpdateError.message);
       }
     }
   }
-}
-  
-  const{data,error}=await db.from("technicians").update({auth_user_id:authUserId,full_name:clean(input.full_name,120),mobile:String(input.mobile).replace(/\D/g,""),username:clean(input.username,80),specialization:Array.isArray(input.specialization)?input.specialization.slice(0,10):[],working_days:Array.isArray(input.working_days)?input.working_days:[1,2,3,4,5,6],working_start:input.working_start||"10:00",working_end:input.working_end||"19:00",is_active:input.is_active!==false}).eq("id",input.id).select().single();if(error)throw error;return{technician:data};}
 
+  const{
+    data,
+    error
+  }=await db
+    .from("technicians")
+    .update({
+      auth_user_id:authUserId,
+      full_name:clean(input.full_name,120),
+      mobile:String(input.mobile).replace(/\D/g,""),
+      username:clean(input.username,80),
+      specialization:Array.isArray(input.specialization)
+        ? input.specialization.slice(0,10)
+        : [],
+      working_days:Array.isArray(input.working_days)
+        ? input.working_days
+        : [1,2,3,4,5,6],
+      working_start:input.working_start||"10:00",
+      working_end:input.working_end||"19:00",
+      is_active:input.is_active!==false
+    })
+    .eq("id",input.id)
+    .select()
+    .single();
+
+  if(error){
+    throw error;
+  }
+
+  return{
+    technician:data
+  };
+}
 async function toggleTechnicianStatus(db, body) {
   if (
     !body?.id ||

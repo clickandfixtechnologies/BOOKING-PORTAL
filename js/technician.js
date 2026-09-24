@@ -530,6 +530,7 @@ async function loadDetail(id){
         id
     );
 
+
     detail.innerHTML = `
         <div class="tech-loading-message">
             Loading appointment details...
@@ -575,6 +576,9 @@ async function loadDetail(id){
                 </a>
               `
             : "";
+
+console.log("Rendering appointment details...");
+console.log("Appointment object:", a);
 
 
         detail.innerHTML = `
@@ -792,6 +796,10 @@ async function loadDetail(id){
             </div>
         `;
 
+        console.log(
+            "Appointment details rendered.",
+            detail.innerHTML.length
+        );
 
         document
             .querySelectorAll(".tech-action-button[data-status]")

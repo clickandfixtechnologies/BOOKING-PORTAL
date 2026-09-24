@@ -614,7 +614,7 @@ assignTech.onclick = () =>
     });
 
 const confirmAppointmentButton =
-    document.getElementById("confirm");
+    document.getElementById("confirmAppointment");
 
 if (confirmAppointmentButton) {
     confirmAppointmentButton.onclick = function () {
@@ -665,7 +665,12 @@ jobSave.onclick = async () => {
 
 
 const sidebar=document.querySelector(".admin-sidebar"),sidebarOverlay=document.createElement("div"),menuClose=document.createElement("button"),closeSidebar=()=>{sidebar.classList.remove("open");sidebarOverlay.hidden=true;document.body.classList.remove("sidebar-open")},openSidebar=()=>{sidebar.classList.add("open");sidebarOverlay.hidden=false;document.body.classList.add("sidebar-open")};sidebarOverlay.id="sidebarOverlay";sidebarOverlay.className="sidebar-overlay";sidebarOverlay.hidden=true;document.querySelector(".admin-shell").prepend(sidebarOverlay);menuClose.type="button";menuClose.id="menuClose";menuClose.className="btn btn-sm btn-outline-light d-md-none";menuClose.setAttribute("aria-label","Close menu");menuClose.textContent="×";sidebar.prepend(menuClose);menuToggle.onclick=()=>sidebar.classList.contains("open")?closeSidebar():openSidebar();menuClose.onclick=closeSidebar;sidebarOverlay.onclick=closeSidebar;document.addEventListener("keydown",event=>{if(event.key==="Escape")closeSidebar()});document.querySelectorAll("[data-view]").forEach(button=>button.addEventListener("click",()=>{if(matchMedia("(max-width: 767px)").matches)closeSidebar()}));
-const existingDetail=detail;table=function(rows){return`<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Appointment</th><th>Customer</th><th>Service</th><th>Date / Time</th><th>Technician</th><th>Job</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows.map(item=>`<tr><td>${e(item.appointment_id)}</td><td>${e(item.customer_name)}<br><small>${e(item.mobile)} · ${e(item.email)}</small></td><td>${e(serviceCategoryLabel(item.service_category))}<br><small>${e(serviceTypeLabel(item.service_type))}</small></td><td>${e(formatAppointmentDateTime(item.appointment_date, item.appointment_time))}</td><td>${e(item.technicians?.full_name)}</td><td>${e(item.job_code)}</td><td><span class="badge status-badge">${L(item.status)}</span></td><td class="actions"><button class="btn btn-sm btn-outline-primary" data-view-id="${item.id}">View</button>${item.status==="pending"?`<button class="btn btn-sm btn-primary" data-set="confirmed" data-id="${item.id}">Confirm</button>`:""}
+const existingDetail=detail;table=function(rows){return`<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Appointment</th><th>Customer</th><th>Service</th><th>Date / Time</th><th>Technician</th><th>Job</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows.map(item=>`<tr><td>${e(item.appointment_id)}</td><td>${e(item.customer_name)}<br><small>${e(item.mobile)} · ${e(item.email)}</small></td><td>${e(serviceCategoryLabel(item.service_category))}<br><small>${e(serviceTypeLabel(item.service_type))}</small></td><td>${e(formatAppointmentDateTime(item.appointment_date, item.appointment_time))}</td><td>${e(item.technicians?.full_name)}</td><td>${e(item.job_code)}</td><td><span class="badge status-badge">${L(item.status)}</span></td><td class="actions"><button class="btn btn-sm btn-outline-primary" data-view-id="${item.id}">View</button>
+${["pending", "rescheduled"].includes(item.status)
+    ? `<button class="btn btn-sm btn-primary" data-set="confirmed" data-id="${item.id}">
+        Confirm
+       </button>`
+    : ""}
 
 
 

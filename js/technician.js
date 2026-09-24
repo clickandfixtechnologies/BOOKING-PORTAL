@@ -21,6 +21,38 @@ const sb =
 const jobs = document.getElementById("jobs");
 const detail = document.getElementById("detail");
 
+/* =========================================================
+   TECHNICIAN JOB CARD CLICK HANDLER
+   Event Delegation
+   ========================================================= */
+
+jobs?.addEventListener("click", event => {
+
+    const card =
+        event.target.closest(".tech-job-card");
+
+    if (!card) {
+        return;
+    }
+
+    const id = card.dataset.id;
+
+    if (!id) {
+        console.error(
+            "Technician job card has no appointment ID."
+        );
+
+        return;
+    }
+
+    console.log(
+        "Opening technician appointment:",
+        id
+    );
+
+    loadDetail(id);
+});
+
 const esc = value => {
     const e = document.createElement("div");
     e.textContent = value ?? "—";
@@ -169,34 +201,7 @@ async function load() {
         `;
 
 
-        document
-    .querySelectorAll(".tech-job-card")
-    .forEach(card => {
-
-        card.addEventListener("click", event => {
-
-            /*
-             * Completed job-এর ভিতরে যদি ভবিষ্যতে
-             * আলাদা কোনো button/link থাকে, সেগুলোর click
-             * যেন card click trigger না করে।
-             */
-            if (
-                event.target.closest("a, button:not(.tech-job-card)")
-            ) {
-                return;
-            }
-
-            const id = card.dataset.id;
-
-            if (!id) {
-                return;
-            }
-
-            loadDetail(id);
-
-        });
-
-    });
+        
 
 
     } catch (e) {
@@ -519,6 +524,11 @@ function completedJobCard(a) {
 }
 
 async function loadDetail(id){
+
+    console.log(
+        "loadDetail() called with appointment ID:",
+        id
+    );
 
     try{
 

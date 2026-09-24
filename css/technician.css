@@ -1,6 +1,6 @@
 /* =========================================================
    CLICK & FIX TECHNOLOGIES
-   TECHNICIAN DASHBOARD - FRESH MODERN LOOK (NO BOOTSTRAP)
+   TECHNICIAN DASHBOARD & LOGIN - COMPLETE FRESH CSS
    ========================================================= */
 
 :root {
@@ -26,30 +26,40 @@
 }
 
 /* =========================================================
-   DASHBOARD ROOT & SECTIONS
+   DASHBOARD ROOT
    ========================================================= */
 
-#jobs, .tech-job-section {
+#jobs {
     width: 100%;
     max-width: 100%;
-    min-width: 0;
 }
+
+.tech-job-section {
+    width: 100%;
+    max-width: 100%;
+}
+
+
+/* =========================================================
+   TOP JOB SECTION
+   ========================================================= */
 
 .tech-top-section {
     width: 100%;
-    margin-bottom: 28px;
+    margin: 0 0 30px;
 }
 
 .tech-section-title {
-    margin: 0 0 16px;
+    margin: 0 0 14px;
     color: var(--tech-dark);
     font-size: 16px;
     line-height: 1.4;
     font-weight: 700;
 }
 
+
 /* =========================================================
-   JOB GRID LAYOUT
+   TODAY / UPCOMING JOB LAYOUT
    ========================================================= */
 
 .tech-job-grid {
@@ -57,8 +67,8 @@
     max-width: 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-    align-items: stretch;
+    gap: 18px;
+    align-items: start;
 }
 
 .tech-job-grid > *,
@@ -67,17 +77,18 @@
     width: 100%;
 }
 
+
 /* =========================================================
-   EMPTY JOB STATE
+   EMPTY JOB
    ========================================================= */
 
 .tech-empty-job {
     width: 100%;
-    min-height: 140px;
-    padding: 30px 20px;
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-    border: 1px solid var(--tech-border-light);
-    border-radius: var(--tech-radius-md);
+    min-height: 120px;
+    padding: 28px 22px;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -93,9 +104,9 @@
 }
 
 .tech-empty-icon {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 12px;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 10px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -113,168 +124,6 @@
     color: var(--tech-indigo);
 }
 
-/* =========================================================
-   JOB CARD DESIGN
-   ========================================================= */
-
-.tech-job-card {
-    width: 100%;
-    min-width: 0;
-    margin: 0;
-    padding: 0;
-    background: var(--tech-white);
-    border: 1px solid var(--tech-border);
-    border-radius: var(--tech-radius-md);
-    overflow: hidden;
-    text-align: left;
-    cursor: pointer;
-    font-family: inherit;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.tech-job-card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
-    transform: translateY(-2px);
-}
-
-.tech-job-card-header {
-    min-height: 50px;
-    padding: 12px 18px;
-    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
-    border-bottom: 1px solid var(--tech-border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.tech-job-card-header strong {
-    min-width: 0;
-    color: var(--tech-dark);
-    font-size: 12px;
-    font-weight: 700;
-    overflow-wrap: anywhere;
-}
-
-.tech-job-date {
-    flex-shrink: 0;
-    color: var(--tech-muted);
-    font-size: 11px;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.tech-job-date i {
-    margin-right: 5px;
-}
-
-.tech-job-card-body {
-    padding: 18px;
-}
-
-.tech-job-customer p {
-    margin: 0;
-    color: var(--tech-text);
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-.tech-job-customer p + p {
-    margin-top: 5px;
-}
-
-.tech-job-customer strong {
-    color: var(--tech-dark);
-    font-weight: 700;
-}
-
-.tech-job-customer span {
-    color: var(--tech-muted);
-    font-weight: 400;
-}
-
-.tech-job-customer .fa-phone {
-    margin-right: 6px;
-    color: var(--tech-primary);
-    font-size: 10px;
-}
-
-.tech-job-divider {
-    width: 100%;
-    height: 1px;
-    margin: 14px 0;
-    background: var(--tech-border-light);
-    border: 0;
-}
-
-/* =========================================================
-   SERVICE DETAILS & FOOTER
-   ========================================================= */
-
-.tech-service-label {
-    margin: 0 0 6px;
-    color: #94a3b8;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.tech-service-value {
-    margin: 0;
-    color: var(--tech-text);
-    font-size: 12px;
-    font-weight: 600;
-    overflow-wrap: anywhere;
-}
-
-.tech-service-value span {
-    margin: 0 6px;
-    color: #cbd5e1;
-}
-
-.tech-job-footer {
-    margin-top: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.tech-status-badge {
-    padding: 5px 10px;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    font-weight: 800;
-    white-space: nowrap;
-}
-
-.tech-status-completed {
-    background: var(--tech-success-light);
-    color: var(--tech-success-text);
-}
-
-.tech-status-default {
-    background: var(--tech-indigo-light);
-    color: #4338ca;
-}
-
-.tech-feedback-link {
-    color: var(--tech-muted);
-    font-size: 11px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.18s ease;
-}
-
-.tech-feedback-link:hover {
-    color: var(--tech-primary);
-}
 
 /* =========================================================
    COMPLETED JOBS SECTION
@@ -282,14 +131,14 @@
 
 .tech-completed-section {
     width: 100%;
-    padding: 24px;
+    padding: 20px;
     background: var(--tech-white);
     border: 1px solid var(--tech-border);
     border-radius: var(--tech-radius-lg);
     box-shadow: var(--tech-shadow-sm);
-    margin-top: 24px;
 }
 
+.tech-completed-section .tech-section-title,
 .tech-completed-title {
     margin: 0 0 16px;
     color: var(--tech-dark);
@@ -304,13 +153,218 @@
     gap: 14px;
 }
 
+
 /* =========================================================
-   DETAIL CARD & VIEWS
+   JOB CARD
+   ========================================================= */
+
+.tech-job-card {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    background: var(--tech-white);
+    border: 1px solid var(--tech-border);
+    border-radius: 11px;
+    overflow: hidden;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.tech-job-card:hover {
+    border-color: #d7dee8;
+    box-shadow: 0 5px 16px rgba(15, 23, 42, 0.07);
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   JOB CARD HEADER
+   ========================================================= */
+
+.tech-job-card-header {
+    width: 100%;
+    min-height: 42px;
+    padding: 11px 16px;
+    background: #f3f6fa;
+    border-bottom: 1px solid var(--tech-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.tech-job-card-header strong {
+    min-width: 0;
+    color: var(--tech-dark);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.tech-job-date {
+    flex-shrink: 0;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.tech-job-date i {
+    margin-right: 5px;
+}
+
+
+/* =========================================================
+   JOB CARD BODY
+   ========================================================= */
+
+.tech-job-card-body {
+    width: 100%;
+    padding: 18px 16px;
+}
+
+.tech-job-customer {
+    width: 100%;
+}
+
+.tech-job-customer p {
+    margin: 0;
+    color: var(--tech-text);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.tech-job-customer p + p {
+    margin-top: 4px;
+}
+
+.tech-job-customer strong {
+    font-weight: 700;
+}
+
+.tech-job-customer span {
+    color: #64748b;
+    font-weight: 400;
+}
+
+.tech-job-customer .fa-phone {
+    margin-right: 4px;
+    color: var(--tech-primary);
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   DIVIDER
+   ========================================================= */
+
+.tech-job-divider {
+    width: 100%;
+    height: 1px;
+    margin: 14px 0;
+    background: #eef2f7;
+    border: 0;
+}
+
+
+/* =========================================================
+   SERVICE DETAILS
+   ========================================================= */
+
+.tech-service-label {
+    margin: 0 0 5px;
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.tech-service-value {
+    margin: 0;
+    color: var(--tech-text);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.tech-service-value span {
+    margin: 0 6px;
+    color: #94a3b8;
+}
+
+
+/* =========================================================
+   JOB FOOTER
+   ========================================================= */
+
+.tech-job-footer {
+    width: 100%;
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+
+/* =========================================================
+   STATUS BADGE
+   ========================================================= */
+
+.tech-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.tech-status-completed {
+    background: var(--tech-success-light);
+    color: var(--tech-success-text);
+}
+
+.tech-status-default {
+    background: var(--tech-indigo-light);
+    color: #4338ca;
+}
+
+
+/* =========================================================
+   FEEDBACK
+   ========================================================= */
+
+.tech-feedback-link {
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.tech-feedback-link:hover {
+    color: var(--tech-primary);
+}
+
+
+/* =========================================================
+   DETAIL CARD & VIEW
    ========================================================= */
 
 .tech-detail {
     width: 100%;
-    margin-top: 24px;
+    margin-top: 22px;
 }
 
 .tech-detail-card {
@@ -323,7 +377,7 @@
 }
 
 .tech-detail-header {
-    padding: 22px;
+    padding: 20px 22px;
     border-bottom: 1px solid var(--tech-border);
     display: flex;
     align-items: center;
@@ -348,12 +402,12 @@
 }
 
 .tech-detail-body {
-    padding: 24px;
+    padding: 22px;
 }
 
 .tech-detail-section {
     padding: 18px 0;
-    border-bottom: 1px solid var(--tech-border-light);
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .tech-detail-section:first-child {
@@ -366,24 +420,29 @@
 }
 
 .tech-detail-section h3 {
-    margin: 0 0 14px;
+    margin: 0 0 13px;
     color: var(--tech-dark);
     font-size: 14px;
     font-weight: 700;
 }
 
+
+/* =========================================================
+   DETAIL INFORMATION
+   ========================================================= */
+
 .tech-detail-info-grid {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
+    gap: 16px;
 }
 
 .tech-detail-info-grid div {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
 }
 
 .tech-detail-info-grid span {
@@ -403,35 +462,36 @@
 .tech-detail-address,
 .tech-detail-description {
     margin: 0;
-    color: var(--tech-muted);
+    color: #64748b;
     font-size: 13px;
     line-height: 1.6;
 }
 
+
 /* =========================================================
-   BUTTONS & INPUTS
+   DETAIL ACTIONS & BUTTONS
    ========================================================= */
 
 .tech-detail-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 9px;
 }
 
 .tech-action-button,
 .tech-complete-button,
 .tech-action-btn {
-    min-height: 42px;
-    padding: 10px 16px;
-    border: 1px solid #cbd5e1;
-    border-radius: 9px;
+    min-height: 40px;
+    padding: 8px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
     background: var(--tech-white);
     color: var(--tech-text);
     font-family: inherit;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .tech-action-button:hover,
@@ -447,16 +507,9 @@
     color: white;
 }
 
-.tech-action-btn.success,
-.tech-complete-button {
+.tech-action-btn.success {
     border-color: var(--tech-success);
     background: var(--tech-success);
-    color: white;
-}
-
-.tech-complete-button:hover {
-    background: #047857;
-    border-color: #047857;
     color: white;
 }
 
@@ -468,68 +521,114 @@
     text-decoration: none;
 }
 
-.tech-job-id-row, .tech-job-input-row, .tech-otp-row {
+
+/* =========================================================
+   JOB ID & INPUTS
+   ========================================================= */
+
+.tech-job-id-row,
+.tech-job-input-row,
+.tech-otp-row {
     width: 100%;
     display: flex;
-    gap: 10px;
+    gap: 9px;
 }
 
-.tech-input, .tech-job-input-row input, .tech-otp-row input {
+.tech-input,
+.tech-job-input-row input,
+.tech-otp-row input {
     width: 100%;
     min-width: 0;
-    min-height: 44px;
-    padding: 10px 14px;
-    border: 1px solid #cbd5e1;
-    border-radius: 9px;
+    min-height: 40px;
+    padding: 8px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
     background: var(--tech-white);
-    color: var(--tech-dark);
+    color: var(--tech-text);
     font-family: inherit;
     font-size: 13px;
     outline: none;
     box-sizing: border-box;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.tech-input:focus, .tech-job-input-row input:focus, .tech-otp-row input:focus {
-    border-color: var(--tech-primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+.tech-input:focus,
+.tech-job-input-row input:focus,
+.tech-otp-row input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
 }
+
 
 /* =========================================================
-   OTP AREA & MESSAGES
+   COMPLETE BUTTON
+   ========================================================= */
+
+.tech-complete-button {
+    border-color: var(--tech-success);
+    background: var(--tech-success);
+    color: #ffffff;
+}
+
+.tech-complete-button:hover {
+    border-color: #047857;
+    background: #047857;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   OTP
    ========================================================= */
 
 .tech-otp-area {
-    margin-top: 18px;
+    margin-top: 16px;
 }
 
-.tech-otp-message, .tech-otp-alert {
-    padding: 14px 16px;
+.tech-otp-message,
+.tech-otp-alert {
+    padding: 13px 15px;
     background: var(--tech-primary-light);
     border: 1px solid var(--tech-primary-soft);
-    border-radius: 10px;
+    border-radius: 9px;
     display: flex;
     align-items: flex-start;
-    gap: 12px;
+    gap: 10px;
     color: #1e40af;
+}
+
+.tech-otp-message > i {
+    margin-top: 2px;
+    font-size: 16px;
+}
+
+.tech-otp-message strong {
     font-size: 12px;
-    line-height: 1.5;
+}
+
+.tech-otp-message p {
+    margin: 3px 0 0;
+    color: #64748b;
+    font-size: 11px;
 }
 
 .tech-resend-button {
-    margin-top: 8px;
-    padding: 4px 0;
+    margin-top: 7px;
+    padding: 3px 0;
     border: 0;
     background: transparent;
     color: var(--tech-primary);
     font-family: inherit;
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
-    font-weight: 600;
 }
 
+
+/* =========================================================
+   MESSAGES
+   ========================================================= */
+
 .tech-message {
-    min-height: 20px;
+    min-height: 18px;
     margin: 10px 0 0;
     color: #dc2626;
     font-size: 12px;
@@ -539,10 +638,9 @@
     padding: 14px;
     background: #fef2f2;
     border: 1px solid #fecaca;
-    border-radius: 10px;
+    border-radius: 9px;
     color: #b91c1c;
     font-size: 13px;
-    line-height: 1.5;
 }
 
 .tech-success-message {
@@ -552,12 +650,28 @@
     border-radius: 12px;
     display: flex;
     align-items: flex-start;
-    gap: 14px;
+    gap: 12px;
     color: #065f46;
 }
 
+.tech-success-message > i {
+    margin-top: 2px;
+    font-size: 21px;
+}
+
+.tech-success-message h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.tech-success-message p {
+    margin: 4px 0 0;
+    font-size: 12px;
+}
+
+
 /* =========================================================
-   [UNCHANGED] LOGIN SCREEN STYLES (AS REQUESTED)
+   [UNCHANGED] LOGIN SCREEN DESIGN (SAME AS REQUESTED)
    ========================================================= */
 
 .tech-login-screen {
@@ -629,7 +743,6 @@
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
-    transition: background 0.2s ease;
 }
 
 .tech-login-button:hover {
@@ -643,7 +756,11 @@
     font-size: 12px;
 }
 
-/* Password View Toggle */
+
+/* =========================================================
+   PASSWORD VIEW TOGGLE
+   ========================================================= */
+
 .tech-password-wrapper {
     position: relative;
     width: 100%;
@@ -675,6 +792,20 @@
     background: #f8fafc;
 }
 
+.tech-password-wrapper .tech-password-toggle i {
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   OVERLAY & MOBILE SIDEBAR
+   ========================================================= */
+
+.tech-sidebar-overlay {
+    display: none;
+}
+
+
 /* =========================================================
    RESPONSIVE QUERIES
    ========================================================= */
@@ -683,13 +814,102 @@
     .tech-job-grid {
         grid-template-columns: 1fr;
     }
+
+    .tech-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.22s ease;
+    }
+
+    .tech-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .tech-main {
+        margin-left: 0;
+    }
+
+    .tech-sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.35);
+        z-index: 90;
+    }
+
+    .tech-sidebar-overlay.open {
+        display: block;
+    }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 767px) {
+    .tech-section-title {
+        font-size: 15px;
+    }
+
+    .tech-completed-section {
+        padding: 16px;
+    }
+
+    .tech-job-card-header {
+        padding: 11px 14px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .tech-job-date {
+        white-space: normal;
+    }
+
+    .tech-job-card-body {
+        padding: 16px 14px;
+    }
+
+    .tech-detail-header {
+        padding: 17px;
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .tech-detail-body {
+        padding: 17px;
+    }
+
     .tech-detail-info-grid {
         grid-template-columns: 1fr;
+        gap: 13px;
     }
-    .tech-job-id-row, .tech-otp-row, .tech-job-input-row {
+
+    .tech-job-id-row,
+    .tech-job-input-row,
+    .tech-otp-row {
         flex-direction: column;
+    }
+
+    .tech-job-id-row .tech-action-button,
+    .tech-otp-row .tech-complete-button {
+        width: 100%;
+    }
+}
+
+
+/* =========================================================
+   ACCESSIBILITY & REDUCED MOTION
+   ========================================================= */
+
+.tech-portal button:focus-visible,
+.tech-portal input:focus-visible,
+.tech-portal a:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.20);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tech-job-card,
+    .tech-action-button,
+    .tech-complete-button,
+    .tech-portal * {
+        transition: none !important;
+        transform: none !important;
+        animation-duration: 0.01ms !important;
     }
 }

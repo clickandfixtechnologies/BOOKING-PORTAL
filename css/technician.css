@@ -1534,3 +1534,14 @@
 } 
 .tech-login-error { min-height: 20px; margin: 9px 0 0; color: #dc2626; font-size: 12px; 
 }
+/* ========================================================= PASSWORD VIEW TOGGLE ========================================================= */ 
+.tech-password-wrapper { position: relative; width: 100%; 
+} 
+.tech-password-wrapper .tech-password-input { padding-right: 48px; 
+} 
+.tech-password-wrapper .tech-password-toggle { position: absolute; top: 0; right: 0; width: 44px; height: 44px; border: 0; background: transparent; color: #6b7280; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 0 8px 8px 0; transition: color 0.18s ease, background 0.18s ease; 
+} 
+.tech-password-wrapper .tech-password-toggle:hover { color: #2563eb; background: #f8fafc; 
+} 
+.tech-password-wrapper .tech-password-toggle i { font-size: 14px; 
+}

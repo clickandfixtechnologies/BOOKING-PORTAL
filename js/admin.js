@@ -389,7 +389,20 @@ function renderTechForm(t={}){
   `;
 }
 
-async function techniciansView(){pageTitle.textContent="Technicians";let t=(await api("technicians")).technicians;q.innerHTML=`<div class="admin-card"><h2 class="h6">${window.editTech?"Edit technician":"Add technician"}</h2>${renderTechForm(window.editTech||{})}</div><div class="admin-card mt-3"><h2 class="h6">Technicians</h2>${t.map(x=>`<div class="border rounded p-2 mb-2"><b>${e(x.technician_code)}</b> ${e(x.full_name)} · ${e(x.mobile)} · ${x.is_active?"Active":"Inactive"}<div class="actions float-end"><button class="btn btn-sm btn-outline-primary" data-edit-tech="${x.id}">Edit</button><button class="btn btn-sm btn-outline-secondary" data-toggle-tech="${x.id}">${x.is_active?"Deactivate":"Activate"}</button></div></div>`).join("")||"No technicians yet."}</div>`
+async function techniciansView(){pageTitle.textContent="Technicians";let t=(await api("technicians")).technicians;q.innerHTML=`<div class="admin-card"><h2 class="h6">${window.editTech?"Edit technician":"Add technician"}</h2>${renderTechForm(window.editTech||{})}</div><div class="admin-card mt-3"><h2 class="h6">Technicians</h2>${t.map(x=>`<div class="border rounded p-2 mb-2"><b>${e(x.technician_code)}</b> ${e(x.full_name)} · ${e(x.mobile)} · ${x.is_active?"Active":"Inactive"}<div class="actions float-end">
+
+<button class="btn btn-sm btn-outline-primary" data-edit-tech="${x.id}">Edit</button>
+<button class="btn btn-sm btn-outline-secondary" data-toggle-tech="${x.id}">${x.is_active?"Deactivate":"Activate"}</button>
+
+<button
+  class="btn btn-sm btn-outline-danger"
+  data-delete-tech="${x.id}"
+  ${x.is_active ? "disabled title=\"Deactivate this technician before deleting\"" : ""}
+>
+  Delete
+</button>
+
+</div></div>`).join("")||"No technicians yet."}</div>`
 
 const technicianPassword=document.getElementById("technicianPassword");
 const toggleTechnicianPassword=document.getElementById("toggleTechnicianPassword");
@@ -441,6 +454,69 @@ const techFormElement=document.getElementById("techForm");techFormElement.onsubm
             flash(
                 err.message ||
                 "Technician status could not be updated.",
+                false
+            );
+        }
+    }
+);
+
+document.querySelectorAll("[data-delete-tech]").forEach(b =>
+    b.onclick = async () => {
+
+        const technician = t.find(
+            x => x.id === b.dataset.deleteTech
+        );
+
+        if (!technician) {
+            flash("Technician not found.", false);
+            return;
+        }
+
+        /*
+         * Frontend safety check.
+         * Backend also checks this independently.
+         */
+        if (technician.is_active) {
+            flash(
+                "Active technician cannot be deleted. Deactivate the technician first.",
+                false
+            );
+            return;
+        }
+
+        const confirmed = window.confirm(
+            `Delete technician "${technician.full_name}" permanently?\n\n` +
+            "This will also delete the technician's portal login account.\n\n" +
+            "This action cannot be undone."
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+
+            b.disabled = true;
+            b.textContent = "Deleting…";
+
+            await api("delete_technician", {
+                id: technician.id
+            });
+
+            flash(
+                "Technician deleted successfully."
+            );
+
+            techniciansView();
+
+        } catch (err) {
+
+            b.disabled = false;
+            b.textContent = "Delete";
+
+            flash(
+                err.message ||
+                "Technician could not be deleted.",
                 false
             );
         }

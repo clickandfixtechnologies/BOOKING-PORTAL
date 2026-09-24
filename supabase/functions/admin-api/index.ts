@@ -48,6 +48,7 @@ async function route(db:any, userId:string, body:any) {
     case "create_technician": return createTechnician(db,body.technician);
     case "update_technician": return updateTechnician(db,body.technician);
     case "toggle_technician_status": return toggleTechnicianStatus(db,body);
+    case "delete_technician": return deleteTechnician(db,body.id);
     case "notifications": return notifications(db,userId);
     case "notification_logs": return notificationLogs(db);
     case "mark_notification_read": return markRead(db,userId,body.id);
@@ -346,6 +347,104 @@ async function toggleTechnicianStatus(db, body) {
 
   return {
     technician: data
+  };
+}
+
+async function deleteTechnician(db:any,id:string){
+
+  if(
+    !id ||
+    !/^[0-9a-f-]{36}$/i.test(id)
+  ){
+    throw new Error("Invalid technician.");
+  }
+
+  const {
+    data:technician,
+    error:technicianError
+  }=await db
+    .from("technicians")
+    .select("id,auth_user_id,is_active,full_name,technician_code")
+    .eq("id",id)
+    .single();
+
+  if(technicianError||!technician){
+    throw new Error("Technician not found.");
+  }
+
+  /*
+   * Active technicians must never be deleted.
+   * They must be deactivated first.
+   */
+  if(technician.is_active){
+    throw new Error(
+      "Active technician cannot be deleted. Deactivate the technician first."
+    );
+  }
+
+  /*
+   * Check whether this technician is still assigned
+   * to any appointment.
+   *
+   * We do not delete a technician that is referenced
+   * by an appointment.
+   */
+  const {
+    count:appointmentCount,
+    error:appointmentError
+  }=await db
+    .from("appointments")
+    .select("id",{count:"exact",head:true})
+    .eq("technician_id",id);
+
+  if(appointmentError){
+    throw appointmentError;
+  }
+
+  if((appointmentCount||0)>0){
+    throw new Error(
+      "This technician is assigned to one or more appointments. Reassign those appointments before deleting the technician."
+    );
+  }
+
+  /*
+   * Delete linked Supabase Auth account first.
+   *
+   * If the technician has no Auth account,
+   * continue with database deletion.
+   */
+  if(technician.auth_user_id){
+
+    const {
+      error:authDeleteError
+    }=await db.auth.admin.deleteUser(
+      technician.auth_user_id
+    );
+
+    if(authDeleteError){
+      throw new Error(
+        "Technician portal login could not be deleted: "+
+        authDeleteError.message
+      );
+    }
+  }
+
+  /*
+   * Delete technician database record.
+   */
+  const {
+    error:deleteError
+  }=await db
+    .from("technicians")
+    .delete()
+    .eq("id",id);
+
+  if(deleteError){
+    throw deleteError;
+  }
+
+  return{
+    ok:true
   };
 }
 

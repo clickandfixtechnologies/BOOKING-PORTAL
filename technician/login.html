@@ -88,14 +88,28 @@
                 >
 
 
-                <input
-                    id="password"
-                    type="password"
-                    class="tech-input"
-                    placeholder="Password"
-                    autocomplete="current-password"
-                    required
-                >
+                <div class="tech-password-wrapper">
+
+    <input
+        id="password"
+        type="password"
+        class="tech-input tech-password-input"
+        placeholder="Password"
+        autocomplete="current-password"
+        required
+    >
+
+    <button
+        type="button"
+        id="togglePassword"
+        class="tech-password-toggle"
+        aria-label="Show password"
+        title="Show password"
+    >
+        <i class="fa-regular fa-eye"></i>
+    </button>
+
+</div>
 
 
                 <button

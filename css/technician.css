@@ -2283,3 +2283,479 @@
     }
 
 }
+
+/* =========================================================
+   FINAL TECHNICIAN DASHBOARD MODERN LAYOUT
+   ========================================================= */
+
+/* Main dashboard width */
+.tech-content {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 28px 30px 45px;
+}
+
+
+/* =========================================================
+   TOP JOBS — 3 COLUMN DESKTOP LAYOUT
+   ========================================================= */
+
+.tech-job-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 20px;
+
+    width: 100%;
+
+    align-items: start;
+}
+
+
+/* Each job card */
+.tech-job-card {
+    min-width: 0;
+    height: 100%;
+
+    background: rgba(255, 255, 255, 0.92);
+
+    border: 1px solid rgba(226, 232, 240, 0.95);
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 2px 6px rgba(15, 23, 42, 0.035);
+
+    overflow: hidden;
+
+    transition:
+        transform 0.22s ease,
+        box-shadow 0.22s ease,
+        border-color 0.22s ease,
+        background 0.22s ease;
+}
+
+
+/* Modern hover */
+.tech-job-card:hover {
+    transform: translateY(-4px);
+
+    border-color: rgba(37, 99, 235, 0.20);
+
+    background: rgba(255, 255, 255, 0.98);
+
+    box-shadow:
+        0 14px 30px rgba(15, 23, 42, 0.08),
+        0 4px 12px rgba(37, 99, 235, 0.06);
+}
+
+
+/* Card header */
+.tech-job-card-header {
+    min-height: 58px;
+
+    padding: 11px 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8fafc,
+            #f1f5f9
+        );
+
+    border-bottom: 1px solid #e5e7eb;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+}
+
+
+/* Job ID */
+.tech-job-card-header strong {
+    color: #172033;
+
+    font-size: 13px;
+    font-weight: 750;
+
+    line-height: 1.35;
+}
+
+
+/* Date */
+.tech-job-date {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.tech-job-date i {
+    color: #64748b;
+    font-size: 10px;
+}
+
+
+/* Card body */
+.tech-job-card-body {
+    padding: 20px;
+}
+
+
+/* Customer information */
+.tech-job-customer p {
+    margin: 0;
+
+    color: #334155;
+
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.tech-job-customer p + p {
+    margin-top: 3px;
+}
+
+.tech-job-customer strong {
+    color: #334155;
+    font-weight: 650;
+}
+
+.tech-job-customer span {
+    color: #64748b;
+}
+
+.tech-job-customer .fa-phone {
+    color: #2563eb;
+    font-size: 10px;
+}
+
+
+/* Divider */
+.tech-job-divider {
+    height: 1px;
+
+    margin: 16px 0;
+
+    background:
+        linear-gradient(
+            to right,
+            transparent,
+            #e5e7eb,
+            transparent
+        );
+
+    border: 0;
+}
+
+
+/* Service label */
+.tech-service-label {
+    margin: 0 0 5px;
+
+    color: #94a3b8;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: .09em;
+
+    text-transform: uppercase;
+}
+
+
+/* Service value */
+.tech-service-value {
+    margin: 0;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    line-height: 1.5;
+
+    word-break: break-word;
+}
+
+.tech-service-value span {
+    margin: 0 6px;
+
+    color: #cbd5e1;
+}
+
+
+/* Footer */
+.tech-job-footer {
+    margin-top: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+
+/* Status badge */
+.tech-status-badge {
+    min-height: 23px;
+
+    padding: 4px 9px;
+
+    border-radius: 999px;
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+.tech-status-default {
+    background: #eef2ff;
+    color: #4338ca;
+}
+
+.tech-status-completed {
+    background: #d1fae5;
+    color: #047857;
+}
+
+
+/* Feedback */
+.tech-feedback-link {
+    color: #94a3b8;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    transition:
+        color .18s ease;
+}
+
+.tech-feedback-link:hover {
+    color: #2563eb;
+}
+
+
+/* =========================================================
+   SECTION HEADINGS
+   ========================================================= */
+
+.tech-top-section {
+    margin-bottom: 26px;
+}
+
+.tech-section-title {
+    margin: 0 0 13px;
+
+    color: #172033;
+
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 750;
+
+    letter-spacing: -0.01em;
+}
+
+
+/* =========================================================
+   COMPLETED JOBS
+   ========================================================= */
+
+.tech-completed-section {
+    padding: 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.96),
+            rgba(248,250,252,.92)
+        );
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 3px 12px rgba(15,23,42,.035);
+}
+
+.tech-completed-title {
+    margin: 0 0 15px;
+
+    color: #172033;
+
+    font-size: 15px;
+    font-weight: 750;
+}
+
+.tech-completed-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+
+/* Completed card */
+.tech-completed-section .tech-job-card {
+    border-radius: 12px;
+}
+
+
+/* =========================================================
+   SIDEBAR MODERN TOUCH
+   ========================================================= */
+
+.tech-sidebar {
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #fbfdff 100%
+        );
+
+    box-shadow:
+        4px 0 20px rgba(15, 23, 42, 0.025);
+}
+
+.tech-brand-logo {
+    border-radius: 10px;
+
+    box-shadow:
+        0 5px 12px rgba(37, 99, 235, 0.18);
+}
+
+.tech-nav-item {
+    margin-bottom: 5px;
+
+    border-radius: 10px;
+}
+
+.tech-nav-item.active {
+    box-shadow:
+        0 4px 12px rgba(37, 99, 235, 0.07);
+}
+
+
+/* =========================================================
+   TOPBAR MODERN TOUCH
+   ========================================================= */
+
+.tech-topbar {
+    background:
+        rgba(255, 255, 255, 0.94);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    box-shadow:
+        0 1px 10px rgba(15, 23, 42, 0.025);
+}
+
+.tech-user-avatar {
+    border: 2px solid #ffffff;
+
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, 0.10);
+}
+
+.tech-signout {
+    border-color: #e2e8f0;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+
+/* =========================================================
+   DESKTOP LARGE SCREEN
+   ========================================================= */
+
+@media (min-width: 1200px) {
+
+    .tech-job-grid {
+        gap: 20px;
+    }
+
+    .tech-job-card-body {
+        padding: 20px;
+    }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+    .tech-content {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    .tech-job-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .tech-content {
+        padding:
+            20px
+            15px
+            30px;
+    }
+
+    .tech-job-grid {
+        grid-template-columns: 1fr;
+
+        gap: 15px;
+    }
+
+    .tech-job-card {
+        height: auto;
+    }
+
+    .tech-job-card-header {
+        min-height: 52px;
+
+        padding:
+            10px
+            14px;
+    }
+
+    .tech-job-card-body {
+        padding: 17px;
+    }
+}

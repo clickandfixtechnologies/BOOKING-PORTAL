@@ -368,18 +368,18 @@ function section(title,items){
 
                         <div class="tech-job-card-header">
 
-                            <strong>
-                                ${esc(a.appointment_id)}
-                            </strong>
+    <strong class="tech-job-card-id">
+        ${esc(a.appointment_id)}
+    </strong>
 
-                            <span class="tech-job-date">
-                                <i class="fa-regular fa-calendar"></i>
-                                ${formatDate(a.appointment_date)}
-                                &nbsp;&nbsp;
-                                ${formatTime(a.appointment_time)}
-                            </span>
+    <span class="tech-job-date">
+        <i class="fa-regular fa-calendar"></i>
+        ${formatDate(a.appointment_date)}
+        <span class="tech-job-time-separator">•</span>
+        ${formatTime(a.appointment_time)}
+    </span>
 
-                        </div>
+</div>
 
 
                         <div class="tech-job-card-body">
@@ -1175,6 +1175,28 @@ function closeTechnicianMenu() {
     techSidebarOverlay?.classList.remove("open");
 }
 
+document.addEventListener("click", event => {
+
+    if (
+        !techSidebar?.classList.contains("open")
+    ) {
+        return;
+    }
+
+    const clickedInsideSidebar =
+        techSidebar.contains(event.target);
+
+    const clickedMenuButton =
+        techMenuBtn?.contains(event.target);
+
+    if (
+        !clickedInsideSidebar &&
+        !clickedMenuButton
+    ) {
+        closeTechnicianMenu();
+    }
+
+});
 
 function toggleTechnicianMenu() {
 

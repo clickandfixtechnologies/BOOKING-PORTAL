@@ -792,6 +792,11 @@
     font-weight: 750;
 }
 
+.tech-detail-description {
+    box-shadow:
+        0 6px 18px rgba(37, 99, 235, 0.10),
+        0 2px 6px rgba(37, 99, 235, 0.06);
+}
 
 /* =========================================================
    CUSTOMER INFORMATION GRID
@@ -835,6 +840,8 @@
 
 .tech-detail-address,
 .tech-detail-description {
+    width: 100%;
+    max-width: 100%;
     margin: 0;
     padding: 16px 18px;
     background: rgba(248, 250, 252, 0.78);
@@ -843,10 +850,11 @@
     color: var(--tech-text);
     font-size: 13px;
     line-height: 1.65;
-}
 
-.tech-detail-description {
-    white-space: pre-wrap;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
 }
 
 
@@ -905,26 +913,42 @@
 }
 
 /* =========================================================
-   DISABLED TECHNICIAN ACTION BUTTONS
+   UPDATE JOB STATUS BUTTONS
+   ACTIVE + INACTIVE BOTH BLUE
    ========================================================= */
 
-.tech-action-button:disabled {
-    cursor: not-allowed;
+.tech-detail-actions .tech-action-button {
+    background: var(--tech-primary);
+    border-color: var(--tech-primary);
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.16);
+}
+
+.tech-detail-actions .tech-action-button i {
+    color: #ffffff;
+}
+
+.tech-detail-actions .tech-action-button:hover:not(:disabled) {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.22);
+}
+
+/* Inactive button — still blue */
+.tech-detail-actions .tech-action-button:disabled {
+    background: var(--tech-primary);
+    border-color: var(--tech-primary);
+    color: #ffffff;
     opacity: 0.45;
-    background: rgba(241, 245, 249, 0.75);
-    color: var(--tech-light-muted);
-    border-color: var(--tech-border);
+    cursor: not-allowed;
     box-shadow: none;
     transform: none;
 }
 
-.tech-action-button:disabled:hover {
-    cursor: not-allowed;
-    background: rgba(241, 245, 249, 0.75);
-    color: var(--tech-light-muted);
-    border-color: var(--tech-border);
-    box-shadow: none;
-    transform: none;
+.tech-detail-actions .tech-action-button:disabled i {
+    color: #ffffff;
 }
 
 /* =========================================================
@@ -1134,8 +1158,9 @@
     }
 
     .tech-detail-info-grid {
-        grid-template-columns: 1fr;
-    }
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
 
     .tech-detail-actions {
         flex-direction: column;
@@ -1299,38 +1324,124 @@
 
 @media (max-width: 768px) {
 
-    .tech-job-card-header {
-        padding: 15px 18px;
-        gap: 6px;
-    }
-
-    .tech-job-card-id {
-        font-size: 13px;
-    }
-
-    .tech-job-date {
-        font-size: 10.5px;
-    }
-
-}
-
-@media (max-width: 992px) {
-
-    .tech-mobile-header {
+    /* Mobile top bar */
+    .tech-topbar > div:first-child {
         display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .tech-mobile-brand {
-        display: flex;
+        flex-direction: row;
         align-items: center;
         gap: 10px;
     }
 
     .tech-mobile-menu {
         display: inline-flex;
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
     }
 
+    .tech-mobile-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .tech-mobile-brand-logo {
+        width: 32px;
+        height: 32px;
+    }
+
+    .tech-mobile-brand-title {
+        font-size: 14px;
+    }
+
+
+    /* Detail */
+    .tech-detail {
+        margin-top: 24px;
+    }
+
+    .tech-detail-header {
+        padding: 18px 20px;
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .tech-detail-title {
+        font-size: 17px;
+    }
+
+    .tech-detail-body {
+        padding: 20px;
+    }
+
+
+    /* Customer Details — 2 columns */
+    .tech-detail-info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .tech-detail-info-grid > div {
+        padding: 13px 12px;
+        min-width: 0;
+    }
+
+    .tech-detail-info-grid span {
+        font-size: 10px;
+    }
+
+    .tech-detail-info-grid strong {
+        font-size: 12px;
+        overflow-wrap: anywhere;
+    }
+
+
+    /* Problem Description */
+    .tech-detail-description {
+        width: 100%;
+        max-width: 100%;
+        text-align: left;
+        white-space: normal;
+        word-break: normal;
+        overflow-wrap: anywhere;
+
+        box-shadow:
+            0 6px 18px rgba(37, 99, 235, 0.10),
+            0 2px 6px rgba(37, 99, 235, 0.06);
+    }
+
+
+    /* Status buttons */
+    .tech-detail-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .tech-detail-actions .tech-action-button {
+        width: 100%;
+    }
+
+
+    /* Job ID */
+    .tech-job-id-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tech-job-id-row .tech-action-button {
+        width: 100%;
+    }
+
+
+    /* OTP */
+    .tech-otp-row {
+        flex-direction: column;
+    }
+
+    .tech-otp-row .tech-complete-button {
+        width: 100%;
+    }
 }

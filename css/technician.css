@@ -1445,3 +1445,66 @@
         width: 100%;
     }
 }
+
+@media (max-width: 992px) {
+
+    .tech-topbar > div:first-child {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+        margin-right: auto;
+    }
+
+    .tech-mobile-menu {
+        order: 1;
+        display: inline-flex;
+        flex: 0 0 38px;
+        width: 38px;
+        height: 38px;
+        margin: 0;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .tech-mobile-brand {
+        order: 2;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    .tech-user-area {
+        margin-left: auto;
+    }
+}
+
+.tech-edit-job-button {
+    background: var(--tech-primary-light);
+    border-color: rgba(37, 99, 235, 0.25);
+    color: var(--tech-primary);
+}
+
+.tech-edit-job-button:hover {
+    background: var(--tech-primary-soft);
+    border-color: rgba(37, 99, 235, 0.45);
+    color: var(--tech-primary);
+}
+
+
+/* Locked Job ID */
+#jobCode[readonly] {
+    background: rgba(241, 245, 249, 0.75);
+    color: var(--tech-dark);
+    cursor: not-allowed;
+}
+
+
+/* Editable after Edit Job ID */
+#jobCode:not([readonly]) {
+    background: #ffffff;
+    border-color: rgba(37, 99, 235, 0.45);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}

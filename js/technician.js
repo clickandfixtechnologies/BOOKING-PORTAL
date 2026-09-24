@@ -804,32 +804,48 @@ async function loadDetail(id){
 
                     <div class="tech-detail-section">
 
-                        <h3>
-                            Job ID
-                        </h3>
+    <h3>
+        Job ID
+    </h3>
 
-                        <div class="tech-job-id-row">
+    <div class="tech-job-id-row">
 
-                            <input
-                                id="jobCode"
-                                class="tech-input"
-                                value="${esc(a.job_code||"")}"
-                                placeholder="CFX-JOB-2026-00452"
-                            >
+        <input
+            id="jobCode"
+            class="tech-input"
+            value="${esc(a.job_code || "")}"
+            placeholder="CFX-JOB-2026-00452"
+            ${a.status !== "in_progress" || a.job_code ? "readonly" : ""}
+        >
 
-                            <button
-    id="saveJob"
-    type="button"
-    class="tech-action-button"
-    ${a.status !== "in_progress" ? "disabled" : ""}
->
-    <i class="fa-solid fa-floppy-disk"></i>
-    Save Job ID
-</button>
+        <button
+            id="saveJob"
+            type="button"
+            class="tech-action-button"
+            ${a.status !== "in_progress" || a.job_code ? "disabled" : ""}
+        >
+            <i class="fa-solid fa-floppy-disk"></i>
+            Save Job ID
+        </button>
 
-                        </div>
+        ${
+            a.status === "job_id_created" && a.job_code
+                ? `
+                    <button
+                        id="editJob"
+                        type="button"
+                        class="tech-action-button tech-edit-job-button"
+                    >
+                        <i class="fa-solid fa-pen"></i>
+                        Edit Job ID
+                    </button>
+                  `
+                : ""
+        }
 
-                    </div>
+    </div>
+
+</div>
 
 
                     ${
@@ -902,21 +918,67 @@ detail.scrollIntoView({
 
 
         const saveJobButton =
-            document.getElementById("saveJob");
+    document.getElementById("saveJob");
 
-        const jobCode =
-            document.getElementById("jobCode");
+const editJobButton =
+    document.getElementById("editJob");
+
+const jobCode =
+    document.getElementById("jobCode");
 
 
-        saveJobButton?.addEventListener(
-            "click",
-            () =>
-                status(
-                    id,
-                    "job_id_created",
-                    jobCode.value
-                )
+saveJobButton?.addEventListener(
+    "click",
+    () => {
+
+        const value =
+            jobCode?.value.trim();
+
+        if (!value) {
+
+            const message =
+                document.getElementById("techMessage");
+
+            if (message) {
+                message.textContent =
+                    "Please enter a Job ID.";
+            }
+
+            jobCode?.focus();
+
+            return;
+        }
+
+        status(
+            id,
+            "job_id_created",
+            value
         );
+
+    }
+);
+
+
+editJobButton?.addEventListener(
+    "click",
+    () => {
+
+        if (!jobCode) {
+            return;
+        }
+
+        jobCode.readOnly = false;
+
+        jobCode.focus();
+
+        jobCode.select();
+
+        if (saveJobButton) {
+            saveJobButton.disabled = false;
+        }
+
+    }
+);
 
 
         const completeButton =

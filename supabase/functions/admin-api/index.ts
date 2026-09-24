@@ -4,8 +4,32 @@ const statuses=["pending","confirmed","technician_assigned","on_the_way","in_pro
 Deno.serve(async(request)=>{
   if(request.method==="OPTIONS") return new Response("ok",{headers:corsHeaders});
   try { const {supabase,user}=await requireAdmin(request); const body=await request.json(); const output=await route(supabase,user.id,body); return corsResponse(output); }
-  catch(error) { const message=error.message === "AUTH_REQUIRED" ? "Sign in is required." : error.message === "ADMIN_REQUIRED" ? "Administrator access is required." : error.message || "Request failed."; return corsResponse({error:message}, message.includes("required") ? 401 : 400); }
-});
+  
+  catch(error) {
+
+  const message =
+    error.message === "AUTH_REQUIRED"
+      ? "Sign in is required."
+      : error.message === "ADMIN_REQUIRED"
+      ? "Administrator access is required."
+      : error.message === "ADMIN_LOOKUP_FAILED"
+      ? "Administrator verification failed."
+      : error.message === "TECHNICIAN_LOOKUP_FAILED"
+      ? "Technician verification failed."
+      : error.message || "Request failed.";
+
+  const status =
+    error.message === "AUTH_REQUIRED" ||
+    error.message === "ADMIN_REQUIRED"
+      ? 401
+      : 400;
+
+  return corsResponse(
+    { error: message },
+    status
+  );
+}
+
 async function route(db:any, userId:string, body:any) {
   switch(body.action) {
     case "dashboard": return dashboard(db);

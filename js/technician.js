@@ -1,8 +1,191 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-const c=window.CFX_CONFIG||{}, sb=c.supabaseUrl&&createClient(c.supabaseUrl,c.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}}), jobs=document.getElementById("jobs"), detail=document.getElementById("detail");let refreshInFlight;
+
+const c = window.CFX_CONFIG || {};
+
+const sb =
+    c.supabaseUrl &&
+    createClient(
+        c.supabaseUrl,
+        c.supabaseAnonKey,
+        {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: false,
+                storage: window.localStorage,
+                storageKey: "clickfix-technician-auth"
+            }
+        }
+    );
+
+const jobs = document.getElementById("jobs");
+const detail = document.getElementById("detail");
+
+let refreshInFlight = null;
+
 const esc=value=>{const e=document.createElement("div");e.textContent=value??"—";return e.innerHTML};
-async function getValidAccessToken(){const{data:{session}}=await sb.auth.getSession();if(!session)throw Error("Sign in is required.");if(!session.expires_at||session.expires_at*1000-Date.now()>60000)return session.access_token;refreshInFlight??=sb.auth.refreshSession().finally(()=>{refreshInFlight=null});const{data,error}=await refreshInFlight;if(error||!data.session)throw Error("Your session has expired. Please sign in again.");return data.session.access_token}
-async function api(action,body={}){const token=await getValidAccessToken();const r=await fetch(`${c.supabaseUrl.replace(/\/$/,"")}/functions/v1/technician-api`,{method:"POST",headers:{"Content-Type":"application/json",apikey:c.supabaseAnonKey,Authorization:`Bearer ${token}`},body:JSON.stringify({action,...body})}),data=await r.json().catch(()=>({}));if(!r.ok)throw Error(data.error||"Request failed.");return data}
+
+async function getValidAccessToken(){
+
+    if(!sb){
+        throw Error("Technician portal is not configured.");
+    }
+
+    const {
+        data: {
+            session
+        },
+        error: sessionError
+    } = await sb.auth.getSession();
+
+    if(sessionError){
+        throw Error(sessionError.message);
+    }
+
+    if(!session){
+        throw Error("Sign in is required.");
+    }
+
+    const expiresAt =
+        session.expires_at
+            ? session.expires_at * 1000
+            : 0;
+
+    const remaining =
+        expiresAt
+            ? expiresAt - Date.now()
+            : 0;
+
+    /*
+     * Session is still comfortably valid.
+     */
+    if(remaining > 120000){
+        return session.access_token;
+    }
+
+    /*
+     * Session is close to expiry.
+     * Only one refresh request should run at a time.
+     */
+    refreshInFlight ??=
+        sb.auth
+            .refreshSession()
+            .finally(() => {
+                refreshInFlight = null;
+            });
+
+    const {
+        data,
+        error
+    } = await refreshInFlight;
+
+    if(error || !data?.session){
+        throw Error(
+            "Your session has expired. Please sign in again."
+        );
+    }
+
+    return data.session.access_token;
+}
+
+async function api(action, body = {}){
+
+    async function request(token){
+
+        const response =
+            await fetch(
+                `${c.supabaseUrl.replace(/\/$/, "")}/functions/v1/technician-api`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json",
+                        apikey: c.supabaseAnonKey,
+                        Authorization: `Bearer ${token}`
+                    },
+
+                    body: JSON.stringify({
+                        action,
+                        ...body
+                    })
+                }
+            );
+
+        const data =
+            await response
+                .json()
+                .catch(() => ({}));
+
+        return {
+            response,
+            data
+        };
+    }
+
+
+    /*
+     * First request
+     */
+    let token =
+        await getValidAccessToken();
+
+    let {
+        response,
+        data
+    } = await request(token);
+
+
+    /*
+     * If the access token has expired,
+     * refresh the session once and retry.
+     */
+    if(response.status === 401){
+
+        refreshInFlight ??=
+            sb.auth
+                .refreshSession()
+                .finally(() => {
+                    refreshInFlight = null;
+                });
+
+        const {
+            data: refreshData,
+            error: refreshError
+        } = await refreshInFlight;
+
+
+        if(
+            refreshError ||
+            !refreshData?.session
+        ){
+            throw Error(
+                "Your session has expired. Please sign in again."
+            );
+        }
+
+
+        token =
+            refreshData.session.access_token;
+
+
+        ({
+            response,
+            data
+        } = await request(token));
+    }
+
+
+    if(!response.ok){
+        throw Error(
+            data?.error ||
+            "Request failed."
+        );
+    }
+
+
+    return data;
+}
+
 async function load() {
 
     try {

@@ -1545,3 +1545,117 @@
 } 
 .tech-password-wrapper .tech-password-toggle i { font-size: 14px; 
 }
+
+/* =========================================================
+   SERVICE CATEGORY ICONS
+   ========================================================= */
+
+.tech-service-value {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+/* Common service icon */
+.tech-service-value i {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+    line-height: 1;
+
+    background: var(--tech-primary-light);
+    color: var(--tech-primary);
+
+    border: 1px solid rgba(37, 99, 235, 0.12);
+
+    box-shadow:
+        0 4px 10px rgba(37, 99, 235, 0.08);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+
+/* CCTV / Camera */
+.tech-service-value .fa-video {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+}
+
+
+/* Networking / WiFi / Router */
+.tech-service-value .fa-wifi {
+    background: #ecfdf5;
+    color: #059669;
+    border-color: #a7f3d0;
+}
+
+
+/* Computer / Laptop */
+.tech-service-value .fa-laptop {
+    background: #eef2ff;
+    color: #4f46e5;
+    border-color: #c7d2fe;
+}
+
+
+/* Printer */
+.tech-service-value .fa-print {
+    background: #fff7ed;
+    color: #ea580c;
+    border-color: #fed7aa;
+}
+
+
+/* Data Recovery / Storage */
+.tech-service-value .fa-hard-drive {
+    background: #f5f3ff;
+    color: #7c3aed;
+    border-color: #ddd6fe;
+}
+
+
+/* Other Service / General Repair */
+.tech-service-value .fa-screwdriver-wrench {
+    background: #f8fafc;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+
+
+/* Icon hover */
+.tech-service-value i:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 7px 16px rgba(37, 99, 235, 0.14);
+}
+
+
+/* Mobile */
+@media (max-width: 768px) {
+
+    .tech-service-value {
+        gap: 6px;
+    }
+
+    .tech-service-value i {
+        width: 28px;
+        height: 28px;
+        flex-basis: 28px;
+        font-size: 13px;
+        border-radius: 7px;
+    }
+
+}

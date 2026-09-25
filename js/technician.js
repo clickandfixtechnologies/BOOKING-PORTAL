@@ -258,73 +258,116 @@ async function load() {
 
     <div class="tech-dashboard-welcome">
 
-        <div class="tech-work-summary">
+        <div class="tech-welcome-text">
 
-    <div class="tech-summary-intro">
+            <h1>
+                <span class="tech-welcome-hand">
+                    <i class="fa-solid fa-hand"></i>
+                </span>
 
-        <div class="tech-summary-main-icon">
-            <i class="fa-solid fa-briefcase"></i>
-        </div>
+                Hello, ${esc(technicianName)}!
+            </h1>
 
-        <div class="tech-summary-text">
-            <h2>Your Work Summary</h2>
-            <p>Quick overview of your jobs</p>
-        </div>
+            <p>
+                Here are your assigned jobs.
+            </p>
 
-    </div>
-
-
-    <div class="tech-summary-divider"></div>
-
-
-    <div class="tech-summary-stat">
-
-        <div class="tech-summary-icon tech-summary-icon-today">
-            <i class="fa-solid fa-calendar-check"></i>
-        </div>
-
-        <div class="tech-summary-stat-content">
-            <strong>${(d.today || []).length}</strong>
-            <span>Today's Jobs</span>
         </div>
 
     </div>
 
 
-    <div class="tech-summary-divider"></div>
+    <!-- Work Summary -->
 
+    <div class="tech-work-summary">
 
-    <div class="tech-summary-stat">
+        <div class="tech-summary-intro">
 
-        <div class="tech-summary-icon tech-summary-icon-upcoming">
-            <i class="fa-regular fa-calendar"></i>
+            <div class="tech-summary-icon tech-summary-icon-blue">
+                <i class="fa-solid fa-briefcase"></i>
+            </div>
+
+            <div class="tech-summary-text">
+
+                <h2>
+                    Your Work Summary
+                </h2>
+
+                <p>
+                    Quick overview of your jobs
+                </p>
+
+            </div>
+
         </div>
 
-        <div class="tech-summary-stat-content">
-            <strong>${(d.upcoming || []).length}</strong>
-            <span>Upcoming</span>
+
+        <div class="tech-summary-divider"></div>
+
+
+        <div class="tech-summary-stat">
+
+            <div class="tech-summary-stat-icon tech-summary-icon-green">
+                <i class="fa-solid fa-calendar-check"></i>
+            </div>
+
+            <div class="tech-summary-stat-content">
+
+                <strong>
+                    ${(d.today || []).length}
+                </strong>
+
+                <span>
+                    Today's Jobs
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="tech-summary-stat">
+
+            <div class="tech-summary-stat-icon tech-summary-icon-blue">
+                <i class="fa-regular fa-calendar"></i>
+            </div>
+
+            <div class="tech-summary-stat-content">
+
+                <strong>
+                    ${(d.upcoming || []).length}
+                </strong>
+
+                <span>
+                    Upcoming
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="tech-summary-stat">
+
+            <div class="tech-summary-stat-icon tech-summary-icon-purple">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div class="tech-summary-stat-content">
+
+                <strong>
+                    ${(d.completed || []).length}
+                </strong>
+
+                <span>
+                    Completed
+                </span>
+
+            </div>
+
         </div>
 
     </div>
-
-
-    <div class="tech-summary-divider"></div>
-
-
-    <div class="tech-summary-stat">
-
-        <div class="tech-summary-icon tech-summary-icon-completed">
-            <i class="fa-solid fa-circle-check"></i>
-        </div>
-
-        <div class="tech-summary-stat-content">
-            <strong>${(d.completed || []).length}</strong>
-            <span>Completed</span>
-        </div>
-
-    </div>
-
-</div>
 
 
     <!-- Today's + Upcoming -->

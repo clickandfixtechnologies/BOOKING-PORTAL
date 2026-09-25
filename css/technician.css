@@ -1538,6 +1538,90 @@ i[class*="fa-"]{
     background:#15803d;
 }
 
+/* =========================================================
+   CUSTOMER CONTACT BUTTONS
+   ========================================================= */
+
+.tech-detail-heading{
+    min-width:0;
+}
+
+
+.tech-detail-title-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+
+.tech-contact-buttons{
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+
+.tech-contact-button{
+    width:32px;
+    height:32px;
+
+    flex:0 0 32px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:8px;
+
+    text-decoration:none;
+
+    font-size:14px;
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        background .18s ease;
+}
+
+
+/* Phone */
+
+.tech-call-button{
+    background:#eff6ff;
+    color:#2563eb;
+
+    border:1px solid #bfdbfe;
+}
+
+
+.tech-call-button:hover{
+    background:#dbeafe;
+    color:#1d4ed8;
+
+    transform:translateY(-1px);
+
+    box-shadow:0 5px 12px rgba(37,99,235,.16);
+}
+
+
+/* WhatsApp */
+
+.tech-whatsapp-button{
+    background:#ecfdf5;
+    color:#16a34a;
+
+    border:1px solid #bbf7d0;
+}
+
+
+.tech-whatsapp-button:hover{
+    background:#dcfce7;
+    color:#15803d;
+
+    transform:translateY(-1px);
+
+    box-shadow:0 5px 12px rgba(22,163,74,.16);
+}
 
 /* =========================================================
    JOB ID
@@ -2129,4 +2213,16 @@ i[class*="fa-"]{
         font-size:12px;
     }
 }
+.tech-detail-title-row{
+    gap:8px;
+}
 
+
+.tech-contact-button{
+    width:30px;
+    height:30px;
+
+    flex-basis:30px;
+
+    font-size:13px;
+}

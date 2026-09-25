@@ -1093,24 +1093,44 @@ async function loadDetail(id){
             <div class="tech-detail-card">
 
                 <div class="tech-detail-header">
+    <div class="tech-detail-heading">
+        <p class="tech-detail-label">APPOINTMENT</p>
 
-                    <div>
+        <div class="tech-detail-title-row">
+            <h2 class="tech-detail-title">
+                ${esc(a.appointment_id)}
+            </h2>
 
-                        <p class="tech-detail-label">
-                            APPOINTMENT
-                        </p>
+            <div class="tech-contact-buttons">
 
-                        <h2 class="tech-detail-title">
-                            ${esc(a.appointment_id)}
-                        </h2>
+                <a
+                    class="tech-contact-button tech-call-button"
+                    href="tel:${esc(a.mobile)}"
+                    aria-label="Call customer"
+                    title="Call customer"
+                >
+                    <i class="fa-solid fa-phone"></i>
+                </a>
 
-                    </div>
+                <a
+                    class="tech-contact-button tech-whatsapp-button"
+                    href="https://wa.me/91${String(a.mobile || "").replace(/\D/g,"")}"
+                    target="_blank"
+                    rel="noopener"
+                    aria-label="WhatsApp customer"
+                    title="WhatsApp customer"
+                >
+                    <i class="fa-brands fa-whatsapp"></i>
+                </a>
 
-                    <span class="tech-status-badge tech-status-default">
-                    ${formatStatus(a.status)}
-                    </span>
+            </div>
+        </div>
+    </div>
 
-                </div>
+    <span class="tech-status-badge tech-status-default">
+        ${formatStatus(a.status)}
+    </span>
+</div>
 
 
                 <div class="tech-detail-body">

@@ -2414,7 +2414,7 @@ i[class*="fa-"]{
 
 
 /* =========================================================
-   WORK SUMMARY — MOBILE
+   WORK SUMMARY — MOBILE COMPACT
    ========================================================= */
 
 @media (max-width:768px){
@@ -2422,58 +2422,123 @@ i[class*="fa-"]{
     .tech-work-summary{
         display:grid;
 
-        grid-template-columns:1fr 1fr;
+        grid-template-columns:repeat(3, 1fr);
 
-        gap:14px;
+        gap:10px;
 
-        padding:18px;
+        padding:16px;
+
+        margin-bottom:22px;
+
+        min-height:0;
+
+        border-radius:18px;
     }
 
+
+    /* Summary heading */
 
     .tech-summary-intro{
         grid-column:1 / -1;
 
         min-width:0;
+
+        gap:14px;
+
+        margin-bottom:4px;
     }
 
+
+    .tech-summary-main-icon{
+        width:54px;
+        height:54px;
+
+        flex:0 0 54px;
+
+        border-radius:15px;
+
+        font-size:22px;
+    }
+
+
+    .tech-summary-text h2{
+        margin-bottom:3px;
+
+        font-size:20px;
+
+        line-height:1.15;
+    }
+
+
+    .tech-summary-text p{
+        font-size:13px;
+
+        line-height:1.2;
+    }
+
+
+    /* Hide desktop separators */
 
     .tech-summary-divider{
         display:none;
     }
 
 
+    /* Statistics */
+
     .tech-summary-stat{
         min-width:0;
 
-        padding:10px;
+        width:100%;
+
+        display:flex;
+
+        flex-direction:column;
+
+        align-items:center;
+
+        justify-content:center;
+
+        gap:7px;
+
+        padding:8px 4px;
+    }
+
+
+    .tech-summary-icon{
+        width:48px;
+        height:48px;
+
+        flex:0 0 48px;
+
+        border-radius:14px;
+
+        font-size:19px;
+    }
+
+
+    .tech-summary-stat-content{
+        align-items:center;
+
+        gap:2px;
     }
 
 
     .tech-summary-stat-content strong{
-        font-size:28px;
+        font-size:27px;
+
+        line-height:1;
     }
 
 
     .tech-summary-stat-content span{
-        font-size:14px;
-    }
+        font-size:13px;
 
+        line-height:1.15;
 
-    .tech-summary-main-icon{
-        width:62px;
-        height:62px;
+        text-align:center;
 
-        flex-basis:62px;
-    }
-
-
-    .tech-summary-text h2{
-        font-size:21px;
-    }
-
-
-    .tech-summary-text p{
-        font-size:14px;
+        white-space:nowrap;
     }
 
 }

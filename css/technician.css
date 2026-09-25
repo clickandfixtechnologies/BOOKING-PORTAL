@@ -332,13 +332,19 @@
     font-weight: 700;
 }
 
-.tech-dashboard-grid,
-.tech-job-grid {
+.tech-dashboard-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
     align-items: start;
     margin-bottom: 30px;
+}
+
+.tech-job-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    width: 100%;
 }
 
 .tech-panel,
@@ -388,33 +394,33 @@
 }
 
 /* 1. Today's Jobs Column (Left Column) -> Blue Tone */
-.tech-dashboard-grid > div:nth-child(1) .tech-job-card {
+.tech-dashboard-grid > section:nth-child(1) .tech-job-card {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(239, 246, 255, 0.75));
     border-left: 4px solid var(--tech-primary);
 }
 
-.tech-dashboard-grid > div:nth-child(1) .tech-job-card .tech-job-card-header,
-.tech-dashboard-grid > div:nth-child(1) .tech-job-header {
+.tech-dashboard-grid > section:nth-child(1) .tech-job-card .tech-job-card-header,
+.tech-dashboard-grid > section:nth-child(1) .tech-job-header {
     background: rgba(239, 246, 255, 0.6);
 }
 
 /* 2. Upcoming Jobs Column (Right Column) -> Soft Orange / Amber Tone */
-.tech-dashboard-grid > div:nth-child(2) .tech-job-card,
+.tech-dashboard-grid > section:nth-child(2) .tech-job-card,
 .tech-job-grid > div:nth-child(2) .tech-job-card {
     background: linear-gradient(135deg, rgba(255, 251, 235, 0.9), rgba(255, 255, 255, 0.95));
     border-color: var(--tech-warning-border);
     border-left: 4px solid var(--tech-warning);
 }
 
-.tech-dashboard-grid > div:nth-child(2) .tech-job-card:hover,
+.tech-dashboard-grid > section:nth-child(2) .tech-job-card:hover,
 .tech-job-grid > div:nth-child(2) .tech-job-card:hover {
     border-color: #f59e0b;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1), 0 4px 12px rgba(217, 119, 6, 0.1);
 }
 
-.tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-card-header,
+.tech-dashboard-grid > section:nth-child(2) .tech-job-card .tech-job-card-header,
 .tech-job-grid > div:nth-child(2) .tech-job-card .tech-job-card-header,
-.tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-header {
+.tech-dashboard-grid > section:nth-child(2) .tech-job-card .tech-job-header {
     background: rgba(254, 243, 199, 0.6);
 }
 
@@ -534,11 +540,18 @@
         display: flex;
     }
 
-    .tech-dashboard-grid,
-    .tech-job-grid {
+    @media (max-width: 992px) {
+
+    .tech-dashboard-grid {
         grid-template-columns: 1fr;
         gap: 20px;
     }
+
+    .tech-job-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
 }
 
 @media (max-width: 768px) {
@@ -573,7 +586,7 @@
    TODAY'S JOBS - FIXED SOFT BLUE
    ========================================================= */
 
-.tech-dashboard-grid > div:nth-child(1) .tech-job-card {
+.tech-dashboard-grid > section:nth-child(1) .tech-job-card {
 
     background:
         linear-gradient(
@@ -598,8 +611,8 @@
 
 /* Today's header */
 
-.tech-dashboard-grid > div:nth-child(1) .tech-job-card .tech-job-card-header,
-.tech-dashboard-grid > div:nth-child(1) .tech-job-card .tech-job-header {
+.tech-dashboard-grid > section:nth-child(1) .tech-job-card .tech-job-card-header,
+.tech-dashboard-grid > section:nth-child(1) .tech-job-card .tech-job-header {
 
     background:
         linear-gradient(
@@ -614,7 +627,7 @@
 
 /* Today's hover = slightly stronger, NOT a colour change */
 
-.tech-dashboard-grid > div:nth-child(1) .tech-job-card:hover {
+.tech-dashboard-grid > section:nth-child(1) .tech-job-card:hover {
 
     background:
         linear-gradient(
@@ -638,7 +651,7 @@
    UPCOMING JOBS - FIXED SOFT ORANGE
    ========================================================= */
 
-.tech-dashboard-grid > div:nth-child(2) .tech-job-card {
+.tech-dashboard-grid > section:nth-child(2) .tech-job-card {
 
     background:
         linear-gradient(
@@ -663,8 +676,8 @@
 
 /* Upcoming header */
 
-.tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-card-header,
-.tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-header {
+.tech-dashboard-grid > section:nth-child(2) .tech-job-card .tech-job-card-header,
+.tech-dashboard-grid > section:nth-child(2) .tech-job-card .tech-job-header {
 
     background:
         linear-gradient(
@@ -679,7 +692,7 @@
 
 /* Upcoming hover = slightly stronger, NOT a colour change */
 
-.tech-dashboard-grid > div:nth-child(2) .tech-job-card:hover {
+.tech-dashboard-grid > section:nth-child(2) .tech-job-card:hover {
 
     background:
         linear-gradient(

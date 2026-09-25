@@ -254,30 +254,68 @@ async function load() {
 
         jobs.innerHTML = `
 
-            <div class="tech-dashboard-grid">
+    <!-- Dashboard Welcome -->
 
-                ${section(
-                    "Today's Jobs",
-                    d.today || [],
-                    "today"
-                )}
+    <div class="tech-dashboard-welcome">
 
-                ${section(
-                    "Upcoming Jobs",
-                    d.upcoming || [],
-                    "upcoming"
-                )}
+        <div class="tech-welcome-text">
 
-            </div>
+            <h1>
+                <span class="tech-welcome-hand">
+                    <i class="fa-solid fa-hand"></i>
+                </span>
+
+                Hello, ${esc(technicianName)}!
+            </h1>
+
+            <p>
+                Here are your assigned jobs.
+            </p>
+
+        </div>
 
 
-            ${section(
-                "Completed Jobs",
-                d.completed || [],
-                "completed"
-            )}
+        <div class="tech-welcome-decoration">
 
-        `;
+            <span>
+                Keep Going
+            </span>
+
+            <i class="fa-solid fa-gear"></i>
+
+        </div>
+
+    </div>
+
+
+    <!-- Today's + Upcoming -->
+
+    <div class="tech-dashboard-grid">
+
+        ${section(
+            "Today's Jobs",
+            d.today || [],
+            "today"
+        )}
+
+        ${section(
+            "Upcoming Jobs",
+            d.upcoming || [],
+            "upcoming"
+        )}
+
+    </div>
+
+
+    <!-- Completed -->
+
+    ${section(
+        "Completed Jobs",
+        d.completed || [],
+        "completed"
+    )}
+
+`;
 
 
         
@@ -298,41 +336,280 @@ async function load() {
 }
 }
 
-function section(title,items){
+function getServiceIcon(category, serviceType) {
 
-    const titleIcon =
-        title === "Today's Jobs"
-            ? '<i class="fa-regular fa-calendar-days"></i>'
-            : title === "Upcoming Jobs"
-                ? '<i class="fa-solid fa-clock"></i>'
-                : '';
+    const cat = String(category || "")
+        .toLowerCase()
+        .replace(/[_-]/g, " ");
 
-    if(!items.length){
+    const type = String(serviceType || "")
+        .toLowerCase()
+        .replace(/[_-]/g, " ");
+
+    const value = `${cat} ${type}`;
+
+
+    // =====================================================
+    // CCTV Installation / Service
+    // =====================================================
+
+    if (
+        cat.includes("cctv") ||
+        cat.includes("camera") ||
+        value.includes("cctv") ||
+        value.includes("camera")
+    ) {
+        return `
+            <i class="fa-solid fa-video"></i>
+        `;
+    }
+
+
+    // =====================================================
+    // Networking / IT Support
+    // =====================================================
+
+    if (
+        cat.includes("network") ||
+        cat.includes("it support") ||
+        value.includes("network") ||
+        value.includes("wifi") ||
+        value.includes("router")
+    ) {
+        return `
+            <i class="fa-solid fa-wifi"></i>
+        `;
+    }
+
+
+    // =====================================================
+    // Data Recovery
+    // =====================================================
+
+    if (
+        cat.includes("data recovery") ||
+        value.includes("data recovery") ||
+        value.includes("hard disk") ||
+        value.includes("hard drive") ||
+        value.includes("ssd recovery")
+    ) {
+        return `
+            <i class="fa-solid fa-hard-drive"></i>
+        `;
+    }
+
+
+    // =====================================================
+    // Printer / Peripheral Service
+    // =====================================================
+
+    if (
+        cat.includes("printer") ||
+        cat.includes("peripheral") ||
+        value.includes("printer")
+    ) {
+        return `
+            <i class="fa-solid fa-print"></i>
+        `;
+    }
+
+
+    // =====================================================
+    // Computer / Laptop Service
+    // =====================================================
+
+    if (
+        cat.includes("computer") ||
+        cat.includes("laptop")
+    ) {
+
+        // Laptop Repair
+        if (
+            type.includes("laptop")
+        ) {
+            return `
+                <i class="fa-solid fa-laptop"></i>
+            `;
+        }
+
+
+        // Desktop / Computer Repair
+        if (
+            type.includes("desktop") ||
+            type.includes("computer repair")
+        ) {
+            return `
+                <i class="fa-solid fa-desktop"></i>
+            `;
+        }
+
+
+        // Windows / Software
+        if (
+            type.includes("windows") ||
+            type.includes("software")
+        ) {
+            return `
+                <i class="fa-brands fa-windows"></i>
+            `;
+        }
+
+
+        // SSD
+        if (
+            type.includes("ssd") ||
+            type.includes("storage")
+        ) {
+            return `
+                <i class="fa-solid fa-hard-drive"></i>
+            `;
+        }
+
+
+        // RAM
+        if (
+            type.includes("ram") ||
+            type.includes("memory")
+        ) {
+            return `
+                <i class="fa-solid fa-memory"></i>
+            `;
+        }
+
+
+        // Motherboard
+        if (
+            type.includes("motherboard")
+        ) {
+            return `
+                <i class="fa-solid fa-microchip"></i>
+            `;
+        }
+
+
+        // Default Computer / Laptop
+        return `
+            <i class="fa-solid fa-laptop"></i>
+        `;
+    }
+
+
+    // =====================================================
+    // Other Service
+    // =====================================================
+
+    if (
+        cat.includes("other")
+    ) {
+        return `
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+        `;
+    }
+
+
+    // =====================================================
+    // Default
+    // =====================================================
+
+    return `
+        <i class="fa-solid fa-screwdriver-wrench"></i>
+    `;
+}
+
+function section(title, items) {
+
+    const isToday =
+        title === "Today's Jobs";
+
+    const isUpcoming =
+        title === "Upcoming Jobs";
+
+    const isCompleted =
+        title === "Completed Jobs";
+
+
+    const sectionIcon =
+        isToday
+            ? `
+                <i class="fa-solid fa-calendar-days"></i>
+              `
+            : isUpcoming
+                ? `
+                    <i class="fa-solid fa-calendar-days"></i>
+                  `
+                : `
+                    <i class="fa-solid fa-circle-check"></i>
+                  `;
+
+
+    const sectionIconClass =
+        isToday
+            ? "tech-section-icon-blue"
+            : isUpcoming
+                ? "tech-section-icon-purple"
+                : "tech-section-icon-green";
+
+
+    const sectionClass =
+        isCompleted
+            ? "tech-job-section tech-completed-section"
+            : "tech-job-section tech-top-section";
+
+
+    if (!items.length) {
 
         return `
-            <section class="tech-job-section ${title === "Completed Jobs" ? "tech-completed-section" : ""}">
+            <section class="${sectionClass}">
 
-                <h2 class="tech-section-title">
-                    ${esc(title)}
-                </h2>
+                <div class="tech-section-heading">
+
+                    <div class="
+                        tech-section-icon
+                        ${sectionIconClass}
+                    ">
+                        ${sectionIcon}
+                    </div>
+
+                    <div>
+
+                        <h2 class="tech-section-title">
+                            ${esc(title)}
+                        </h2>
+
+                        <p class="tech-section-subtitle">
+                            ${
+                                isToday
+                                    ? "Jobs scheduled for today"
+                                    : isUpcoming
+                                        ? "Jobs scheduled for later"
+                                        : "Recently completed jobs"
+                            }
+                        </p>
+
+                    </div>
+
+                </div>
+
 
                 <div class="tech-empty-job">
 
-                    ${
-                        titleIcon
-                            ? `
-                                <div class="tech-empty-icon ${
-                                    title === "Today's Jobs"
-                                        ? "tech-empty-icon-blue"
-                                        : "tech-empty-icon-indigo"
-                                }">
-                                    ${titleIcon}
-                                </div>
-                              `
-                            : ""
-                    }
+                    <div class="tech-empty-icon ${
+                        isToday
+                            ? "tech-empty-icon-blue"
+                            : "tech-empty-icon-indigo"
+                    }">
 
-                    <p>No jobs scheduled for this time</p>
+                        ${sectionIcon}
+
+                    </div>
+
+                    <p>
+                        ${
+                            isCompleted
+                                ? "No completed jobs"
+                                : "No jobs scheduled for this time"
+                        }
+                    </p>
 
                 </div>
 
@@ -342,124 +619,277 @@ function section(title,items){
 
 
     return `
-        <section class="tech-job-section ${
-            title === "Completed Jobs"
-                ? "tech-completed-section"
-                : "tech-top-section"
-        }">
+        <section class="${sectionClass}">
 
-            <h2 class="tech-section-title">
-                ${esc(title)}
-            </h2>
+            <div class="tech-section-heading">
+
+                <div class="
+                    tech-section-icon
+                    ${sectionIconClass}
+                ">
+                    ${sectionIcon}
+                </div>
+
+                <div>
+
+                    <h2 class="tech-section-title">
+                        ${esc(title)}
+                    </h2>
+
+                    <p class="tech-section-subtitle">
+                        ${
+                            isToday
+                                ? "Jobs scheduled for today"
+                                : isUpcoming
+                                    ? "Jobs scheduled for later"
+                                    : "Recently completed jobs"
+                        }
+                    </p>
+
+                </div>
+
+            </div>
+
 
             <div class="${
-                title === "Completed Jobs"
+                isCompleted
                     ? "tech-completed-list"
                     : "tech-job-grid"
             }">
 
-                ${items.map(a => `
 
-                    <button
-                        type="button"
-                        class="tech-job-card"
-                        data-id="${esc(a.id)}"
-                    >
+                ${items.map(a => {
 
-                        <div class="tech-job-card-header">
-
-    <strong class="tech-job-card-id">
-        ${esc(a.appointment_id)}
-    </strong>
-
-    <span class="tech-job-date">
-        <i class="fa-regular fa-calendar"></i>
-        ${formatDate(a.appointment_date)}
-        <span class="tech-job-time-separator">•</span>
-        ${formatTime(a.appointment_time)}
-    </span>
-
-</div>
+                    const serviceIcon =
+                        getServiceIcon(
+                            a.service_category,
+                            a.service_type
+                        );
 
 
-                        <div class="tech-job-card-body">
+                    const statusClass =
+                        isToday
+                            ? "tech-job-status-today"
+                            : isUpcoming
+                                ? "tech-job-status-upcoming"
+                                : "tech-job-status-completed";
 
-                            <div class="tech-job-customer">
 
-                                <p>
-                                    <strong>Client:</strong>
-                                    <span>
-                                        ${esc(a.customer_name)}
-                                    </span>
-                                </p>
+                    const statusIcon =
+                        isToday
+                            ? `
+                                <i class="fa-solid fa-circle"></i>
+                              `
+                            : isUpcoming
+                                ? `
+                                    <i class="fa-regular fa-clock"></i>
+                                  `
+                                : `
+                                    <i class="fa-solid fa-circle-check"></i>
+                                  `;
 
-                                <p>
-                                    <strong>Phone:</strong>
 
-                                    <span>
-                                        <i class="fa-solid fa-phone"></i>
-                                        ${esc(a.mobile)}
-                                    </span>
-                                </p>
+                    const statusText =
+                        isToday
+                            ? "Today's Job"
+                            : isUpcoming
+                                ? "Upcoming"
+                                : "Completed";
+
+
+                    return `
+
+                        <button
+                            type="button"
+                            class="tech-job-card"
+                            data-id="${esc(a.id)}"
+                        >
+
+
+                            <!-- Appointment Header -->
+
+                            <div class="tech-job-card-header">
+
+                                <strong class="tech-job-card-id">
+                                    ${esc(a.appointment_id)}
+                                </strong>
+
+
+                                <span class="
+                                    tech-job-status
+                                    ${statusClass}
+                                ">
+                                    ${statusIcon}
+                                    ${statusText}
+                                </span>
 
                             </div>
 
 
-                            <div class="tech-job-divider"></div>
+                            <!-- Card Divider -->
+
+                            <div class="tech-card-divider"></div>
 
 
-                            <div class="tech-service-details">
+                            <!-- Main Card Content -->
 
-                                <p class="tech-service-label">
-                                    SERVICE DETAILS
-                                </p>
-
-                                <p class="tech-service-value">
-                                    ${formatServiceType(a.service_category)}
-
-                                    <span>/</span>
-
-                                    ${formatServiceType(a.service_type)}
-                                </p>
-
-                            </div>
+                            <div class="tech-job-card-main">
 
 
-                            <div class="tech-job-footer">
+                                <!-- Service Icon -->
 
-                                <span class="tech-status-badge ${
-                                    a.status === "completed"
-                                        ? "tech-status-completed"
-                                        : "tech-status-default"
-                                }">
-
+                                <div class="
+                                    tech-service-icon
                                     ${
-                                        a.status === "completed"
-                                            ? '<i class="fa-solid fa-circle-check"></i> COMPLETED'
-                                            : formatStatus(a.status)
+                                        isUpcoming
+                                            ? "tech-service-icon-purple"
+                                            : ""
                                     }
+                                ">
+                                    ${serviceIcon}
+                                </div>
+
+
+                                <!-- Customer Information -->
+
+                                <div class="tech-job-information">
+
+
+                                    <h3 class="tech-job-service-title">
+
+                                        ${formatServiceType(
+                                            a.service_category
+                                        )}
+
+                                        <span>/</span>
+
+                                        ${formatServiceType(
+                                            a.service_type
+                                        )}
+
+                                    </h3>
+
+
+                                    <div class="tech-job-info-row">
+
+                                        <i class="fa-regular fa-user"></i>
+
+                                        <span class="tech-info-label">
+                                            Client
+                                        </span>
+
+                                        <strong>
+                                            ${esc(a.customer_name)}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="tech-job-info-row">
+
+                                        <i class="fa-solid fa-phone"></i>
+
+                                        <span class="tech-info-label">
+                                            Phone
+                                        </span>
+
+                                        <strong>
+                                            ${esc(a.mobile)}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="tech-job-info-row">
+
+                                        <i class="fa-solid fa-screwdriver-wrench"></i>
+
+                                        <span class="tech-info-label">
+                                            Service Details
+                                        </span>
+
+                                        <strong>
+                                            ${formatServiceType(
+                                                a.service_category
+                                            )}
+
+                                            /
+
+                                            ${formatServiceType(
+                                                a.service_type
+                                            )}
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Date / Time -->
+
+                                <div class="tech-job-date-box">
+
+                                    <i class="
+                                        fa-regular
+                                        fa-calendar-days
+                                    "></i>
+
+                                    <div>
+
+                                        <strong>
+                                            ${formatDate(
+                                                a.appointment_date
+                                            )}
+                                        </strong>
+
+                                        <span>
+                                            ${formatTime(
+                                                a.appointment_time
+                                            )}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Card Footer -->
+
+                            <div class="tech-job-card-footer">
+
+
+                                <span class="tech-view-details">
+
+                                    <i class="
+                                        fa-solid
+                                        fa-check
+                                    "></i>
+
+                                    View Details
 
                                 </span>
 
 
-                                ${
-                                    a.status === "completed"
-                                        ? `
-                                            <span class="tech-feedback-link">
-                                                <i class="fa-regular fa-comment-dots"></i>
-                                                Feedback/Notes
-                                            </span>
-                                          `
-                                        : ""
-                                }
+                                <span class="tech-card-arrow">
+
+                                    <i class="
+                                        fa-solid
+                                        fa-chevron-right
+                                    "></i>
+
+                                </span>
 
                             </div>
 
-                        </div>
 
-                    </button>
+                        </button>
 
-                `).join("")}
+                    `;
+
+                }).join("")}
+
 
             </div>
 

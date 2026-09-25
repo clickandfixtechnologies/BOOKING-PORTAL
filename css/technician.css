@@ -332,19 +332,13 @@
     font-weight: 700;
 }
 
-.tech-dashboard-grid {
+.tech-dashboard-grid,
+.tech-job-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
     align-items: start;
     margin-bottom: 30px;
-}
-
-.tech-job-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-    width: 100%;
 }
 
 .tech-panel,
@@ -394,33 +388,33 @@
 }
 
 /* 1. Today's Jobs Column (Left Column) -> Blue Tone */
-.tech-dashboard-grid > section:nth-child(1) .tech-job-card {
+.tech-dashboard-grid > div:nth-child(1) .tech-job-card {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(239, 246, 255, 0.75));
     border-left: 4px solid var(--tech-primary);
 }
 
-.tech-dashboard-grid > section:nth-child(1) .tech-job-card .tech-job-card-header,
-.tech-dashboard-grid > section:nth-child(1) .tech-job-header {
+.tech-dashboard-grid > div:nth-child(1) .tech-job-card .tech-job-card-header,
+.tech-dashboard-grid > div:nth-child(1) .tech-job-header {
     background: rgba(239, 246, 255, 0.6);
 }
 
 /* 2. Upcoming Jobs Column (Right Column) -> Soft Orange / Amber Tone */
-.tech-dashboard-grid > section:nth-child(2) .tech-job-card,
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card,
 .tech-job-grid > div:nth-child(2) .tech-job-card {
     background: linear-gradient(135deg, rgba(255, 251, 235, 0.9), rgba(255, 255, 255, 0.95));
     border-color: var(--tech-warning-border);
     border-left: 4px solid var(--tech-warning);
 }
 
-.tech-dashboard-grid > section:nth-child(2) .tech-job-card:hover,
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card:hover,
 .tech-job-grid > div:nth-child(2) .tech-job-card:hover {
     border-color: #f59e0b;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1), 0 4px 12px rgba(217, 119, 6, 0.1);
 }
 
-.tech-dashboard-grid > section:nth-child(2) .tech-job-card .tech-job-card-header,
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-card-header,
 .tech-job-grid > div:nth-child(2) .tech-job-card .tech-job-card-header,
-.tech-dashboard-grid > section:nth-child(2) .tech-job-card .tech-job-header {
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-header {
     background: rgba(254, 243, 199, 0.6);
 }
 
@@ -540,18 +534,11 @@
         display: flex;
     }
 
-    @media (max-width: 992px) {
-
-    .tech-dashboard-grid {
+    .tech-dashboard-grid,
+    .tech-job-grid {
         grid-template-columns: 1fr;
         gap: 20px;
     }
-
-    .tech-job-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-}
 }
 
 @media (max-width: 768px) {
@@ -586,7 +573,7 @@
    TODAY'S JOBS - FIXED SOFT BLUE
    ========================================================= */
 
-.tech-dashboard-grid > section:nth-child(1) .tech-job-card {
+.tech-dashboard-grid > div:nth-child(1) .tech-job-card {
 
     background:
         linear-gradient(
@@ -611,8 +598,8 @@
 
 /* Today's header */
 
-.tech-dashboard-grid > section:nth-child(1) .tech-job-card .tech-job-card-header,
-.tech-dashboard-grid > section:nth-child(1) .tech-job-card .tech-job-header {
+.tech-dashboard-grid > div:nth-child(1) .tech-job-card .tech-job-card-header,
+.tech-dashboard-grid > div:nth-child(1) .tech-job-card .tech-job-header {
 
     background:
         linear-gradient(
@@ -627,7 +614,7 @@
 
 /* Today's hover = slightly stronger, NOT a colour change */
 
-.tech-dashboard-grid > section:nth-child(1) .tech-job-card:hover {
+.tech-dashboard-grid > div:nth-child(1) .tech-job-card:hover {
 
     background:
         linear-gradient(
@@ -651,7 +638,7 @@
    UPCOMING JOBS - FIXED SOFT ORANGE
    ========================================================= */
 
-.tech-dashboard-grid > section:nth-child(2) .tech-job-card {
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card {
 
     background:
         linear-gradient(
@@ -676,8 +663,8 @@
 
 /* Upcoming header */
 
-.tech-dashboard-grid > section:nth-child(2) .tech-job-card .tech-job-card-header,
-.tech-dashboard-grid > section:nth-child(2) .tech-job-card .tech-job-header {
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-card-header,
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card .tech-job-header {
 
     background:
         linear-gradient(
@@ -692,7 +679,7 @@
 
 /* Upcoming hover = slightly stronger, NOT a colour change */
 
-.tech-dashboard-grid > section:nth-child(2) .tech-job-card:hover {
+.tech-dashboard-grid > div:nth-child(2) .tech-job-card:hover {
 
     background:
         linear-gradient(
@@ -1557,118 +1544,4 @@
 .tech-password-wrapper .tech-password-toggle:hover { color: #2563eb; background: #f8fafc; 
 } 
 .tech-password-wrapper .tech-password-toggle i { font-size: 14px; 
-}
-
-/* =========================================================
-   SERVICE CATEGORY ICONS
-   ========================================================= */
-
-.tech-service-value {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 7px;
-}
-
-/* Common service icon */
-.tech-service-value i {
-    width: 30px;
-    height: 30px;
-    flex: 0 0 30px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 8px;
-
-    font-size: 14px;
-    line-height: 1;
-
-    background: var(--tech-primary-light);
-    color: var(--tech-primary);
-
-    border: 1px solid rgba(37, 99, 235, 0.12);
-
-    box-shadow:
-        0 4px 10px rgba(37, 99, 235, 0.08);
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
-}
-
-
-/* CCTV / Camera */
-.tech-service-value .fa-video {
-    background: #eff6ff;
-    color: #2563eb;
-    border-color: #bfdbfe;
-}
-
-
-/* Networking / WiFi / Router */
-.tech-service-value .fa-wifi {
-    background: #ecfdf5;
-    color: #059669;
-    border-color: #a7f3d0;
-}
-
-
-/* Computer / Laptop */
-.tech-service-value .fa-laptop {
-    background: #eef2ff;
-    color: #4f46e5;
-    border-color: #c7d2fe;
-}
-
-
-/* Printer */
-.tech-service-value .fa-print {
-    background: #fff7ed;
-    color: #ea580c;
-    border-color: #fed7aa;
-}
-
-
-/* Data Recovery / Storage */
-.tech-service-value .fa-hard-drive {
-    background: #f5f3ff;
-    color: #7c3aed;
-    border-color: #ddd6fe;
-}
-
-
-/* Other Service / General Repair */
-.tech-service-value .fa-screwdriver-wrench {
-    background: #f8fafc;
-    color: #475569;
-    border-color: #cbd5e1;
-}
-
-
-/* Icon hover */
-.tech-service-value i:hover {
-    transform: translateY(-2px);
-    box-shadow:
-        0 7px 16px rgba(37, 99, 235, 0.14);
-}
-
-
-/* Mobile */
-@media (max-width: 768px) {
-
-    .tech-service-value {
-        gap: 6px;
-    }
-
-    .tech-service-value i {
-        width: 28px;
-        height: 28px;
-        flex-basis: 28px;
-        font-size: 13px;
-        border-radius: 7px;
-    }
-
 }

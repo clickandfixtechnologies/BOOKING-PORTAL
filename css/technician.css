@@ -2228,7 +2228,7 @@ i[class*="fa-"]{
 }
 
 /* =========================================================
-   WORK SUMMARY
+   WORK SUMMARY — DESKTOP
    ========================================================= */
 
 .tech-work-summary{
@@ -2237,20 +2237,8 @@ i[class*="fa-"]{
     min-width:0;
     min-height:96px;
 
-    display:grid;
-
-    grid-template-columns:
-        minmax(300px, 1.35fr)
-        1px
-        minmax(140px, .8fr)
-        1px
-        minmax(140px, .8fr)
-        1px
-        minmax(140px, .8fr);
-
+    display:flex;
     align-items:center;
-
-    gap:0;
 
     padding:14px 20px;
     margin:0 0 22px;
@@ -2268,6 +2256,8 @@ i[class*="fa-"]{
     -webkit-backdrop-filter:blur(10px);
 
     overflow:hidden;
+
+    gap:0;
 }
 
 
@@ -2277,6 +2267,8 @@ i[class*="fa-"]{
 
 .tech-summary-intro{
     min-width:0;
+
+    flex:1.35 1 320px;
 
     display:flex;
     align-items:center;
@@ -2303,11 +2295,16 @@ i[class*="fa-"]{
         145deg,
         #dbeafe,
         #bfdbfe
-    );
+    ) !important;
 
-    color:#2563eb;
+    color:#2563eb !important;
 
     font-size:25px;
+}
+
+
+.tech-summary-main-icon i{
+    color:#2563eb !important;
 }
 
 
@@ -2350,20 +2347,11 @@ i[class*="fa-"]{
     width:1px;
     height:58px;
 
-    background:rgba(37,99,235,.16);
+    flex:0 0 1px;
 
     display:block;
-}
 
-
-/*
-   The divider elements are placed between
-   the intro and statistics.
-
-   Keep them visually lightweight.
-*/
-.tech-summary-divider + .tech-summary-stat{
-    margin-left:-1px;
+    background:rgba(37,99,235,.16);
 }
 
 
@@ -2374,12 +2362,16 @@ i[class*="fa-"]{
 .tech-summary-stat{
     min-width:0;
 
+    flex:1 1 0;
+
     display:flex;
     align-items:center;
 
     gap:12px;
 
-    padding:0 16px;
+    padding:0 18px;
+
+    box-sizing:border-box;
 }
 
 
@@ -2400,24 +2392,36 @@ i[class*="fa-"]{
 
 
 /* =========================================================
-   STAT COLORS
+   STAT ICON COLORS
    ========================================================= */
 
 .tech-summary-icon-today{
-    background:#dcfce7;
-    color:#16a34a;
+    background:#dcfce7 !important;
+    color:#16a34a !important;
+}
+
+.tech-summary-icon-today i{
+    color:#16a34a !important;
 }
 
 
 .tech-summary-icon-upcoming{
-    background:#dbeafe;
-    color:#2563eb;
+    background:#dbeafe !important;
+    color:#2563eb !important;
+}
+
+.tech-summary-icon-upcoming i{
+    color:#2563eb !important;
 }
 
 
 .tech-summary-icon-completed{
-    background:#ede9fe;
-    color:#7c3aed;
+    background:#ede9fe !important;
+    color:#7c3aed !important;
+}
+
+.tech-summary-icon-completed i{
+    color:#7c3aed !important;
 }
 
 
@@ -2478,7 +2482,7 @@ i[class*="fa-"]{
 
 
 /* =========================================================
-   DESKTOP WIDTH SAFETY
+   DESKTOP SAFETY
    ========================================================= */
 
 .tech-main,
@@ -2500,31 +2504,28 @@ i[class*="fa-"]{
 @media (max-width:1100px){
 
     .tech-work-summary{
-        grid-template-columns:
-            minmax(250px,1.2fr)
-            minmax(130px,1fr)
-            minmax(130px,1fr)
-            minmax(130px,1fr);
-
-        padding:12px 16px;
+        padding:12px 14px;
     }
 
 
     .tech-summary-intro{
+        flex:1.15 1 270px;
+
         gap:12px;
-        padding-right:12px;
+
+        padding-right:14px;
     }
 
 
     .tech-summary-main-icon{
-        width:56px;
-        height:56px;
+        width:54px;
+        height:54px;
 
-        flex-basis:56px;
+        flex-basis:54px;
 
         border-radius:15px;
 
-        font-size:23px;
+        font-size:22px;
     }
 
 
@@ -2539,18 +2540,18 @@ i[class*="fa-"]{
 
 
     .tech-summary-stat{
-        gap:9px;
+        gap:8px;
         padding:0 10px;
     }
 
 
     .tech-summary-icon{
-        width:48px;
-        height:48px;
+        width:46px;
+        height:46px;
 
-        flex-basis:48px;
+        flex-basis:46px;
 
-        border-radius:14px;
+        border-radius:13px;
 
         font-size:18px;
     }
@@ -2562,13 +2563,18 @@ i[class*="fa-"]{
 
 
     .tech-summary-stat-content span{
-        font-size:13px;
+        font-size:12px;
+    }
+
+
+    .tech-summary-divider{
+        height:52px;
     }
 }
 
 
 /* =========================================================
-   MOBILE — COMPACT
+   MOBILE
    ========================================================= */
 
 @media (max-width:768px){
@@ -2579,7 +2585,7 @@ i[class*="fa-"]{
         display:grid;
 
         grid-template-columns:
-            repeat(3, minmax(0,1fr));
+            repeat(3,minmax(0,1fr));
 
         grid-template-rows:auto auto;
 
@@ -2596,14 +2602,16 @@ i[class*="fa-"]{
     }
 
 
-    /* -----------------------------------------
-       Intro
-       ----------------------------------------- */
+    /* -----------------------------------------------------
+       INTRO
+       ----------------------------------------------------- */
 
     .tech-summary-intro{
         grid-column:1 / -1;
 
         min-width:0;
+
+        width:100%;
 
         display:flex;
         align-items:center;
@@ -2649,18 +2657,18 @@ i[class*="fa-"]{
     }
 
 
-    /* -----------------------------------------
-       Hide desktop dividers
-       ----------------------------------------- */
+    /* -----------------------------------------------------
+       HIDE DESKTOP DIVIDERS
+       ----------------------------------------------------- */
 
     .tech-summary-divider{
         display:none;
     }
 
 
-    /* -----------------------------------------
-       Statistics
-       ----------------------------------------- */
+    /* -----------------------------------------------------
+       MOBILE STAT
+       ----------------------------------------------------- */
 
     .tech-summary-stat{
         min-width:0;
@@ -2668,13 +2676,14 @@ i[class*="fa-"]{
         width:100%;
 
         display:flex;
-        flex-direction:row;
         align-items:center;
         justify-content:center;
 
         gap:7px;
 
         padding:3px 2px;
+
+        flex:none;
     }
 
 
@@ -2780,56 +2789,4 @@ i[class*="fa-"]{
     .tech-summary-stat-content span{
         font-size:10px;
     }
-}
-
-/* =========================================================
-   WORK SUMMARY — ICON COLORS
-   ========================================================= */
-
-.tech-summary-main-icon{
-    background:linear-gradient(
-        145deg,
-        #dbeafe,
-        #bfdbfe
-    ) !important;
-
-    color:#2563eb !important;
-}
-
-
-.tech-summary-icon-today{
-    background:#dcfce7 !important;
-    color:#16a34a !important;
-}
-
-
-.tech-summary-icon-upcoming{
-    background:#dbeafe !important;
-    color:#2563eb !important;
-}
-
-
-.tech-summary-icon-completed{
-    background:#ede9fe !important;
-    color:#7c3aed !important;
-}
-
-
-.tech-summary-icon-today i{
-    color:#16a34a !important;
-}
-
-
-.tech-summary-icon-upcoming i{
-    color:#2563eb !important;
-}
-
-
-.tech-summary-icon-completed i{
-    color:#7c3aed !important;
-}
-
-
-.tech-summary-main-icon i{
-    color:#2563eb !important;
 }

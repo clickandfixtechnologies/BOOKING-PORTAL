@@ -2238,11 +2238,15 @@ i[class*="fa-"]{
     min-height:96px;
 
     display:grid;
+
     grid-template-columns:
         minmax(300px, 1.35fr)
-        minmax(150px, .8fr)
-        minmax(150px, .8fr)
-        minmax(150px, .8fr);
+        1px
+        minmax(140px, .8fr)
+        1px
+        minmax(140px, .8fr)
+        1px
+        minmax(140px, .8fr);
 
     align-items:center;
 
@@ -2346,9 +2350,9 @@ i[class*="fa-"]{
     width:1px;
     height:58px;
 
-    justify-self:start;
-
     background:rgba(37,99,235,.16);
+
+    display:block;
 }
 
 
@@ -2776,4 +2780,56 @@ i[class*="fa-"]{
     .tech-summary-stat-content span{
         font-size:10px;
     }
+}
+
+/* =========================================================
+   WORK SUMMARY — ICON COLORS
+   ========================================================= */
+
+.tech-summary-main-icon{
+    background:linear-gradient(
+        145deg,
+        #dbeafe,
+        #bfdbfe
+    ) !important;
+
+    color:#2563eb !important;
+}
+
+
+.tech-summary-icon-today{
+    background:#dcfce7 !important;
+    color:#16a34a !important;
+}
+
+
+.tech-summary-icon-upcoming{
+    background:#dbeafe !important;
+    color:#2563eb !important;
+}
+
+
+.tech-summary-icon-completed{
+    background:#ede9fe !important;
+    color:#7c3aed !important;
+}
+
+
+.tech-summary-icon-today i{
+    color:#16a34a !important;
+}
+
+
+.tech-summary-icon-upcoming i{
+    color:#2563eb !important;
+}
+
+
+.tech-summary-icon-completed i{
+    color:#7c3aed !important;
+}
+
+
+.tech-summary-main-icon i{
+    color:#2563eb !important;
 }

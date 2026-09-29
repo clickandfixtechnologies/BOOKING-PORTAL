@@ -3616,7 +3616,7 @@ if (techUserName) {
 
             const profileNav =
                 document.querySelector(
-                    '[data-section="profile"]'
+                    '[data-nav="profile"]'
                 );
 
             if (profileNav) {
@@ -3639,7 +3639,7 @@ if (techUserName) {
 
                 const profileNav =
                     document.querySelector(
-                        '[data-section="profile"]'
+                        '[data-nav="profile"]'
                     );
 
                 if (profileNav) {

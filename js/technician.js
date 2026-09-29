@@ -1474,6 +1474,909 @@ async function loadProfile() {
     }
 }
 
+async function openTechnicianPhotoCropper(file) {
+
+    return new Promise((resolve, reject) => {
+
+        const objectUrl = URL.createObjectURL(file);
+
+        const modal = document.createElement("div");
+
+        modal.className = "tech-photo-crop-modal";
+
+        modal.innerHTML = `
+            <div class="tech-photo-crop-backdrop"></div>
+
+            <div class="tech-photo-crop-dialog">
+
+                <div class="tech-photo-crop-header">
+
+                    <div>
+                        <div class="tech-photo-crop-title">
+                            Adjust Profile Photo
+                        </div>
+
+                        <div class="tech-photo-crop-subtitle">
+                            Move and zoom the image to fit the square
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="tech-photo-crop-close"
+                        id="techPhotoCropClose"
+                        aria-label="Close"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <div class="tech-photo-crop-stage">
+
+                    <div class="tech-photo-crop-frame">
+
+                        <canvas
+                            id="technicianPhotoCropCanvas"
+                            width="640"
+                            height="640"
+                        ></canvas>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tech-photo-crop-controls">
+
+                    <label
+                        for="technicianPhotoZoom"
+                        class="tech-photo-crop-zoom-label"
+                    >
+                        Zoom
+                    </label>
+
+                    <input
+                        type="range"
+                        id="technicianPhotoZoom"
+                        min="1"
+                        max="3"
+                        step="0.01"
+                        value="1"
+                    >
+
+                </div>
+
+
+                <div class="tech-photo-crop-actions">
+
+                    <button
+                        type="button"
+                        class="tech-photo-crop-cancel"
+                        id="techPhotoCropCancel"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="button"
+                        class="tech-photo-crop-confirm"
+                        id="techPhotoCropConfirm"
+                    >
+                        Use This Photo
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const canvas =
+            modal.querySelector(
+                "#technicianPhotoCropCanvas"
+            );
+
+        const ctx =
+            canvas.getContext("2d");
+
+        const zoomInput =
+            modal.querySelector(
+                "#technicianPhotoZoom"
+            );
+
+        const closeButton =
+            modal.querySelector(
+                "#techPhotoCropClose"
+            );
+
+        const cancelButton =
+            modal.querySelector(
+                "#techPhotoCropCancel"
+            );
+
+        const confirmButton =
+            modal.querySelector(
+                "#techPhotoCropConfirm"
+            );
+
+        const backdrop =
+            modal.querySelector(
+                ".tech-photo-crop-backdrop"
+            );
+
+
+        const image =
+            new Image();
+
+        image.onload = () => {
+
+            initializeCropper();
+
+        };
+
+        image.onerror = () => {
+
+            cleanup();
+
+            reject(
+                new Error(
+                    "The selected image could not be loaded."
+                )
+            );
+
+        };
+
+        image.src = objectUrl;
+
+
+        let scale = 1;
+
+        let minScale = 1;
+
+        let offsetX = 0;
+
+        let offsetY = 0;
+
+        let dragging = false;
+
+        let startPointerX = 0;
+
+        let startPointerY = 0;
+
+        let startOffsetX = 0;
+
+        let startOffsetY = 0;
+
+
+        function initializeCropper() {
+
+            const imageAspect =
+                image.width / image.height;
+
+            if (imageAspect > 1) {
+
+                minScale =
+                    canvas.height / image.height;
+
+            } else {
+
+                minScale =
+                    canvas.width / image.width;
+
+            }
+
+            scale = minScale;
+
+            zoomInput.value = "1";
+
+            offsetX =
+                (canvas.width -
+                    image.width * scale) / 2;
+
+            offsetY =
+                (canvas.height -
+                    image.height * scale) / 2;
+
+            draw();
+
+            requestAnimationFrame(() => {
+
+                modal.classList.add(
+                    "is-visible"
+                );
+
+            });
+
+        }
+
+
+        function draw() {
+
+            ctx.clearRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            ctx.fillStyle = "#111";
+
+            ctx.fillRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+
+            const drawWidth =
+                image.width * scale;
+
+            const drawHeight =
+                image.height * scale;
+
+
+            ctx.drawImage(
+                image,
+                offsetX,
+                offsetY,
+                drawWidth,
+                drawHeight
+            );
+
+
+            /*
+             * Square crop boundary.
+             * Canvas itself is already 1:1,
+             * so the whole canvas is the crop area.
+             */
+
+            ctx.save();
+
+            ctx.strokeStyle =
+                "rgba(255,255,255,0.85)";
+
+            ctx.lineWidth = 4;
+
+            ctx.strokeRect(
+                2,
+                2,
+                canvas.width - 4,
+                canvas.height - 4
+            );
+
+            ctx.restore();
+
+        }
+
+
+        function updateZoom(newZoom) {
+
+            const oldScale = scale;
+
+            const zoomRatio =
+                Number(newZoom);
+
+            scale =
+                minScale *
+                zoomRatio;
+
+
+            /*
+             * Keep image centered while
+             * changing zoom.
+             */
+
+            const centerX =
+                canvas.width / 2;
+
+            const centerY =
+                canvas.height / 2;
+
+
+            const imagePointX =
+                (centerX - offsetX) /
+                oldScale;
+
+            const imagePointY =
+                (centerY - offsetY) /
+                oldScale;
+
+
+            offsetX =
+                centerX -
+                imagePointX * scale;
+
+            offsetY =
+                centerY -
+                imagePointY * scale;
+
+
+            constrainImage();
+
+            draw();
+
+        }
+
+
+        function constrainImage() {
+
+            const width =
+                image.width * scale;
+
+            const height =
+                image.height * scale;
+
+
+            /*
+             * Image must always cover
+             * the complete square.
+             */
+
+            if (width <= canvas.width) {
+
+                offsetX =
+                    (canvas.width - width) / 2;
+
+            } else {
+
+                const minX =
+                    canvas.width - width;
+
+                const maxX = 0;
+
+                offsetX =
+                    Math.min(
+                        maxX,
+                        Math.max(
+                            minX,
+                            offsetX
+                        )
+                    );
+
+            }
+
+
+            if (height <= canvas.height) {
+
+                offsetY =
+                    (canvas.height - height) / 2;
+
+            } else {
+
+                const minY =
+                    canvas.height - height;
+
+                const maxY = 0;
+
+                offsetY =
+                    Math.min(
+                        maxY,
+                        Math.max(
+                            minY,
+                            offsetY
+                        )
+                    );
+
+            }
+
+        }
+
+
+        function pointerDown(event) {
+
+            dragging = true;
+
+            const point =
+                getPointerPosition(event);
+
+            startPointerX =
+                point.x;
+
+            startPointerY =
+                point.y;
+
+            startOffsetX =
+                offsetX;
+
+            startOffsetY =
+                offsetY;
+
+
+            canvas.setPointerCapture(
+                event.pointerId
+            );
+
+        }
+
+
+        function pointerMove(event) {
+
+            if (!dragging) {
+
+                return;
+
+            }
+
+
+            const point =
+                getPointerPosition(event);
+
+
+            offsetX =
+                startOffsetX +
+                (
+                    point.x -
+                    startPointerX
+                );
+
+
+            offsetY =
+                startOffsetY +
+                (
+                    point.y -
+                    startPointerY
+                );
+
+
+            constrainImage();
+
+            draw();
+
+        }
+
+
+        function pointerUp(event) {
+
+            dragging = false;
+
+            try {
+
+                canvas.releasePointerCapture(
+                    event.pointerId
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        function getPointerPosition(event) {
+
+            const rect =
+                canvas.getBoundingClientRect();
+
+            const scaleX =
+                canvas.width /
+                rect.width;
+
+            const scaleY =
+                canvas.height /
+                rect.height;
+
+
+            return {
+
+                x:
+                    (
+                        event.clientX -
+                        rect.left
+                    ) * scaleX,
+
+                y:
+                    (
+                        event.clientY -
+                        rect.top
+                    ) * scaleY
+
+            };
+
+        }
+
+
+        function cleanup() {
+
+            URL.revokeObjectURL(
+                objectUrl
+            );
+
+            modal.remove();
+
+        }
+
+
+        function closeCropper() {
+
+            cleanup();
+
+            resolve(null);
+
+        }
+
+
+        zoomInput.addEventListener(
+            "input",
+            () => {
+
+                updateZoom(
+                    zoomInput.value
+                );
+
+            }
+        );
+
+
+        canvas.addEventListener(
+            "pointerdown",
+            pointerDown
+        );
+
+
+        canvas.addEventListener(
+            "pointermove",
+            pointerMove
+        );
+
+
+        canvas.addEventListener(
+            "pointerup",
+            pointerUp
+        );
+
+
+        canvas.addEventListener(
+            "pointercancel",
+            pointerUp
+        );
+
+
+        closeButton.addEventListener(
+            "click",
+            closeCropper
+        );
+
+
+        cancelButton.addEventListener(
+            "click",
+            closeCropper
+        );
+
+
+        backdrop.addEventListener(
+            "click",
+            closeCropper
+        );
+
+
+        confirmButton.addEventListener(
+            "click",
+            async () => {
+
+                try {
+
+                    confirmButton.disabled =
+                        true;
+
+                    confirmButton.textContent =
+                        "Preparing...";
+
+
+                    const blob =
+                        await createTechnicianWebP(
+                            canvas,
+                            0.82
+                        );
+
+
+                    cleanup();
+
+
+                    await uploadTechnicianProfilePhoto(
+                        blob
+                    );
+
+
+                    resolve(true);
+
+                } catch (error) {
+
+                    console.error(
+                        "Profile photo crop/upload failed:",
+                        error
+                    );
+
+
+                    cleanup();
+
+                    reject(error);
+
+                }
+
+            }
+        );
+
+    });
+
+}
+
+async function createTechnicianWebP(
+    canvas,
+    quality = 0.82
+) {
+
+    return new Promise((resolve, reject) => {
+
+        canvas.toBlob(
+            (blob) => {
+
+                if (!blob) {
+
+                    reject(
+                        new Error(
+                            "Could not create WebP image."
+                        )
+                    );
+
+                    return;
+
+                }
+
+
+                resolve(blob);
+
+            },
+            "image/webp",
+            quality
+        );
+
+    });
+
+}
+
+
+async function uploadTechnicianProfilePhoto(
+    blob
+) {
+
+    if (!(blob instanceof Blob)) {
+
+        throw new Error(
+            "Invalid profile photo."
+        );
+
+    }
+
+
+    if (blob.size <= 0) {
+
+        throw new Error(
+            "The generated image is empty."
+        );
+
+    }
+
+
+    const maxSize =
+        5 * 1024 * 1024;
+
+
+    if (blob.size > maxSize) {
+
+        throw new Error(
+            "The profile photo is larger than 5 MB."
+        );
+
+    }
+
+
+    const token =
+        await getValidAccessToken();
+
+
+    const formData =
+        new FormData();
+
+
+    formData.append(
+        "action",
+        "upload"
+    );
+
+
+    formData.append(
+        "file",
+        blob,
+        "profile.webp"
+    );
+
+
+    showTechnicianPhotoUploadState(
+        true
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${c.supabaseUrl.replace(/\/$/, "")}/functions/v1/technician-profile-photo`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        apikey:
+                            c.supabaseAnonKey,
+
+                        Authorization:
+                            `Bearer ${token}`
+                    },
+
+                    body: formData
+                }
+            );
+
+
+        const data =
+            await response
+                .json()
+                .catch(() => ({}));
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data?.error ||
+                "Profile photo upload failed."
+            );
+
+        }
+
+
+        if (!data?.success) {
+
+            throw new Error(
+                "Profile photo upload failed."
+            );
+
+        }
+
+
+        await loadProfile();
+
+
+    } finally {
+
+        showTechnicianPhotoUploadState(
+            false
+        );
+
+    }
+
+}
+
+
+async function removeTechnicianProfilePhoto() {
+
+    const token =
+        await getValidAccessToken();
+
+
+    const formData =
+        new FormData();
+
+
+    formData.append(
+        "action",
+        "remove"
+    );
+
+
+    showTechnicianPhotoUploadState(
+        true
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${c.supabaseUrl.replace(/\/$/, "")}/functions/v1/technician-profile-photo`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        apikey:
+                            c.supabaseAnonKey,
+
+                        Authorization:
+                            `Bearer ${token}`
+                    },
+
+                    body: formData
+                }
+            );
+
+
+        const data =
+            await response
+                .json()
+                .catch(() => ({}));
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data?.error ||
+                "Profile photo could not be removed."
+            );
+
+        }
+
+
+        if (!data?.success) {
+
+            throw new Error(
+                "Profile photo could not be removed."
+            );
+
+        }
+
+
+        await loadProfile();
+
+
+    } finally {
+
+        showTechnicianPhotoUploadState(
+            false
+        );
+
+    }
+
+}
+
+
+function showTechnicianPhotoUploadState(
+    loading
+) {
+
+    const changeButton =
+        document.getElementById(
+            "changeTechnicianPhotoBtn"
+        );
+
+    const removeButton =
+        document.getElementById(
+            "removeTechnicianPhotoBtn"
+        );
+
+
+    if (changeButton) {
+
+        changeButton.disabled =
+            loading;
+
+        changeButton.textContent =
+            loading
+                ? "Uploading..."
+                : "Change Photo";
+
+    }
+
+
+    if (removeButton) {
+
+        removeButton.disabled =
+            loading;
+
+    }
+
+}
+
+
 /* =========================================================
    TECHNICIAN PROFILE PHOTO - INITIALS
    ========================================================= */

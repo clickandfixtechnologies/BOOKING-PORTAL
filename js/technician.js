@@ -1164,6 +1164,7 @@ async function loadProfile() {
     if (!p) {
         throw new Error("Technician profile was not returned.");
     }
+    updateTechnicianHeaderAvatar(p);
 
     const specialization = Array.isArray(p.specialization)
         ? p.specialization.join(", ")
@@ -2376,6 +2377,143 @@ function showTechnicianPhotoUploadState(
 
 }
 
+
+/* =========================================================
+   TECHNICIAN HEADER AVATAR
+   ========================================================= */
+
+function updateTechnicianHeaderAvatar(profile) {
+
+    const avatar =
+        document.getElementById(
+            "techUserAvatar"
+        );
+
+    if (!avatar) {
+        return;
+    }
+
+
+    const imageUrl =
+        profile?.profile_image_url || "";
+
+
+    if (imageUrl) {
+
+        avatar.src = imageUrl;
+
+        avatar.alt =
+            profile?.full_name ||
+            "Technician";
+
+        avatar.style.display = "block";
+
+        return;
+    }
+
+
+    /*
+     * No profile image:
+     * use initials avatar through CSS/data.
+     */
+
+    const initials =
+        getTechnicianInitials(
+            profile?.full_name
+        );
+
+
+    avatar.removeAttribute("src");
+
+    avatar.alt =
+        profile?.full_name ||
+        "Technician";
+
+
+    avatar.style.display =
+        "flex";
+
+
+    avatar.style.objectFit =
+        "cover";
+
+
+    avatar.style.background =
+        "#eef2ff";
+
+
+    avatar.style.color =
+        "#4f46e5";
+
+
+    avatar.style.fontSize =
+        "14px";
+
+
+    avatar.style.fontWeight =
+        "700";
+
+
+    avatar.style.alignItems =
+        "center";
+
+
+    avatar.style.justifyContent =
+        "center";
+
+
+    /*
+     * IMG element cannot directly display
+     * text initials, so use a generated SVG.
+     */
+
+    const svg =
+        `
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="100"
+            height="100"
+            viewBox="0 0 100 100"
+        >
+            <rect
+                width="100"
+                height="100"
+                rx="50"
+                fill="#eef2ff"
+            />
+
+            <text
+                x="50"
+                y="55"
+                text-anchor="middle"
+                dominant-baseline="middle"
+                fill="#4f46e5"
+                font-size="30"
+                font-family="Arial, sans-serif"
+                font-weight="700"
+            >
+                ${escapeSvgText(initials)}
+            </text>
+        </svg>
+        `;
+
+
+    avatar.src =
+        "data:image/svg+xml;charset=UTF-8," +
+        encodeURIComponent(svg);
+
+}
+
+function escapeSvgText(value) {
+
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+
+}
 
 /* =========================================================
    TECHNICIAN PROFILE PHOTO - INITIALS

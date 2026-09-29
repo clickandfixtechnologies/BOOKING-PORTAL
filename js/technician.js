@@ -3599,6 +3599,59 @@ signOut.onclick = async () => {
 
 }
 
+/* =========================================================
+   TECHNICIAN HEADER NAME -> PROFILE
+   ========================================================= */
+
+const techUserName =
+    document.getElementById("techUserName");
+
+if (techUserName) {
+
+    techUserName.style.cursor = "pointer";
+
+    techUserName.addEventListener(
+        "click",
+        () => {
+
+            const profileNav =
+                document.querySelector(
+                    '[data-section="profile"]'
+                );
+
+            if (profileNav) {
+                profileNav.click();
+            }
+
+        }
+    );
+
+    techUserName.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (
+                event.key === "Enter" ||
+                event.key === " "
+            ) {
+
+                event.preventDefault();
+
+                const profileNav =
+                    document.querySelector(
+                        '[data-section="profile"]'
+                    );
+
+                if (profileNav) {
+                    profileNav.click();
+                }
+
+            }
+
+        }
+    );
+}
+
 const techMenuBtn =
     document.getElementById("techMenuBtn");
 

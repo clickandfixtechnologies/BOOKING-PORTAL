@@ -35,7 +35,8 @@ jobs?.addEventListener("click", event => {
         return;
     }
 
-    const id = card.dataset.id;
+    const id =
+        card.dataset.id;
 
     if (!id) {
         console.error(
@@ -45,12 +46,37 @@ jobs?.addEventListener("click", event => {
         return;
     }
 
+
+    /* =====================================================
+       HISTORY JOBS ARE READ-ONLY
+       ===================================================== */
+
+    if (
+        card.dataset.history === "true"
+    ) {
+
+        console.log(
+            "Opening history appointment in read-only mode:",
+            id
+        );
+
+        loadHistoryDetail(id);
+
+        return;
+    }
+
+
+    /* =====================================================
+       NORMAL JOBS
+       ===================================================== */
+
     console.log(
         "Opening technician appointment:",
         id
     );
 
     loadDetail(id);
+
 });
 
 const esc = value => {
@@ -2775,9 +2801,10 @@ async function loadHistory() {
                 ${history.map(a => `
 
                     <article
-                        class="tech-job-card"
-                        data-id="${esc(a.id)}"
-                    >
+    class="tech-job-card"
+    data-id="${esc(a.id)}"
+    data-history="true"
+>
 
                         <div class="tech-job-header">
 

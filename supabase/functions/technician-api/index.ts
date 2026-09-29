@@ -339,14 +339,15 @@ async function profile(
     )
     .single();
 
-  if (
-    error ||
-    !data
-  ) {
-    throw new Error(
-      "Technician profile not found."
-    );
-  }
+ if (error) {
+    console.error("TECHNICIAN PROFILE QUERY ERROR:", error.message);
+    throw new Error("PROFILE_QUERY_FAILED: " + error.message);
+}
+
+if (!data) {
+    console.error("TECHNICIAN PROFILE DATA EMPTY:", technicianId);
+    throw new Error("PROFILE_DATA_EMPTY");
+}
 
   /*
    * Email does not exist in technicians table.

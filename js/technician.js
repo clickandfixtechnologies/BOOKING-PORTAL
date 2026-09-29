@@ -1182,6 +1182,27 @@ async function loadProfile() {
         ? "tech-status-completed"
         : "tech-status-default";
 
+    const profileImageUrl =
+        p.profile_image_url || "";
+
+    const avatarContent = profileImageUrl
+        ? `
+            <img
+                src="${esc(profileImageUrl)}"
+                alt="${esc(p.full_name || "Technician")}"
+                class="tech-profile-avatar-image"
+                id="technicianProfileAvatar"
+            >
+        `
+        : `
+            <div
+                class="tech-profile-avatar-fallback"
+                id="technicianProfileAvatar"
+            >
+                ${esc(getTechnicianInitials(p.full_name))}
+            </div>
+        `;
+
     jobs.innerHTML = `
 
         <section class="tech-detail-card">
@@ -1208,6 +1229,80 @@ async function loadProfile() {
 
 
             <div class="tech-detail-body">
+
+
+                <!-- =================================================
+                     PROFILE PHOTO
+                     ================================================= -->
+
+                <div class="tech-detail-section tech-profile-photo-section">
+
+                    <h3>
+                        Profile Photo
+                    </h3>
+
+                    <div class="tech-profile-photo-wrapper">
+
+                        <div class="tech-profile-avatar-container">
+
+                            ${avatarContent}
+
+                        </div>
+
+                        <div class="tech-profile-photo-content">
+
+                            <div class="tech-profile-photo-title">
+                                Your Profile Picture
+                            </div>
+
+                            <p class="tech-profile-photo-help">
+                                Upload a clear photo. JPG, PNG or WebP.
+                                Maximum size 5 MB.
+                            </p>
+
+                            <div class="tech-profile-photo-actions">
+
+                                <button
+                                    type="button"
+                                    class="tech-profile-photo-btn"
+                                    id="changeTechnicianPhotoBtn"
+                                >
+                                    Change Photo
+                                </button>
+
+                                ${
+                                    profileImageUrl
+                                        ? `
+                                            <button
+                                                type="button"
+                                                class="tech-profile-photo-remove-btn"
+                                                id="removeTechnicianPhotoBtn"
+                                            >
+                                                Remove Photo
+                                            </button>
+                                        `
+                                        : ""
+                                }
+
+                            </div>
+
+                            <input
+                                type="file"
+                                id="technicianProfilePhotoInput"
+                                accept="image/jpeg,image/png,image/webp"
+                                hidden
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     PERSONAL INFORMATION
+                     ================================================= -->
 
                 <div class="tech-detail-section">
 
@@ -1250,6 +1345,10 @@ async function loadProfile() {
                 </div>
 
 
+                <!-- =================================================
+                     PROFESSIONAL INFORMATION
+                     ================================================= -->
+
                 <div class="tech-detail-section">
 
                     <h3>
@@ -1291,6 +1390,10 @@ async function loadProfile() {
                 </div>
 
 
+                <!-- =================================================
+                     ACCOUNT INFORMATION
+                     ================================================= -->
+
                 <div class="tech-detail-section">
 
                     <h3>
@@ -1321,6 +1424,210 @@ async function loadProfile() {
 
         </section>
     `;
+
+
+    /* =========================================================
+       PROFILE PHOTO EVENTS
+       ========================================================= */
+
+    const changePhotoBtn =
+        document.getElementById(
+            "changeTechnicianPhotoBtn"
+        );
+
+    const photoInput =
+        document.getElementById(
+            "technicianProfilePhotoInput"
+        );
+
+    const removePhotoBtn =
+        document.getElementById(
+            "removeTechnicianPhotoBtn"
+        );
+
+
+    if (
+        changePhotoBtn &&
+        photoInput
+    ) {
+
+        changePhotoBtn.addEventListener(
+            "click",
+            () => {
+                photoInput.click();
+            }
+        );
+
+        photoInput.addEventListener(
+            "change",
+            handleTechnicianProfilePhotoSelected
+        );
+    }
+
+
+    if (removePhotoBtn) {
+
+        removePhotoBtn.addEventListener(
+            "click",
+            handleTechnicianProfilePhotoRemove
+        );
+    }
+}
+
+/* =========================================================
+   TECHNICIAN PROFILE PHOTO - INITIALS
+   ========================================================= */
+
+function getTechnicianInitials(name) {
+
+    const value =
+        String(name || "")
+            .trim();
+
+    if (!value) {
+        return "T";
+    }
+
+    const parts =
+        value
+            .split(/\s+/)
+            .filter(Boolean);
+
+    if (parts.length === 1) {
+        return parts[0]
+            .substring(0, 2)
+            .toUpperCase();
+    }
+
+    return (
+        parts[0][0] +
+        parts[parts.length - 1][0]
+    ).toUpperCase();
+}
+
+
+/* =========================================================
+   PROFILE PHOTO - FILE SELECTED
+   ========================================================= */
+
+async function handleTechnicianProfilePhotoSelected(event) {
+
+    const input =
+        event.currentTarget;
+
+    const file =
+        input?.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    ];
+
+    if (
+        !allowedTypes.includes(
+            file.type
+        )
+    ) {
+
+        alert(
+            "Please select a JPG, PNG or WebP image."
+        );
+
+        input.value = "";
+        return;
+    }
+
+    if (
+        file.size >
+        5 * 1024 * 1024
+    ) {
+
+        alert(
+            "Profile photo must be 5 MB or smaller."
+        );
+
+        input.value = "";
+        return;
+    }
+
+
+    /*
+     * Crop modal will be opened here
+     * in the next part of Step 4.
+     */
+
+    await openTechnicianPhotoCropper(
+        file
+    );
+
+    input.value = "";
+}
+
+
+/* =========================================================
+   PROFILE PHOTO - REMOVE
+   ========================================================= */
+
+async function handleTechnicianProfilePhotoRemove() {
+
+    const confirmed =
+        window.confirm(
+            "Are you sure you want to remove your profile photo?"
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+
+        const button =
+            document.getElementById(
+                "removeTechnicianPhotoBtn"
+            );
+
+        if (button) {
+
+            button.disabled =
+                true;
+
+            button.textContent =
+                "Removing...";
+        }
+
+
+        /*
+         * api() currently sends JSON.
+         *
+         * Profile-photo Edge Function uses
+         * multipart/form-data, so upload/remove
+         * will use a dedicated request helper.
+         *
+         * This will be connected in the next part.
+         */
+
+        await removeTechnicianProfilePhoto();
+
+
+        await loadProfile();
+
+    } catch (error) {
+
+        console.error(
+            "Technician profile photo removal failed:",
+            error
+        );
+
+        alert(
+            error?.message ||
+            "Profile photo could not be removed."
+        );
+    }
 }
 
 async function loadHistory() {

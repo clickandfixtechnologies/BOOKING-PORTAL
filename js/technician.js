@@ -2515,6 +2515,35 @@ function escapeSvgText(value) {
 
 }
 
+async function loadTechnicianHeaderProfile() {
+
+    try {
+
+        const result =
+            await api("profile");
+
+        const profile =
+            result?.profile;
+
+        if (!profile) {
+            return;
+        }
+
+        updateTechnicianHeaderAvatar(
+            profile
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Technician header profile load failed:",
+            error
+        );
+
+    }
+
+}
+
 /* =========================================================
    TECHNICIAN PROFILE PHOTO - INITIALS
    ========================================================= */
@@ -3600,11 +3629,33 @@ signOut.onclick = async () => {
 }
 
 /* =========================================================
-   TECHNICIAN HEADER NAME -> PROFILE
+   TECHNICIAN HEADER USER AREA -> PROFILE
    ========================================================= */
 
 const techUserName =
     document.getElementById("techUserName");
+
+const techUserAvatar =
+    document.getElementById("techUserAvatar");
+
+const techProfileNav =
+    document.querySelector(
+        '[data-nav="profile"]'
+    );
+
+
+function openTechnicianProfile() {
+
+    if (techProfileNav) {
+        techProfileNav.click();
+    }
+
+}
+
+
+/* =========================================================
+   TECHNICIAN NAME
+   ========================================================= */
 
 if (techUserName) {
 
@@ -3612,18 +3663,7 @@ if (techUserName) {
 
     techUserName.addEventListener(
         "click",
-        () => {
-
-            const profileNav =
-                document.querySelector(
-                    '[data-nav="profile"]'
-                );
-
-            if (profileNav) {
-                profileNav.click();
-            }
-
-        }
+        openTechnicianProfile
     );
 
     techUserName.addEventListener(
@@ -3637,19 +3677,29 @@ if (techUserName) {
 
                 event.preventDefault();
 
-                const profileNav =
-                    document.querySelector(
-                        '[data-nav="profile"]'
-                    );
-
-                if (profileNav) {
-                    profileNav.click();
-                }
+                openTechnicianProfile();
 
             }
 
         }
     );
+
+}
+
+
+/* =========================================================
+   TECHNICIAN PROFILE IMAGE
+   ========================================================= */
+
+if (techUserAvatar) {
+
+    techUserAvatar.style.cursor = "pointer";
+
+    techUserAvatar.addEventListener(
+        "click",
+        openTechnicianProfile
+    );
+
 }
 
 const techMenuBtn =

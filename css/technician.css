@@ -2790,3 +2790,287 @@ i[class*="fa-"]{
         font-size:10px;
     }
 }
+
+/* =========================================================
+   TECHNICIAN HISTORY PAGE
+   ========================================================= */
+
+.tech-section {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--tech-border);
+    border-radius: var(--tech-radius-lg);
+    box-shadow: var(--tech-shadow-md);
+    overflow: hidden;
+}
+
+.tech-section-header {
+    min-height: 82px;
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(239, 246, 255, 0.92),
+            rgba(255, 255, 255, 0.72)
+        );
+
+    border-bottom: 1px solid var(--tech-border);
+}
+
+.tech-section-kicker {
+    margin: 0 0 5px;
+    color: var(--tech-primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.tech-section-title {
+    margin: 0;
+    color: var(--tech-dark);
+    font-size: 20px;
+    font-weight: 750;
+    line-height: 1.25;
+}
+
+.tech-section-count {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+
+    background: var(--tech-primary-light);
+    color: var(--tech-primary);
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.tech-job-list {
+    width: 100%;
+    padding: 24px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+
+/* =========================================================
+   HISTORY JOB CARD
+   ========================================================= */
+
+.tech-job-list .tech-job-card {
+    width: 100%;
+    margin: 0;
+
+    display: block;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.96),
+            rgba(248, 250, 252, 0.92)
+        );
+
+    border: 1px solid var(--tech-border);
+    border-left: 4px solid var(--tech-success);
+
+    border-radius: var(--tech-radius-md);
+
+    box-shadow: var(--tech-shadow-sm);
+
+    overflow: hidden;
+
+    text-align: left;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.tech-job-list .tech-job-card:hover {
+    transform: translateY(-2px);
+
+    border-color: rgba(5, 150, 105, 0.35);
+
+    box-shadow:
+        0 12px 30px rgba(15, 23, 42, 0.08),
+        0 4px 12px rgba(5, 150, 105, 0.08);
+}
+
+.tech-job-list .tech-job-card .tech-job-header {
+    min-height: 58px;
+    padding: 14px 20px;
+
+    background: rgba(236, 253, 245, 0.55);
+
+    border-bottom: 1px solid var(--tech-border);
+}
+
+.tech-job-list .tech-job-card .tech-job-label {
+    margin: 0 0 4px;
+
+    color: var(--tech-muted);
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 0.1em;
+}
+
+.tech-job-list .tech-job-card .tech-job-title {
+    margin: 0;
+
+    color: var(--tech-dark);
+
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.tech-job-list .tech-job-card .tech-job-body {
+    padding: 20px;
+
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 14px;
+}
+
+.tech-job-list .tech-job-card .tech-job-body > div {
+    min-width: 0;
+
+    padding: 13px 14px;
+
+    background: rgba(248, 250, 252, 0.75);
+
+    border: 1px solid var(--tech-border-light);
+
+    border-radius: var(--tech-radius-sm);
+}
+
+.tech-job-list .tech-job-card .tech-job-body span {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: var(--tech-muted);
+
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.tech-job-list .tech-job-card .tech-job-body strong {
+    display: block;
+
+    color: var(--tech-dark);
+
+    font-size: 12px;
+    font-weight: 700;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   HISTORY EMPTY STATE
+   ========================================================= */
+
+.tech-empty-state {
+    padding: 56px 24px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+.tech-empty-state > i {
+    width: 56px;
+    height: 56px;
+
+    margin-bottom: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--tech-primary-light);
+    color: var(--tech-primary);
+
+    font-size: 22px;
+}
+
+.tech-empty-state h3 {
+    margin: 0 0 8px;
+
+    color: var(--tech-dark);
+
+    font-size: 17px;
+    font-weight: 750;
+}
+
+.tech-empty-state p {
+    margin: 0;
+
+    color: var(--tech-muted);
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   HISTORY RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .tech-job-list .tech-job-card .tech-job-body {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .tech-section-header {
+        padding: 18px 20px;
+    }
+
+    .tech-section-title {
+        font-size: 17px;
+    }
+
+    .tech-job-list {
+        padding: 16px;
+    }
+
+    .tech-job-list .tech-job-card .tech-job-body {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+
+    .tech-job-list .tech-job-card .tech-job-header {
+        padding: 13px 16px;
+    }
+
+}

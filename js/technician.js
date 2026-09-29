@@ -254,6 +254,7 @@ async function load() {
     try {
 
         const d = await api("dashboard");
+        await loadTechnicianHeaderProfile();
 
         const technicianName =
             d.technician?.name ||

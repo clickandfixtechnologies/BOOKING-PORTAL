@@ -35,47 +35,29 @@ jobs?.addEventListener("click", event => {
         return;
     }
 
-    const id =
-        card.dataset.id;
+    const id = card.dataset.id;
 
-    if (!id) {
-        console.error(
-            "Technician job card has no appointment ID."
-        );
-
-        return;
-    }
-
-
-    /* =====================================================
-       HISTORY JOBS ARE READ-ONLY
-       ===================================================== */
-
-    if (
-        card.dataset.history === "true"
-    ) {
-
-        console.log(
-            "Opening history appointment in read-only mode:",
-            id
-        );
-
-        loadHistoryDetail(id);
-
-        return;
-    }
-
-
-    /* =====================================================
-       NORMAL JOBS
-       ===================================================== */
-
-    console.log(
-        "Opening technician appointment:",
-        id
+if (!id) {
+    console.error(
+        "Technician job card has no appointment ID."
     );
 
-    loadDetail(id);
+    return;
+}
+
+const isHistory =
+    card.dataset.history === "true";
+
+console.log(
+    "Opening technician appointment:",
+    id,
+    isHistory ? "(READ-ONLY HISTORY)" : ""
+);
+
+loadDetail(
+    id,
+    isHistory
+);
 
 });
 
@@ -3019,7 +3001,10 @@ async function loadSupport() {
     `;
 }
 
-async function loadDetail(id){
+async function loadDetail(
+    id,
+    readOnly = false
+){
 
     console.log(
         "loadDetail() called with appointment ID:",
@@ -3204,38 +3189,43 @@ async function loadDetail(id){
                     </div>
 
 
-                    <div class="tech-detail-section">
+                    ${
+    !readOnly
+        ? `
+            <div class="tech-detail-section">
 
-                        <h3>
-                            Update Job Status
-                        </h3>
+                <h3>
+                    Update Job Status
+                </h3>
 
-                        <div class="tech-detail-actions">
+                <div class="tech-detail-actions">
 
-    <button
-        type="button"
-        class="tech-action-button"
-        data-status="on_the_way"
-        ${a.status !== "technician_assigned" ? "disabled" : ""}
-    >
-        <i class="fa-solid fa-route"></i>
-        Mark On The Way
-    </button>
+                    <button
+                        type="button"
+                        class="tech-action-button"
+                        data-status="on_the_way"
+                        ${a.status !== "technician_assigned" ? "disabled" : ""}
+                    >
+                        <i class="fa-solid fa-route"></i>
+                        Mark On The Way
+                    </button>
 
+                    <button
+                        type="button"
+                        class="tech-action-button"
+                        data-status="in_progress"
+                        ${a.status !== "on_the_way" ? "disabled" : ""}
+                    >
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                        Mark In Progress
+                    </button>
 
-    <button
-        type="button"
-        class="tech-action-button"
-        data-status="in_progress"
-        ${a.status !== "on_the_way" ? "disabled" : ""}
-    >
-        <i class="fa-solid fa-screwdriver-wrench"></i>
-        Mark In Progress
-    </button>
+                </div>
 
-</div>
-
-                    </div>
+            </div>
+        `
+        : ""
+}
 
 
                     <div class="tech-detail-section">
@@ -3244,78 +3234,97 @@ async function loadDetail(id){
         Job ID
     </h3>
 
-    <div class="tech-job-id-row">
+    ${
+        readOnly
+            ? `
+                <div class="tech-job-id-row">
 
-        <input
-            id="jobCode"
-            class="tech-input"
-            value="${esc(a.job_code || "")}"
-            placeholder="CFX-JOB-2026-00452"
-            ${a.status !== "in_progress" || a.job_code ? "readonly" : ""}
-        >
+                    <div class="tech-detail-info-grid">
+                        <div>
+                            <span>Job ID</span>
+                            <strong>
+                                ${esc(a.job_code || "—")}
+                            </strong>
+                        </div>
+                    </div>
 
-        <button
-            id="saveJob"
-            type="button"
-            class="tech-action-button"
-            ${a.status !== "in_progress" || a.job_code ? "disabled" : ""}
-        >
-            <i class="fa-solid fa-floppy-disk"></i>
-            Save Job ID
-        </button>
+                </div>
+              `
+            : `
+                <div class="tech-job-id-row">
 
-        ${
-            a.status === "job_id_created" && a.job_code
-                ? `
-                    <button
-                        id="editJob"
-                        type="button"
-                        class="tech-action-button tech-edit-job-button"
+                    <input
+                        id="jobCode"
+                        class="tech-input"
+                        value="${esc(a.job_code || "")}"
+                        placeholder="CFX-JOB-2026-00452"
+                        ${a.status !== "in_progress" || a.job_code ? "readonly" : ""}
                     >
-                        <i class="fa-solid fa-pen"></i>
-                        Edit Job ID
-                    </button>
-                  `
-                : ""
-        }
 
-    </div>
+                    <button
+                        id="saveJob"
+                        type="button"
+                        class="tech-action-button"
+                        ${a.status !== "in_progress" || a.job_code ? "disabled" : ""}
+                    >
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Save Job ID
+                    </button>
+
+                    ${
+                        a.status === "job_id_created" && a.job_code
+                            ? `
+                                <button
+                                    id="editJob"
+                                    type="button"
+                                    class="tech-action-button tech-edit-job-button"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                    Edit Job ID
+                                </button>
+                              `
+                            : ""
+                    }
+
+                </div>
+              `
+    }
 
 </div>
 
 
                     ${
-                        ["in_progress","job_id_created"].includes(a.status)
-                            ? `
+    !readOnly &&
+    ["in_progress","job_id_created"].includes(a.status)
+        ? `
 
-                                <div class="tech-detail-section">
+            <div class="tech-detail-section">
 
-                                    <button
-                                        id="complete"
-                                        type="button"
-                                        class="tech-complete-button"
-                                    >
-                                        <i class="fa-solid fa-circle-check"></i>
+                <button
+                    id="complete"
+                    type="button"
+                    class="tech-complete-button"
+                >
+                    <i class="fa-solid fa-circle-check"></i>
 
-                                        ${
-                                            a.status === "job_id_created"
-                                                ? "Complete Job"
-                                                : "Complete Service"
-                                        }
-
-                                    </button>
-
-
-                                    <div
-                                        id="otpArea"
-                                        class="tech-otp-area"
-                                    ></div>
-
-                                </div>
-
-                              `
-                            : ""
+                    ${
+                        a.status === "job_id_created"
+                            ? "Complete Job"
+                            : "Complete Service"
                     }
+
+                </button>
+
+                <div
+                    id="otpArea"
+                    class="tech-otp-area"
+                ></div>
+
+            </div>
+
+          `
+        : ""
+}
 
 
                     <p
@@ -3340,17 +3349,23 @@ detail.scrollIntoView({
     block: "start"
 });
 
-        document
-            .querySelectorAll(".tech-action-button[data-status]")
-            .forEach(b => {
+        if (!readOnly) {
 
-                b.onclick = () =>
-                    status(
-                        id,
-                        b.dataset.status
-                    );
+    document
+        .querySelectorAll(
+            ".tech-action-button[data-status]"
+        )
+        .forEach(b => {
 
-            });
+            b.onclick = () =>
+                status(
+                    id,
+                    b.dataset.status
+                );
+
+        });
+
+}
 
 
         const saveJobButton =

@@ -105,6 +105,26 @@ function formatDate(value) {
     });
 }
 
+function formatDateTime(value) {
+
+    if (!value) {
+        return "—";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+
+    return date.toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
 
 function formatTime(value) {
 
@@ -1124,6 +1144,473 @@ function completedJobCard(a) {
             }
 
         </article>
+    `;
+}
+
+async function loadProfile() {
+
+    jobs.innerHTML = `
+        <div class="tech-loading-message">
+            Loading profile...
+        </div>
+    `;
+
+    detail.innerHTML = "";
+
+    const result = await api("profile");
+
+    const p = result?.profile;
+
+    if (!p) {
+        throw new Error("Technician profile was not returned.");
+    }
+
+    const specialization = Array.isArray(p.specialization)
+        ? p.specialization.join(", ")
+        : "Not specified";
+
+    const workingDays = Array.isArray(p.working_days)
+        ? p.working_days.join(", ")
+        : "Not specified";
+
+    const workingHours =
+        p.working_start && p.working_end
+            ? `${formatTime(p.working_start)} - ${formatTime(p.working_end)}`
+            : "Not specified";
+
+    const statusClass = p.is_active
+        ? "tech-status-completed"
+        : "tech-status-default";
+
+    jobs.innerHTML = `
+
+        <section class="tech-detail-card">
+
+            <div class="tech-detail-header">
+
+                <div>
+
+                    <p class="tech-detail-label">
+                        TECHNICIAN PROFILE
+                    </p>
+
+                    <h2 class="tech-detail-title">
+                        ${esc(p.full_name || "Technician")}
+                    </h2>
+
+                </div>
+
+                <span class="tech-status-badge ${statusClass}">
+                    ${p.is_active ? "Active" : "Inactive"}
+                </span>
+
+            </div>
+
+
+            <div class="tech-detail-body">
+
+                <div class="tech-detail-section">
+
+                    <h3>
+                        Personal Information
+                    </h3>
+
+                    <div class="tech-detail-info-grid">
+
+                        <div>
+                            <span>Full Name</span>
+                            <strong>
+                                ${esc(p.full_name || "—")}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Mobile</span>
+                            <strong>
+                                ${esc(p.mobile || "—")}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Email</span>
+                            <strong>
+                                ${esc(p.email || "—")}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Username</span>
+                            <strong>
+                                ${esc(p.username || "—")}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tech-detail-section">
+
+                    <h3>
+                        Professional Information
+                    </h3>
+
+                    <div class="tech-detail-info-grid">
+
+                        <div>
+                            <span>Technician ID</span>
+                            <strong>
+                                ${esc(p.technician_code || "—")}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Specialization</span>
+                            <strong>
+                                ${esc(specialization)}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Working Days</span>
+                            <strong>
+                                ${esc(workingDays)}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Working Hours</span>
+                            <strong>
+                                ${esc(workingHours)}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tech-detail-section">
+
+                    <h3>
+                        Account Information
+                    </h3>
+
+                    <div class="tech-detail-info-grid">
+
+                        <div>
+                            <span>Account Status</span>
+                            <strong>
+                                ${p.is_active ? "Active" : "Inactive"}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Account Created</span>
+                            <strong>
+                                ${formatDateTime(p.created_at)}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+    `;
+}
+
+async function loadHistory() {
+
+    jobs.innerHTML = `
+        <div class="tech-loading-message">
+            Loading service history...
+        </div>
+    `;
+
+    detail.innerHTML = "";
+
+    const result = await api("history");
+
+    const history = Array.isArray(result?.history)
+        ? result.history
+        : [];
+
+    if (!history.length) {
+
+        jobs.innerHTML = `
+            <section class="tech-detail-card">
+
+                <div class="tech-detail-body">
+
+                    <div class="tech-empty-state">
+
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+
+                        <h3>
+                            No Service History
+                        </h3>
+
+                        <p>
+                            You have no completed appointments yet.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+        `;
+
+        return;
+    }
+
+
+    jobs.innerHTML = `
+
+        <section class="tech-section">
+
+            <div class="tech-section-header">
+
+                <div>
+                    <p class="tech-section-kicker">
+                        SERVICE RECORD
+                    </p>
+
+                    <h2 class="tech-section-title">
+                        Service History
+                    </h2>
+                </div>
+
+                <span class="tech-section-count">
+                    ${history.length}
+                </span>
+
+            </div>
+
+
+            <div class="tech-job-list">
+
+                ${history.map(a => `
+
+                    <article
+                        class="tech-job-card"
+                        data-id="${esc(a.id)}"
+                    >
+
+                        <div class="tech-job-header">
+
+                            <div>
+
+                                <p class="tech-job-label">
+                                    APPOINTMENT
+                                </p>
+
+                                <h3 class="tech-job-title">
+                                    ${esc(a.appointment_id || "Appointment")}
+                                </h3>
+
+                            </div>
+
+                            <span class="tech-status-badge tech-status-completed">
+                                Completed
+                            </span>
+
+                        </div>
+
+
+                        <div class="tech-job-body">
+
+                            <div>
+                                <span>Customer</span>
+                                <strong>
+                                    ${esc(a.customer_name || "—")}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Service</span>
+                                <strong>
+                                    ${esc(
+                                        formatServiceType(
+                                            a.service_category
+                                        )
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Date</span>
+                                <strong>
+                                    ${formatDate(a.appointment_date)}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Job ID</span>
+                                <strong>
+                                    ${esc(a.job_code || "—")}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                `).join("")}
+
+            </div>
+
+        </section>
+    `;
+
+    detail.innerHTML = "";
+}
+
+async function loadSupport() {
+
+    jobs.innerHTML = `
+        <div class="tech-loading-message">
+            Loading support...
+        </div>
+    `;
+
+    detail.innerHTML = "";
+
+    const result = await api("support");
+
+    const support = result?.support;
+
+    if (!support) {
+        throw new Error("Support information was not returned.");
+    }
+
+    const company = support.company || {};
+    const contact = support.contact || {};
+    const channels = support.channels || {};
+
+    jobs.innerHTML = `
+
+        <section class="tech-detail-card">
+
+            <div class="tech-detail-header">
+
+                <div>
+
+                    <p class="tech-detail-label">
+                        TECHNICIAN SUPPORT
+                    </p>
+
+                    <h2 class="tech-detail-title">
+                        Support Center
+                    </h2>
+
+                </div>
+
+                <div class="tech-summary-main-icon">
+                    <i class="fa-solid fa-circle-question"></i>
+                </div>
+
+            </div>
+
+
+            <div class="tech-detail-body">
+
+                <div class="tech-detail-section">
+
+                    <h3>
+                        Company Support
+                    </h3>
+
+                    <p class="tech-detail-description">
+                        Need help with your technician account,
+                        assigned service, or portal access?
+                        Contact Click &amp; Fix Technologies.
+                    </p>
+
+                </div>
+
+
+                <div class="tech-detail-section">
+
+                    <h3>
+                        Contact
+                    </h3>
+
+                    <div class="tech-detail-info-grid">
+
+                        <div>
+                            <span>Company</span>
+                            <strong>
+                                ${esc(company.name || "—")}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Phone</span>
+                            <strong>
+                                ${esc(contact.phone || "—")}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Email</span>
+                            <strong>
+                                ${esc(contact.email || "—")}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tech-detail-section">
+
+                    <h3>
+                        Contact Support
+                    </h3>
+
+                    <div class="tech-action-row">
+
+                        <a
+                            class="tech-action-button"
+                            href="${esc(channels.phone || "#")}"
+                        >
+                            <i class="fa-solid fa-phone"></i>
+                            Call
+                        </a>
+
+
+                        <a
+                            class="tech-action-button"
+                            href="${esc(channels.whatsapp || "#")}"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            <i class="fa-brands fa-whatsapp"></i>
+                            WhatsApp
+                        </a>
+
+
+                        <a
+                            class="tech-action-button"
+                            href="${esc(channels.email || "#")}"
+                        >
+                            <i class="fa-solid fa-envelope"></i>
+                            Email
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
     `;
 }
 

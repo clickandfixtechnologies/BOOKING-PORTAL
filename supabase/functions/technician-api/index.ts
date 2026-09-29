@@ -278,12 +278,21 @@ async function appointment(
    TECHNICIAN PROFILE
    ========================================================= */
 
-async function profile(db:any,technicianId:string) {
-  if(!isUuid(technicianId)) {
-    throw new Error("Invalid technician.");
+async function profile(
+  db: any,
+  technicianId: string
+) {
+
+  if (!isUuid(technicianId)) {
+    throw new Error(
+      "Invalid technician."
+    );
   }
 
-  const {data,error}=await db
+  const {
+    data,
+    error
+  } = await db
     .from("technicians")
     .select(`
       id,
@@ -301,53 +310,173 @@ async function profile(db:any,technicianId:string) {
       updated_at,
       profile_image_path
     `)
-    .eq("id",technicianId)
+    .eq(
+      "id",
+      technicianId
+    )
     .maybeSingle();
 
-  if(error) {
-    console.error("TECHNICIAN PROFILE QUERY ERROR:",error.message);
-    throw new Error("PROFILE_QUERY_FAILED: " + error.message);
+
+  if (error) {
+
+    console.error(
+      "TECHNICIAN PROFILE QUERY ERROR:",
+      error.message
+    );
+
+    throw new Error(
+      "PROFILE_QUERY_FAILED: " +
+      error.message
+    );
   }
 
-  if(!data) {
-    console.error("TECHNICIAN PROFILE DATA EMPTY:",technicianId);
-    throw new Error("PROFILE_DATA_EMPTY");
+
+  if (!data) {
+
+    console.error(
+      "TECHNICIAN PROFILE DATA EMPTY:",
+      technicianId
+    );
+
+    throw new Error(
+      "PROFILE_DATA_EMPTY"
+    );
   }
 
-  let email:string|null=null;
 
-  if(data.auth_user_id) {
-    const {data:authData,error:authError} =
-      await db.auth.admin.getUserById(data.auth_user_id);
+  /* =======================================================
+     AUTH EMAIL
+     ======================================================= */
 
-    if(!authError && authData?.user) {
-      email=authData.user.email||null;
+  let email: string | null = null;
+
+  if (data.auth_user_id) {
+
+    const {
+      data: authData,
+      error: authError
+    } =
+      await db.auth.admin.getUserById(
+        data.auth_user_id
+      );
+
+    if (
+      !authError &&
+      authData?.user
+    ) {
+
+      email =
+        authData.user.email ||
+        null;
     }
   }
+
+
+  /* =======================================================
+     PROFILE IMAGE SIGNED URL
+     ======================================================= */
+
+  let profileImageUrl:
+    string | null = null;
+
+
+  if (
+    data.profile_image_path
+  ) {
+
+    const {
+      data: signedData,
+      error: signedError
+    } =
+      await db.storage
+        .from(
+          "technician-profile-images"
+        )
+        .createSignedUrl(
+          data.profile_image_path,
+          60 * 60
+        );
+
+
+    if (signedError) {
+
+      console.error(
+        "PROFILE IMAGE SIGNED URL ERROR:",
+        signedError.message
+      );
+
+    } else {
+
+      profileImageUrl =
+        signedData?.signedUrl ||
+        null;
+    }
+  }
+
+
+  /* =======================================================
+     RESPONSE
+     ======================================================= */
 
   return {
-    profile:{
-      id:data.id,
-      technician_code:data.technician_code,
-      full_name:data.full_name,
-      mobile:data.mobile,
-      username:data.username,
+
+    profile: {
+
+      id:
+        data.id,
+
+      technician_code:
+        data.technician_code,
+
+      full_name:
+        data.full_name,
+
+      mobile:
+        data.mobile,
+
+      username:
+        data.username,
+
       email,
+
       specialization:
-        Array.isArray(data.specialization)
+        Array.isArray(
+          data.specialization
+        )
           ? data.specialization
           : [],
+
       working_days:
-  Array.isArray(data.working_days)
-    ? data.working_days
-    : [],
-      working_start:data.working_start,
-      working_end:data.working_end,
-      is_active:data.is_active,
-      created_at:data.created_at,
-      updated_at:data.updated_at,
-      profile_image_path:data.profile_image_path||null
+        Array.isArray(
+          data.working_days
+        )
+          ? data.working_days
+          : [],
+
+      working_start:
+        data.working_start,
+
+      working_end:
+        data.working_end,
+
+      is_active:
+        data.is_active,
+
+      created_at:
+        data.created_at,
+
+      updated_at:
+        data.updated_at,
+
+      profile_image_path:
+        data.profile_image_path ||
+        null,
+
+      profile_image_url:
+        profileImageUrl
+
     }
+
   };
 }
 

@@ -293,6 +293,7 @@ async function profile(db:any,technicianId:string) {
       mobile,
       username,
       specialization,
+      working_days,
       working_start,
       working_end,
       is_active,
@@ -336,7 +337,10 @@ async function profile(db:any,technicianId:string) {
         Array.isArray(data.specialization)
           ? data.specialization
           : [],
-      working_days:[],
+      working_days:
+  Array.isArray(data.working_days)
+    ? data.working_days
+    : [],
       working_start:data.working_start,
       working_end:data.working_end,
       is_active:data.is_active,

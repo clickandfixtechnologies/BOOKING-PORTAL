@@ -1828,21 +1828,62 @@ document
     .querySelectorAll(".tech-nav-item")
     .forEach(item => {
 
-        item.addEventListener(
-            "click",
-            () => {
+        item.addEventListener("click", async () => {
 
-                document
-                    .querySelectorAll(".tech-nav-item")
-                    .forEach(nav =>
-                        nav.classList.remove("active")
-                    );
+            document
+                .querySelectorAll(".tech-nav-item")
+                .forEach(nav => {
+                    nav.classList.remove("active");
+                });
 
-                item.classList.add("active");
+            item.classList.add("active");
 
-                closeTechnicianMenu();
+            closeTechnicianMenu();
+
+            const nav = item.dataset.nav;
+
+            try {
+
+                if (nav === "dashboard") {
+                    await load();
+                    return;
+                }
+
+                if (nav === "profile") {
+                    await loadProfile();
+                    return;
+                }
+
+                if (nav === "history") {
+                    await loadHistory();
+                    return;
+                }
+
+                if (nav === "support") {
+                    await loadSupport();
+                    return;
+                }
+
+            } catch (error) {
+
+                console.error(
+                    `Technician ${nav} view failed:`,
+                    error
+                );
+
+                jobs.innerHTML = `
+                    <div class="tech-error-message">
+                        ${esc(
+                            error?.message ||
+                            "Unable to load this section."
+                        )}
+                    </div>
+                `;
+
+                detail.innerHTML = "";
 
             }
-        );
+
+        });
 
     });

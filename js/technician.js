@@ -6504,61 +6504,6 @@ async function loadMySupportRequests() {
 
 }
 
-/* =========================================================
-   SUPPORT TYPE FORMATTER
-   ========================================================= */
-
-function formatSupportType(
-    value
-) {
-
-    const labels = {
-
-        TECHNICAL_PROBLEM:
-            "Technical Problem",
-
-        APPOINTMENT_JOB:
-            "Appointment / Job",
-
-        CCTV_PROBLEM:
-            "CCTV Problem",
-
-        COMPUTER_LAPTOP:
-            "Computer / Laptop",
-
-        JOB_ID_BILLING:
-            "Job ID / Billing",
-
-        TECHNICIAN_SUPPORT:
-            "Technician Support",
-
-        OTHER:
-            "Other"
-
-    };
-
-
-    const key =
-        String(
-            value || ""
-        ).toUpperCase();
-
-
-    return (
-        labels[key] ||
-        key
-            .replace(/_/g, " ")
-            .replace(
-                /\b\w/g,
-                (char) =>
-                    char.toUpperCase()
-            ) ||
-        "Support Request"
-    );
-
-}
-
-
 
 /* =========================================================
    SUPPORT DATE FORMATTER

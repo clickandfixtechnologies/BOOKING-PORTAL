@@ -2719,142 +2719,401 @@ async function loadHistory() {
 
     detail.innerHTML = "";
 
-    const result = await api("history");
+    try {
 
-    const history = Array.isArray(result?.history)
-        ? result.history
-        : [];
+        const result = await api("history");
 
-    if (!history.length) {
+        const history = Array.isArray(result?.history)
+            ? result.history
+            : [];
 
-        jobs.innerHTML = `
-            <section class="tech-detail-card">
 
-                <div class="tech-detail-body">
+        if (!history.length) {
 
-                    <div class="tech-empty-state">
+            jobs.innerHTML = `
+                <section class="tech-detail-card">
 
-                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    <div class="tech-detail-body">
 
-                        <h3>
-                            No Service History
-                        </h3>
+                        <div class="tech-empty-state">
 
-                        <p>
-                            You have no completed appointments yet.
-                        </p>
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+
+                            <h3>
+                                No Service History
+                            </h3>
+
+                            <p>
+                                You have no completed appointments yet.
+                            </p>
+
+                        </div>
 
                     </div>
+
+                </section>
+            `;
+
+            return;
+        }
+
+
+        jobs.innerHTML = `
+
+            <section class="tech-section">
+
+                <div class="tech-section-header">
+
+                    <div>
+
+                        <p class="tech-section-kicker">
+                            SERVICE RECORD
+                        </p>
+
+                        <h2 class="tech-section-title">
+                            Service History
+                        </h2>
+
+                    </div>
+
+                    <span
+                        class="tech-section-count"
+                        id="historyCount"
+                    >
+                        ${history.length}
+                    </span>
+
+                </div>
+
+
+                <!-- HISTORY SEARCH -->
+
+                <div class="tech-history-search">
+
+                    <div class="tech-history-search-box">
+
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                        <input
+                            id="historySearchInput"
+                            type="search"
+                            autocomplete="off"
+                            placeholder="Search by name, phone, appointment ID or Job ID"
+                            aria-label="Search service history"
+                        >
+
+                        <button
+                            id="historySearchClear"
+                            type="button"
+                            class="tech-history-search-clear"
+                            aria-label="Clear search"
+                            title="Clear search"
+                            hidden
+                        >
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="tech-job-list"
+                    id="historyJobList"
+                >
+
+                    ${history.map(a => `
+
+                        <article
+                            class="tech-job-card"
+                            data-id="${esc(a.id)}"
+                            data-history="true"
+                        >
+
+                            <div class="tech-job-header">
+
+                                <div>
+
+                                    <p class="tech-job-label">
+                                        APPOINTMENT
+                                    </p>
+
+                                    <h3 class="tech-job-title">
+                                        ${esc(
+                                            a.appointment_id ||
+                                            "Appointment"
+                                        )}
+                                    </h3>
+
+                                </div>
+
+                                <span class="tech-status-badge tech-status-completed">
+                                    Completed
+                                </span>
+
+                            </div>
+
+
+                            <div class="tech-job-body">
+
+                                <div>
+                                    <span>Customer</span>
+
+                                    <strong>
+                                        ${esc(
+                                            a.customer_name ||
+                                            "—"
+                                        )}
+                                    </strong>
+                                </div>
+
+
+                                <div>
+                                    <span>Service</span>
+
+                                    <strong>
+                                        ${esc(
+                                            formatServiceType(
+                                                a.service_category
+                                            )
+                                        )}
+                                    </strong>
+                                </div>
+
+
+                                <div>
+                                    <span>Date</span>
+
+                                    <strong>
+                                        ${formatDate(
+                                            a.appointment_date
+                                        )}
+                                    </strong>
+                                </div>
+
+
+                                <div>
+                                    <span>Job ID</span>
+
+                                    <strong>
+                                        ${esc(
+                                            a.job_code ||
+                                            "—"
+                                        )}
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    `).join("")}
+
+                </div>
+
+
+                <!-- NO SEARCH RESULT -->
+
+                <div
+                    id="historyNoResults"
+                    class="tech-empty-state"
+                    style="display:none;"
+                >
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <h3>
+                        No Matching History
+                    </h3>
+
+                    <p>
+                        No completed service matches your search.
+                    </p>
 
                 </div>
 
             </section>
         `;
 
-        return;
+
+        detail.innerHTML = "";
+
+
+        /* =====================================================
+           HISTORY SEARCH
+           ===================================================== */
+
+        const searchInput =
+            document.getElementById(
+                "historySearchInput"
+            );
+
+        const clearButton =
+            document.getElementById(
+                "historySearchClear"
+            );
+
+        const historyJobList =
+            document.getElementById(
+                "historyJobList"
+            );
+
+        const historyNoResults =
+            document.getElementById(
+                "historyNoResults"
+            );
+
+        const historyCount =
+            document.getElementById(
+                "historyCount"
+            );
+
+
+        function performHistorySearch() {
+
+            const query =
+                String(
+                    searchInput?.value || ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const cards =
+                historyJobList?.querySelectorAll(
+                    ".tech-job-card"
+                ) || [];
+
+
+            let visibleCount = 0;
+
+
+            cards.forEach(card => {
+
+                const appointment =
+                    card.querySelector(
+                        ".tech-job-title"
+                    )?.textContent || "";
+
+
+                const customer =
+                    card.querySelector(
+                        ".tech-job-body div:nth-child(1) strong"
+                    )?.textContent || "";
+
+
+                const jobId =
+                    card.querySelector(
+                        ".tech-job-body div:nth-child(4) strong"
+                    )?.textContent || "";
+
+
+                const phone =
+                    history.find(
+                        item =>
+                            String(item.id) ===
+                            String(card.dataset.id)
+                    )?.mobile || "";
+
+
+                const searchableText = [
+
+                    appointment,
+                    customer,
+                    phone,
+                    jobId
+
+                ]
+                .join(" ")
+                .toLowerCase();
+
+
+                const matched =
+                    !query ||
+                    searchableText.includes(query);
+
+
+                card.style.display =
+                    matched
+                        ? ""
+                        : "none";
+
+
+                if (matched) {
+                    visibleCount++;
+                }
+
+            });
+
+
+            if (historyCount) {
+
+                historyCount.textContent =
+                    visibleCount;
+
+            }
+
+
+            if (historyNoResults) {
+
+                historyNoResults.style.display =
+                    visibleCount === 0
+                        ? ""
+                        : "none";
+
+            }
+
+
+            if (clearButton) {
+
+                clearButton.hidden =
+                    !query;
+
+            }
+
+        }
+
+
+        searchInput?.addEventListener(
+            "input",
+            performHistorySearch
+        );
+
+
+        clearButton?.addEventListener(
+            "click",
+            () => {
+
+                if (!searchInput) {
+                    return;
+                }
+
+                searchInput.value = "";
+
+                performHistorySearch();
+
+                searchInput.focus();
+
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Technician history load failed:",
+            error
+        );
+
+        jobs.innerHTML = `
+
+            <div class="tech-error-message">
+                ${esc(error.message)}
+            </div>
+
+        `;
+
     }
-
-
-    jobs.innerHTML = `
-
-        <section class="tech-section">
-
-            <div class="tech-section-header">
-
-                <div>
-                    <p class="tech-section-kicker">
-                        SERVICE RECORD
-                    </p>
-
-                    <h2 class="tech-section-title">
-                        Service History
-                    </h2>
-                </div>
-
-                <span class="tech-section-count">
-                    ${history.length}
-                </span>
-
-            </div>
-
-
-            <div class="tech-job-list">
-
-                ${history.map(a => `
-
-                    <article
-    class="tech-job-card"
-    data-id="${esc(a.id)}"
-    data-history="true"
->
-
-                        <div class="tech-job-header">
-
-                            <div>
-
-                                <p class="tech-job-label">
-                                    APPOINTMENT
-                                </p>
-
-                                <h3 class="tech-job-title">
-                                    ${esc(a.appointment_id || "Appointment")}
-                                </h3>
-
-                            </div>
-
-                            <span class="tech-status-badge tech-status-completed">
-                                Completed
-                            </span>
-
-                        </div>
-
-
-                        <div class="tech-job-body">
-
-                            <div>
-                                <span>Customer</span>
-                                <strong>
-                                    ${esc(a.customer_name || "—")}
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>Service</span>
-                                <strong>
-                                    ${esc(
-                                        formatServiceType(
-                                            a.service_category
-                                        )
-                                    )}
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>Date</span>
-                                <strong>
-                                    ${formatDate(a.appointment_date)}
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>Job ID</span>
-                                <strong>
-                                    ${esc(a.job_code || "—")}
-                                </strong>
-                            </div>
-
-                        </div>
-
-                    </article>
-
-                `).join("")}
-
-            </div>
-
-        </section>
-    `;
-
-    detail.innerHTML = "";
 }
 
 async function loadSupport() {

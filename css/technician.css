@@ -3422,3 +3422,98 @@ i[class*="fa-"]{
 
 }
 
+/* =========================================================
+   TECHNICIAN HISTORY SEARCH
+   ========================================================= */
+
+.tech-history-search {
+    margin: 18px 0 22px;
+}
+
+.tech-history-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.tech-history-search-box > i {
+    position: absolute;
+    left: 16px;
+    font-size: 15px;
+    pointer-events: none;
+    opacity: 0.65;
+}
+
+.tech-history-search-box input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 48px 0 44px;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 12px;
+    background: var(--card-bg, #ffffff);
+    color: var(--text-color, #111827);
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.tech-history-search-box input:focus {
+    border-color: var(--primary, #6d5dfc);
+    box-shadow:
+        0 0 0 3px
+        rgba(109, 93, 252, 0.10);
+}
+
+.tech-history-search-box input::placeholder {
+    opacity: 0.6;
+}
+
+.tech-history-search-clear {
+    position: absolute;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.65;
+    transition:
+        background 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.tech-history-search-clear:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.tech-history-search-clear[hidden] {
+    display: none;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .tech-history-search {
+        margin-top: 14px;
+        margin-bottom: 18px;
+    }
+
+    .tech-history-search-box input {
+        min-height: 46px;
+        font-size: 13px;
+        border-radius: 11px;
+    }
+
+}
+

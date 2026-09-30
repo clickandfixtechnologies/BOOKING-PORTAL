@@ -4028,25 +4028,6 @@ document
 
 
     /* =========================================================
-       SUPPORT CHAT
-       ========================================================= */
-
-    document
-        .getElementById("openSupportChat")
-        ?.addEventListener(
-            "click",
-            () => {
-
-                showSupportPhase2Placeholder(
-                    "Support Chat",
-                    "Live support chat will be connected after the support request flow is completed."
-                );
-
-            }
-        );
-
-
-    /* =========================================================
    MY SUPPORT REQUESTS
    PHASE 4B
    ========================================================= */

@@ -22,6 +22,19 @@ const jobs = document.getElementById("jobs");
 const detail = document.getElementById("detail");
 
 /* =========================================================
+   SUPPORT CHAT REALTIME
+   PHASE 5C
+   ========================================================= */
+
+let supportChatRealtimeChannel = null;
+
+let supportChatRealtimeRequestId = null;
+
+let supportChatRealtimeReady = false;
+
+let supportChatRealtimePending = [];
+
+/* =========================================================
    TECHNICIAN JOB CARD CLICK HANDLER
    Event Delegation
    ========================================================= */
@@ -6902,6 +6915,295 @@ function showMySupportRequestDetailsError(
 }
 
 /* =========================================================
+   SUPPORT CHAT REALTIME
+   CLEANUP
+   ========================================================= */
+
+async function stopSupportChatRealtime() {
+
+    supportChatRealtimeReady = false;
+
+    supportChatRealtimePending = [];
+
+    supportChatRealtimeRequestId = null;
+
+    if (
+        supportChatRealtimeChannel
+    ) {
+
+        try {
+
+            await supabase.removeChannel(
+                supportChatRealtimeChannel
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Support chat realtime cleanup failed:",
+                error
+            );
+
+        }
+
+        supportChatRealtimeChannel = null;
+
+    }
+
+}
+
+/* =========================================================
+   SUPPORT CHAT REALTIME
+   SUBSCRIBE
+   ========================================================= */
+
+async function startSupportChatRealtime(
+    requestId
+) {
+
+    const id =
+        String(
+            requestId || ""
+        ).trim();
+
+    if (!id) {
+
+        console.warn(
+            "Support realtime: Missing request ID."
+        );
+
+        return;
+
+    }
+
+    /*
+     * Stop any previous support chat channel.
+     */
+
+    await stopSupportChatRealtime();
+
+    supportChatRealtimeRequestId =
+        id;
+
+    supportChatRealtimeReady =
+        false;
+
+    /*
+     * Create a unique channel name.
+     */
+
+    const channelName =
+        `support-chat-${id}`;
+
+    supportChatRealtimeChannel =
+        supabase
+            .channel(channelName)
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "support_messages",
+                    filter:
+                        `support_request_id=eq.${id}`
+                },
+                payload => {
+
+                    handleSupportChatRealtimeMessage(
+                        payload
+                    );
+
+                }
+            )
+            .subscribe(
+                status => {
+
+                    console.log(
+                        "Support chat realtime status:",
+                        status
+                    );
+
+                    if (
+                        status === "SUBSCRIBED"
+                    ) {
+
+                        supportChatRealtimeReady =
+                            true;
+
+                        flushSupportChatRealtimePending();
+
+                    }
+
+                }
+            );
+
+}
+
+/* =========================================================
+   SUPPORT CHAT REALTIME
+   MESSAGE HANDLER
+   ========================================================= */
+
+function handleSupportChatRealtimeMessage(
+    payload
+) {
+
+    const message =
+        payload?.new;
+
+    if (
+        !message ||
+        !message.id
+    ) {
+
+        return;
+
+    }
+
+    /*
+     * Extra safety:
+     * Ignore messages from another request.
+     */
+
+    if (
+        String(
+            message.support_request_id || ""
+        ) !==
+        String(
+            supportChatRealtimeRequestId || ""
+        )
+    ) {
+
+        return;
+
+    }
+
+    /*
+     * If initial chat rendering has not completed,
+     * temporarily hold the realtime message.
+     */
+
+    if (
+        !supportChatRealtimeReady
+    ) {
+
+        const alreadyPending =
+            supportChatRealtimePending
+                .some(
+                    item =>
+                        item.id ===
+                        message.id
+                );
+
+        if (
+            !alreadyPending
+        ) {
+
+            supportChatRealtimePending.push(
+                message
+            );
+
+        }
+
+        return;
+
+    }
+
+    appendSupportChatMessageIfNew(
+        message
+    );
+
+}
+
+/* =========================================================
+   SUPPORT CHAT REALTIME
+   FLUSH PENDING
+   ========================================================= */
+
+function flushSupportChatRealtimePending() {
+
+    if (
+        !Array.isArray(
+            supportChatRealtimePending
+        ) ||
+        !supportChatRealtimePending.length
+    ) {
+
+        return;
+
+    }
+
+    const pendingMessages =
+        [
+            ...supportChatRealtimePending
+        ];
+
+    supportChatRealtimePending =
+        [];
+
+    pendingMessages.forEach(
+        message => {
+
+            appendSupportChatMessageIfNew(
+                message
+            );
+
+        }
+    );
+
+}
+
+/* =========================================================
+   SUPPORT CHAT REALTIME
+   DUPLICATE SAFE APPEND
+   ========================================================= */
+
+function appendSupportChatMessageIfNew(
+    message
+) {
+
+    const messageId =
+        String(
+            message?.id || ""
+        ).trim();
+
+    if (!messageId) {
+        return;
+    }
+
+    const container =
+        document.getElementById(
+            "supportChatMessages"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    /*
+     * Already rendered?
+     */
+
+    const existing =
+        container.querySelector(
+            `[data-message-id="${CSS.escape(messageId)}"]`
+        );
+
+    if (existing) {
+
+        return;
+
+    }
+
+    appendSupportChatMessage(
+        message
+    );
+
+}
+
+
+
+/* =========================================================
    SUPPORT CHAT
    OPEN CHAT
    PHASE 5B
@@ -7281,6 +7583,7 @@ function showSupportChatRequestPicker(
 /* =========================================================
    SUPPORT CHAT
    OPEN REQUEST CHAT
+   PHASE 5B + 5C
    ========================================================= */
 
 async function openSupportRequestChat(
@@ -7305,6 +7608,17 @@ async function openSupportRequestChat(
     showSupportChatLoading();
 
     try {
+
+        /*
+         * Start Realtime BEFORE loading messages.
+         *
+         * This reduces the chance of missing a message
+         * while the initial message list is loading.
+         */
+
+        await startSupportChatRealtime(
+            id
+        );
 
         /*
          * Load request details.
@@ -7333,7 +7647,7 @@ async function openSupportRequestChat(
         }
 
         /*
-         * Load messages.
+         * Load existing messages.
          */
 
         const messageResponse =
@@ -7351,10 +7665,26 @@ async function openSupportRequestChat(
                 ? messageResponse.messages
                 : [];
 
+        /*
+         * Render existing conversation.
+         */
+
         renderSupportChat(
             request,
             messages
         );
+
+        /*
+         * Mark initial conversation as ready.
+         *
+         * Any Realtime message received during
+         * initial loading will now be flushed.
+         */
+
+        supportChatRealtimeReady =
+            true;
+
+        flushSupportChatRealtimePending();
 
     } catch (error) {
 
@@ -7362,6 +7692,8 @@ async function openSupportRequestChat(
             "Support chat load failed:",
             error
         );
+
+        await stopSupportChatRealtime();
 
         showSupportChatError(
             error?.message ||
@@ -8229,6 +8561,11 @@ function bindSupportChatClose(
 
 }
 
+/* =========================================================
+   SUPPORT CHAT
+   REMOVE MODAL + REALTIME CLEANUP
+   ========================================================= */
+
 function removeSupportChatModal() {
 
     document
@@ -8236,6 +8573,22 @@ function removeSupportChatModal() {
             "techSupportChatModal"
         )
         ?.remove();
+
+    /*
+     * Cleanup realtime asynchronously.
+     */
+
+    stopSupportChatRealtime()
+        .catch(
+            error => {
+
+                console.warn(
+                    "Support chat realtime cleanup error:",
+                    error
+                );
+
+            }
+        );
 
 }
 

@@ -135,12 +135,35 @@ async function route(
       );
 
 
-    /* =====================================================
-       SUPPORT
+        /* =====================================================
+       SUPPORT CENTER
        ===================================================== */
 
     case "support":
       return support();
+
+
+    /* =====================================================
+       SUPPORT JOBS
+       ===================================================== */
+
+    case "support_jobs":
+      return supportJobs(
+        db,
+        technician.id
+      );
+
+
+    /* =====================================================
+       CREATE SUPPORT REQUEST
+       ===================================================== */
+
+    case "support_create":
+      return createSupportRequest(
+        db,
+        technician.id,
+        body
+      );
 
 
     default:
@@ -577,6 +600,617 @@ function support() {
     }
 
   };
+}
+
+/* =========================================================
+   SUPPORT JOBS
+   PHASE 3A
+   RETURN ONLY THIS TECHNICIAN'S ASSIGNED JOBS
+   ========================================================= */
+
+async function supportJobs(
+  db: any,
+  technicianId: string
+) {
+
+  if (
+    !isUuid(technicianId)
+  ) {
+    throw new Error(
+      "Invalid technician."
+    );
+  }
+
+
+  const {
+    data,
+    error
+  } = await db
+    .from("appointments")
+    .select(`
+      id,
+      appointment_id,
+      appointment_code,
+      appointment_date,
+      appointment_time,
+      customer_name,
+      mobile,
+      service_category,
+      service_type,
+      service_address,
+      problem_description,
+      status,
+      job_code,
+      google_maps_url
+    `)
+    .eq(
+      "technician_id",
+      technicianId
+    )
+    .not(
+      "status",
+      "in",
+      "(completed,cancelled,no_show)"
+    )
+    .order(
+      "appointment_date",
+      {
+        ascending: true
+      }
+    )
+    .order(
+      "appointment_time",
+      {
+        ascending: true
+      }
+    );
+
+
+  if (error) {
+
+    console.error(
+      "SUPPORT JOBS QUERY ERROR:",
+      error.message
+    );
+
+    throw new Error(
+      "SUPPORT_JOBS_QUERY_FAILED"
+    );
+  }
+
+
+  return {
+
+    jobs:
+      (data || []).map(
+        (job: any) => ({
+
+          id:
+            job.id,
+
+          appointment_id:
+            job.appointment_id,
+
+          appointment_code:
+            job.appointment_code,
+
+          appointment_date:
+            job.appointment_date,
+
+          appointment_time:
+            job.appointment_time,
+
+          customer_name:
+            job.customer_name,
+
+          mobile:
+            job.mobile,
+
+          service_category:
+            job.service_category,
+
+          service_type:
+            job.service_type,
+
+          service_address:
+            job.service_address,
+
+          problem_description:
+            job.problem_description,
+
+          status:
+            job.status,
+
+          job_code:
+            job.job_code,
+
+          google_maps_url:
+            job.google_maps_url
+
+        })
+      )
+
+  };
+}
+
+
+/* =========================================================
+   CREATE SUPPORT REQUEST
+   PHASE 3A
+   ========================================================= */
+
+async function createSupportRequest(
+  db: any,
+  technicianId: string,
+  body: any
+) {
+
+  if (
+    !isUuid(technicianId)
+  ) {
+    throw new Error(
+      "Invalid technician."
+    );
+  }
+
+
+  /* =======================================================
+     INPUT VALIDATION
+     ======================================================= */
+
+  const appointmentId =
+    typeof body.appointment_id === "string"
+      ? body.appointment_id.trim()
+      : "";
+
+
+  if (
+    !isUuid(appointmentId)
+  ) {
+    throw new Error(
+      "Invalid appointment."
+    );
+  }
+
+
+  const supportType =
+    typeof body.support_type === "string"
+      ? body.support_type.trim()
+      : "";
+
+
+  const allowedSupportTypes = [
+    "TECHNICAL_PROBLEM",
+    "APPOINTMENT_JOB",
+    "CCTV_PROBLEM",
+    "COMPUTER_LAPTOP",
+    "JOB_ID_BILLING",
+    "TECHNICIAN_SUPPORT",
+    "OTHER"
+  ];
+
+
+  if (
+    !allowedSupportTypes.includes(
+      supportType
+    )
+  ) {
+    throw new Error(
+      "Invalid support type."
+    );
+  }
+
+
+  const problemDetails =
+    text(
+      body.problem_details,
+      2000
+    );
+
+
+  if (
+    !problemDetails ||
+    problemDetails.length < 10
+  ) {
+    throw new Error(
+      "Please provide at least 10 characters describing the problem."
+    );
+  }
+
+
+  /* =======================================================
+     GPS VALIDATION
+     ======================================================= */
+
+  const latitude =
+    Number(
+      body.latitude
+    );
+
+
+  const longitude =
+    Number(
+      body.longitude
+    );
+
+
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude)
+  ) {
+    throw new Error(
+      "Current location is required."
+    );
+  }
+
+
+  if (
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    throw new Error(
+      "Invalid location coordinates."
+    );
+  }
+
+
+  /* =======================================================
+     VERIFY ASSIGNED APPOINTMENT
+     ======================================================= */
+
+  const {
+    data: appointment,
+    error: appointmentError
+  } = await db
+    .from("appointments")
+    .select(`
+      id,
+      appointment_id,
+      appointment_code,
+      customer_name,
+      mobile,
+      service_category,
+      service_type,
+      service_address,
+      status,
+      technician_id
+    `)
+    .eq(
+      "id",
+      appointmentId
+    )
+    .eq(
+      "technician_id",
+      technicianId
+    )
+    .maybeSingle();
+
+
+  if (
+    appointmentError
+  ) {
+
+    console.error(
+      "SUPPORT APPOINTMENT QUERY ERROR:",
+      appointmentError.message
+    );
+
+    throw new Error(
+      "Could not verify the assigned appointment."
+    );
+  }
+
+
+  if (
+    !appointment
+  ) {
+    throw new Error(
+      "Assigned appointment not found."
+    );
+  }
+
+
+  /* =======================================================
+     PREVENT SUPPORT REQUEST ON CLOSED JOB
+     ======================================================= */
+
+  if (
+    [
+      "completed",
+      "cancelled",
+      "no_show"
+    ].includes(
+      appointment.status
+    )
+  ) {
+
+    throw new Error(
+      "Support cannot be raised for this appointment."
+    );
+  }
+
+
+  /* =======================================================
+     GOOGLE MAPS LOCATION URL
+     SERVER GENERATES THIS
+     ======================================================= */
+
+  const locationUrl =
+    `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+
+  /* =======================================================
+     SUPPORT TOKEN
+     ======================================================= */
+
+  let supportToken = null;
+
+  let tokenAttempts = 0;
+
+  while (
+    !supportToken &&
+    tokenAttempts < 10
+  ) {
+
+    tokenAttempts++;
+
+    const candidate =
+      generateSupportToken();
+
+
+    const {
+      data: existing,
+      error: tokenCheckError
+    } = await db
+      .from("support_requests")
+      .select("id")
+      .eq(
+        "support_token",
+        candidate
+      )
+      .maybeSingle();
+
+
+    if (
+      tokenCheckError
+    ) {
+
+      console.error(
+        "SUPPORT TOKEN CHECK ERROR:",
+        tokenCheckError.message
+      );
+
+      throw new Error(
+        "Could not generate support token."
+      );
+    }
+
+
+    if (!existing) {
+
+      supportToken =
+        candidate;
+
+    }
+
+  }
+
+
+  if (
+    !supportToken
+  ) {
+    throw new Error(
+      "Could not generate a unique support token."
+    );
+  }
+
+
+  /* =======================================================
+     CREATE SUPPORT REQUEST
+     ======================================================= */
+
+  const {
+    data: created,
+    error: insertError
+  } = await db
+    .from("support_requests")
+    .insert({
+
+      support_token:
+        supportToken,
+
+      appointment_id:
+        appointment.id,
+
+      technician_id:
+        technicianId,
+
+      /*
+       * Customer Support is currently HOLD.
+       * Therefore customer_id remains NULL for Phase 3.
+       */
+
+      customer_id:
+        null,
+
+      support_type:
+        supportType,
+
+      problem_details:
+        problemDetails,
+
+      latitude:
+        latitude,
+
+      longitude:
+        longitude,
+
+      location_url:
+        locationUrl,
+
+      location_captured_at:
+        new Date().toISOString(),
+
+      status:
+        "OPEN"
+
+    })
+    .select(`
+      id,
+      support_token,
+      appointment_id,
+      technician_id,
+      support_type,
+      problem_details,
+      latitude,
+      longitude,
+      location_url,
+      location_captured_at,
+      status,
+      created_at,
+      updated_at
+    `)
+    .single();
+
+
+  if (
+    insertError
+  ) {
+
+    console.error(
+      "SUPPORT REQUEST INSERT ERROR:",
+      insertError.message
+    );
+
+    throw new Error(
+      "SUPPORT_REQUEST_CREATE_FAILED"
+    );
+  }
+
+
+  /* =======================================================
+     RESPONSE
+     ======================================================= */
+
+  return {
+
+    support: {
+
+      id:
+        created.id,
+
+      support_token:
+        created.support_token,
+
+      appointment_id:
+        created.appointment_id,
+
+      technician_id:
+        created.technician_id,
+
+      support_type:
+        created.support_type,
+
+      problem_details:
+        created.problem_details,
+
+      latitude:
+        created.latitude,
+
+      longitude:
+        created.longitude,
+
+      location_url:
+        created.location_url,
+
+      location_captured_at:
+        created.location_captured_at,
+
+      status:
+        created.status,
+
+      created_at:
+        created.created_at,
+
+      updated_at:
+        created.updated_at
+
+    },
+
+    appointment: {
+
+      id:
+        appointment.id,
+
+      appointment_id:
+        appointment.appointment_id,
+
+      appointment_code:
+        appointment.appointment_code,
+
+      customer_name:
+        appointment.customer_name,
+
+      mobile:
+        appointment.mobile,
+
+      service_category:
+        appointment.service_category,
+
+      service_type:
+        appointment.service_type,
+
+      service_address:
+        appointment.service_address
+
+    }
+
+  };
+}
+
+
+/* =========================================================
+   SUPPORT TOKEN GENERATOR
+   FORMAT:
+   CFS-2026-XXXXX
+   ========================================================= */
+
+function generateSupportToken() {
+
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  const values =
+    new Uint32Array(5);
+
+  crypto.getRandomValues(
+    values
+  );
+
+
+  let randomPart = "";
+
+
+  for (
+    let i = 0;
+    i < 5;
+    i++
+  ) {
+
+    randomPart +=
+      characters[
+        values[i] %
+        characters.length
+      ];
+
+  }
+
+
+  return (
+    `CFS-${new Date().getFullYear()}-${randomPart}`
+  );
 }
 
 

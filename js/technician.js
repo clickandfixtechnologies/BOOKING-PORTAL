@@ -4454,7 +4454,7 @@ function openRaiseSupportRequestModal() {
         overlay
     );
 
-
+    populatePhase2SupportJobs(); 
     /* =====================================================
        ELEMENTS
        ===================================================== */
@@ -4681,7 +4681,7 @@ function openRaiseSupportRequestModal() {
        INITIAL JOB STATE
        ===================================================== */
 
-    populatePhase2SupportJobs();
+    
 
 }
 
@@ -4832,16 +4832,21 @@ async function populatePhase2SupportJobs() {
 
     const select =
         document.getElementById(
-            "support-job-select"
+            "supportJobSelect"
         );
 
     const preview =
         document.getElementById(
-            "support-job-preview"
+            "supportJobPreview"
         );
 
 
     if (!select) {
+
+        console.error(
+            "Support job select element not found."
+        );
+
         return;
     }
 
@@ -4861,11 +4866,7 @@ async function populatePhase2SupportJobs() {
 
     if (preview) {
 
-        preview.innerHTML = `
-            <div class="tech-support-job-preview-empty">
-                Select an assigned service to view details.
-            </div>
-        `;
+        preview.hidden = true;
 
     }
 
@@ -4873,7 +4874,7 @@ async function populatePhase2SupportJobs() {
     try {
 
         /* =================================================
-           LOAD REAL ASSIGNED JOBS
+           LOAD ASSIGNED JOBS
            ================================================= */
 
         const result =
@@ -4882,8 +4883,16 @@ async function populatePhase2SupportJobs() {
             );
 
 
+        console.log(
+            "Support jobs response:",
+            result
+        );
+
+
         const jobs =
-            Array.isArray(result?.jobs)
+            Array.isArray(
+                result?.jobs
+            )
                 ? result.jobs
                 : [];
 
@@ -4902,7 +4911,10 @@ async function populatePhase2SupportJobs() {
 
             select.disabled = true;
 
+
             if (preview) {
+
+                preview.hidden = false;
 
                 preview.innerHTML = `
                     <div class="tech-support-job-preview-empty">
@@ -4918,7 +4930,7 @@ async function populatePhase2SupportJobs() {
 
 
         /* =================================================
-           STORE JOB DATA
+           POPULATE DROPDOWN
            ================================================= */
 
         select.innerHTML = `
@@ -5005,11 +5017,7 @@ async function populatePhase2SupportJobs() {
 
                 if (preview) {
 
-                    preview.innerHTML = `
-                        <div class="tech-support-job-preview-empty">
-                            Select an assigned service to view details.
-                        </div>
-                    `;
+                    preview.hidden = true;
 
                 }
 
@@ -5017,7 +5025,7 @@ async function populatePhase2SupportJobs() {
             }
 
 
-            let job = null;
+            let job;
 
 
             try {
@@ -5035,6 +5043,8 @@ async function populatePhase2SupportJobs() {
                 );
 
                 if (preview) {
+
+                    preview.hidden = false;
 
                     preview.innerHTML = `
                         <div class="tech-support-form-error">
@@ -5075,6 +5085,8 @@ async function populatePhase2SupportJobs() {
 
         if (preview) {
 
+            preview.hidden = false;
+
             preview.innerHTML = `
                 <div class="tech-support-form-error">
                     ${esc(
@@ -5100,9 +5112,9 @@ function renderSupportJobPreview(
 ) {
 
     const preview =
-        document.getElementById(
-            "support-job-preview"
-        );
+    document.getElementById(
+        "supportJobPreview"
+    );
 
 
     if (!preview) {

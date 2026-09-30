@@ -1697,10 +1697,11 @@ async function openAdminSupportRequest(
             requestResponse,
             messageResponse
         ] = await Promise.all([
+
             api(
                 "support_get_request",
                 {
-                    id
+                    request_id: id
                 }
             ),
 
@@ -1710,6 +1711,7 @@ async function openAdminSupportRequest(
                     support_request_id: id
                 }
             )
+
         ]);
 
         const request =
@@ -1771,7 +1773,6 @@ async function openAdminSupportRequest(
             );
     }
 }
-
 
 /* =========================================================
    SUPPORT DETAILS UI

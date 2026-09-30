@@ -1011,7 +1011,7 @@ async function createSupportRequest(
      CREATE SUPPORT REQUEST
      ======================================================= */
 
-  const {
+    const {
     data: created,
     error: insertError
   } = await db
@@ -1026,14 +1026,6 @@ async function createSupportRequest(
 
       technician_id:
         technicianId,
-
-      /*
-       * Customer Support is currently HOLD.
-       * Therefore customer_id remains NULL for Phase 3.
-       */
-
-      customer_id:
-        null,
 
       support_type:
         supportType,
@@ -1075,17 +1067,29 @@ async function createSupportRequest(
     .single();
 
 
-  if (
+   if (
     insertError
   ) {
 
     console.error(
       "SUPPORT REQUEST INSERT ERROR:",
-      insertError.message
+      {
+        message:
+          insertError.message,
+
+        details:
+          insertError.details,
+
+        hint:
+          insertError.hint,
+
+        code:
+          insertError.code
+      }
     );
 
     throw new Error(
-      "SUPPORT_REQUEST_CREATE_FAILED"
+      `SUPPORT_REQUEST_CREATE_FAILED: ${insertError.message}`
     );
   }
 

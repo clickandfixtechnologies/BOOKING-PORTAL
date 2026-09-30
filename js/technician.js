@@ -1400,6 +1400,121 @@ async function loadProfile() {
                 </div>
 
 
+                                <!-- =================================================
+                     CHANGE PASSWORD
+                     ================================================= -->
+
+                <div class="tech-detail-section tech-password-section">
+
+                    <h3>
+                        Change Password
+                    </h3>
+
+                    <p class="tech-password-help">
+                        Update your technician portal password.
+                        Your current password is not required.
+                    </p>
+
+
+                    <div class="tech-password-form">
+
+
+                        <!-- NEW PASSWORD -->
+
+                        <div class="tech-password-field">
+
+                            <label
+                                for="technicianNewPassword"
+                            >
+                                New Password
+                            </label>
+
+                            <div class="tech-password-input-wrap">
+
+                                <input
+                                    type="password"
+                                    id="technicianNewPassword"
+                                    class="tech-input"
+                                    autocomplete="new-password"
+                                    minlength="6"
+                                    placeholder="Enter new password"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="tech-password-toggle"
+                                    data-password-target="technicianNewPassword"
+                                    aria-label="Show password"
+                                    title="Show password"
+                                >
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- CONFIRM PASSWORD -->
+
+                        <div class="tech-password-field">
+
+                            <label
+                                for="technicianConfirmPassword"
+                            >
+                                Confirm New Password
+                            </label>
+
+                            <div class="tech-password-input-wrap">
+
+                                <input
+                                    type="password"
+                                    id="technicianConfirmPassword"
+                                    class="tech-input"
+                                    autocomplete="new-password"
+                                    minlength="6"
+                                    placeholder="Confirm new password"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="tech-password-toggle"
+                                    data-password-target="technicianConfirmPassword"
+                                    aria-label="Show password"
+                                    title="Show password"
+                                >
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PASSWORD MESSAGE -->
+
+                        <p
+                            id="technicianPasswordMessage"
+                            class="tech-password-message"
+                            aria-live="polite"
+                        ></p>
+
+
+                        <!-- CHANGE BUTTON -->
+
+                        <button
+                            type="button"
+                            id="changeTechnicianPasswordBtn"
+                            class="tech-action-button tech-password-change-btn"
+                        >
+                            <i class="fa-solid fa-key"></i>
+                            Change Password
+                        </button>
+
+                    </div>
+
+                </div>
+
                 <!-- =================================================
                      ACCOUNT INFORMATION
                      ================================================= -->
@@ -1475,12 +1590,390 @@ async function loadProfile() {
     }
 
 
-    if (removePhotoBtn) {
+        if (removePhotoBtn) {
 
         removePhotoBtn.addEventListener(
             "click",
             handleTechnicianProfilePhotoRemove
         );
+    }
+
+
+    /* =========================================================
+       CHANGE PASSWORD EVENTS
+       ========================================================= */
+
+    const newPasswordInput =
+        document.getElementById(
+            "technicianNewPassword"
+        );
+
+    const confirmPasswordInput =
+        document.getElementById(
+            "technicianConfirmPassword"
+        );
+
+    const changePasswordButton =
+        document.getElementById(
+            "changeTechnicianPasswordBtn"
+        );
+
+    const passwordMessage =
+        document.getElementById(
+            "technicianPasswordMessage"
+        );
+
+
+    /* =========================================================
+       PASSWORD SHOW / HIDE
+       ========================================================= */
+
+    document
+        .querySelectorAll(
+            ".tech-password-toggle"
+        )
+        .forEach(toggleButton => {
+
+            toggleButton.addEventListener(
+                "click",
+                () => {
+
+                    const targetId =
+                        toggleButton.dataset
+                            .passwordTarget;
+
+                    const input =
+                        document.getElementById(
+                            targetId
+                        );
+
+                    if (!input) {
+                        return;
+                    }
+
+
+                    const icon =
+                        toggleButton.querySelector(
+                            "i"
+                        );
+
+
+                    if (
+                        input.type ===
+                        "password"
+                    ) {
+
+                        input.type =
+                            "text";
+
+                        toggleButton.setAttribute(
+                            "aria-label",
+                            "Hide password"
+                        );
+
+                        toggleButton.setAttribute(
+                            "title",
+                            "Hide password"
+                        );
+
+                        if (icon) {
+
+                            icon.className =
+                                "fa-solid fa-eye-slash";
+
+                        }
+
+                    } else {
+
+                        input.type =
+                            "password";
+
+                        toggleButton.setAttribute(
+                            "aria-label",
+                            "Show password"
+                        );
+
+                        toggleButton.setAttribute(
+                            "title",
+                            "Show password"
+                        );
+
+                        if (icon) {
+
+                            icon.className =
+                                "fa-solid fa-eye";
+
+                        }
+
+                    }
+
+                }
+            );
+
+        });
+
+
+    /* =========================================================
+       CHANGE PASSWORD
+       ========================================================= */
+
+    if (changePasswordButton) {
+
+        changePasswordButton.addEventListener(
+            "click",
+            async () => {
+
+                const newPassword =
+                    String(
+                        newPasswordInput?.value ||
+                        ""
+                    );
+
+                const confirmPassword =
+                    String(
+                        confirmPasswordInput?.value ||
+                        ""
+                    );
+
+
+                if (passwordMessage) {
+
+                    passwordMessage.textContent =
+                        "";
+
+                    passwordMessage.className =
+                        "tech-password-message";
+
+                }
+
+
+                /* ---------------------------------------------
+                   EMPTY CHECK
+                   --------------------------------------------- */
+
+                if (!newPassword) {
+
+                    showTechnicianPasswordMessage(
+                        "Please enter a new password.",
+                        "error"
+                    );
+
+                    newPasswordInput?.focus();
+
+                    return;
+                }
+
+
+                /* ---------------------------------------------
+                   MINIMUM LENGTH
+                   --------------------------------------------- */
+
+                if (newPassword.length < 6) {
+
+                    showTechnicianPasswordMessage(
+                        "Password must be at least 6 characters long.",
+                        "error"
+                    );
+
+                    newPasswordInput?.focus();
+
+                    return;
+                }
+
+
+                /* ---------------------------------------------
+                   CONFIRM PASSWORD
+                   --------------------------------------------- */
+
+                if (!confirmPassword) {
+
+                    showTechnicianPasswordMessage(
+                        "Please confirm your new password.",
+                        "error"
+                    );
+
+                    confirmPasswordInput?.focus();
+
+                    return;
+                }
+
+
+                /* ---------------------------------------------
+                   PASSWORD MATCH
+                   --------------------------------------------- */
+
+                if (
+                    newPassword !==
+                    confirmPassword
+                ) {
+
+                    showTechnicianPasswordMessage(
+                        "New password and confirm password do not match.",
+                        "error"
+                    );
+
+                    confirmPasswordInput?.focus();
+
+                    return;
+                }
+
+
+                /* ---------------------------------------------
+                   LOADING STATE
+                   --------------------------------------------- */
+
+                changePasswordButton.disabled =
+                    true;
+
+                changePasswordButton.innerHTML = `
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Updating Password...
+                `;
+
+
+                try {
+
+                    if (!sb) {
+
+                        throw new Error(
+                            "Technician portal is not configured."
+                        );
+
+                    }
+
+
+                    /* -----------------------------------------
+                       SUPABASE AUTH PASSWORD UPDATE
+
+                       Existing authenticated session
+                       is used automatically.
+                       ----------------------------------------- */
+
+                    const {
+                        data,
+                        error
+                    } =
+                        await sb.auth.updateUser({
+                            password:
+                                newPassword
+                        });
+
+
+                    if (error) {
+
+                        console.error(
+                            "SUPABASE PASSWORD UPDATE ERROR:",
+                            error
+                        );
+
+                        throw error;
+
+                    }
+
+
+                    if (!data?.user) {
+
+                        throw new Error(
+                            "Password could not be updated."
+                        );
+
+                    }
+
+
+                    /* -----------------------------------------
+                       SUCCESS
+                       ----------------------------------------- */
+
+                    showTechnicianPasswordMessage(
+                        "Password changed successfully.",
+                        "success"
+                    );
+
+
+                    newPasswordInput.value =
+                        "";
+
+                    confirmPasswordInput.value =
+                        "";
+
+
+                    /* -----------------------------------------
+                       SESSION MAINTENANCE
+
+                       Supabase keeps the current authenticated
+                       session. We intentionally do not sign
+                       the technician out.
+                       ----------------------------------------- */
+
+                    console.log(
+                        "Technician password changed successfully."
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Technician password change failed:",
+                        error
+                    );
+
+
+                    let message =
+                        error?.message ||
+                        "Password could not be changed.";
+
+
+                    /* -----------------------------------------
+                       EXPIRED / INVALID SESSION
+                       ----------------------------------------- */
+
+                    const lowerMessage =
+                        String(message)
+                            .toLowerCase();
+
+
+                    if (
+                        lowerMessage.includes(
+                            "session"
+                        ) ||
+                        lowerMessage.includes(
+                            "jwt"
+                        ) ||
+                        lowerMessage.includes(
+                            "token"
+                        ) ||
+                        lowerMessage.includes(
+                            "not authenticated"
+                        )
+                    ) {
+
+                        message =
+                            "Your session has expired. Please sign in again.";
+
+                    }
+
+
+                    showTechnicianPasswordMessage(
+                        message,
+                        "error"
+                    );
+
+
+                } finally {
+
+                    changePasswordButton.disabled =
+                        false;
+
+                    changePasswordButton.innerHTML = `
+                        <i class="fa-solid fa-key"></i>
+                        Change Password
+                    `;
+
+                }
+
+            }
+        );
+
     }
 }
 
@@ -2707,6 +3200,34 @@ async function handleTechnicianProfilePhotoRemove() {
             "Profile photo could not be removed."
         );
     }
+}
+
+/* =========================================================
+   TECHNICIAN PASSWORD MESSAGE
+   ========================================================= */
+
+function showTechnicianPasswordMessage(
+    message,
+    type = "error"
+) {
+
+    const element =
+        document.getElementById(
+            "technicianPasswordMessage"
+        );
+
+    if (!element) {
+        return;
+    }
+
+
+    element.textContent =
+        String(message || "");
+
+
+    element.className =
+        `tech-password-message tech-password-message-${type}`;
+
 }
 
 async function loadHistory() {

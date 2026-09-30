@@ -4823,67 +4823,597 @@ function showSupportRequestSuccessPreview(
 
 }
 
-
 /* =========================================================
-   PHASE 2B
-   TEMPORARY JOB DATA
+   POPULATE SUPPORT JOBS
+   PHASE 3B
    ========================================================= */
 
-function populatePhase2SupportJobs() {
+async function populatePhase2SupportJobs() {
 
     const select =
         document.getElementById(
-            "supportJobSelect"
+            "support-job-select"
         );
+
+    const preview =
+        document.getElementById(
+            "support-job-preview"
+        );
+
 
     if (!select) {
         return;
     }
 
 
-    /*
-     * IMPORTANT:
-     * This is intentionally a UI placeholder.
-     *
-     * We are NOT querying Supabase here.
-     *
-     * Phase 3 will populate this dropdown from
-     * the technician's legitimate assigned appointments.
-     */
+    /* =====================================================
+       RESET
+       ===================================================== */
+
+    select.disabled = true;
+
+    select.innerHTML = `
+        <option value="">
+            Loading assigned services...
+        </option>
+    `;
 
 
-    const option =
-        document.createElement(
-            "option"
+    if (preview) {
+
+        preview.innerHTML = `
+            <div class="tech-support-job-preview-empty">
+                Select an assigned service to view details.
+            </div>
+        `;
+
+    }
+
+
+    try {
+
+        /* =================================================
+           LOAD REAL ASSIGNED JOBS
+           ================================================= */
+
+        const result =
+            await api(
+                "support_jobs"
+            );
+
+
+        const jobs =
+            Array.isArray(result?.jobs)
+                ? result.jobs
+                : [];
+
+
+        /* =================================================
+           NO JOBS
+           ================================================= */
+
+        if (!jobs.length) {
+
+            select.innerHTML = `
+                <option value="">
+                    No active assigned services found
+                </option>
+            `;
+
+            select.disabled = true;
+
+            if (preview) {
+
+                preview.innerHTML = `
+                    <div class="tech-support-job-preview-empty">
+                        You currently have no active assigned
+                        service available for support.
+                    </div>
+                `;
+
+            }
+
+            return;
+        }
+
+
+        /* =================================================
+           STORE JOB DATA
+           ================================================= */
+
+        select.innerHTML = `
+            <option value="">
+                Select an assigned service
+            </option>
+        `;
+
+
+        jobs.forEach(
+            (job) => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    job.id;
+
+
+                const date =
+                    job.appointment_date
+                        ? formatSupportJobDate(
+                            job.appointment_date
+                        )
+                        : "";
+
+
+                const time =
+                    job.appointment_time
+                        ? formatSupportJobTime(
+                            job.appointment_time
+                        )
+                        : "";
+
+
+                option.textContent =
+                    [
+                        job.appointment_code,
+                        job.customer_name,
+                        job.service_category,
+                        date,
+                        time
+                    ]
+                    .filter(Boolean)
+                    .join(" • ");
+
+
+                option.dataset.job =
+                    JSON.stringify(
+                        job
+                    );
+
+
+                select.appendChild(
+                    option
+                );
+
+            }
         );
 
-    option.value = "";
 
-    option.textContent =
-        "Assigned services will appear here";
-
-    option.disabled = true;
+        select.disabled = false;
 
 
-    select.appendChild(
-        option
+        /* =================================================
+           JOB SELECTION
+           ================================================= */
+
+        select.onchange = () => {
+
+            const selectedOption =
+                select.options[
+                    select.selectedIndex
+                ];
+
+
+            if (
+                !selectedOption ||
+                !selectedOption.dataset.job
+            ) {
+
+                if (preview) {
+
+                    preview.innerHTML = `
+                        <div class="tech-support-job-preview-empty">
+                            Select an assigned service to view details.
+                        </div>
+                    `;
+
+                }
+
+                return;
+            }
+
+
+            let job = null;
+
+
+            try {
+
+                job =
+                    JSON.parse(
+                        selectedOption.dataset.job
+                    );
+
+            } catch (error) {
+
+                console.error(
+                    "Support job data parse failed:",
+                    error
+                );
+
+                if (preview) {
+
+                    preview.innerHTML = `
+                        <div class="tech-support-form-error">
+                            Unable to load the selected service.
+                        </div>
+                    `;
+
+                }
+
+                return;
+            }
+
+
+            renderSupportJobPreview(
+                job
+            );
+
+        };
+
+
+    } catch (error) {
+
+        console.error(
+            "Support jobs load failed:",
+            error
+        );
+
+
+        select.innerHTML = `
+            <option value="">
+                Unable to load assigned services
+            </option>
+        `;
+
+
+        select.disabled = true;
+
+
+        if (preview) {
+
+            preview.innerHTML = `
+                <div class="tech-support-form-error">
+                    ${esc(
+                        error?.message ||
+                        "Unable to load assigned services."
+                    )}
+                </div>
+            `;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   SUPPORT JOB PREVIEW
+   ========================================================= */
+
+function renderSupportJobPreview(
+    job
+) {
+
+    const preview =
+        document.getElementById(
+            "support-job-preview"
+        );
+
+
+    if (!preview) {
+        return;
+    }
+
+
+    const appointmentCode =
+        job.appointment_code ||
+        "—";
+
+
+    const jobCode =
+        job.job_code ||
+        "Not generated";
+
+
+    const customerName =
+        job.customer_name ||
+        "—";
+
+
+    const mobile =
+        job.mobile ||
+        "—";
+
+
+    const category =
+        job.service_category ||
+        "—";
+
+
+    const serviceType =
+        job.service_type ||
+        "—";
+
+
+    const address =
+        job.service_address ||
+        "Address not available";
+
+
+    const status =
+        job.status ||
+        "—";
+
+
+    const date =
+        job.appointment_date
+            ? formatSupportJobDate(
+                job.appointment_date
+            )
+            : "—";
+
+
+    const time =
+        job.appointment_time
+            ? formatSupportJobTime(
+                job.appointment_time
+            )
+            : "—";
+
+
+    preview.innerHTML = `
+
+        <div class="tech-support-job-preview-grid">
+
+            <div class="tech-support-job-preview-item">
+                <span>Customer</span>
+                <strong>
+                    ${esc(customerName)}
+                </strong>
+            </div>
+
+
+            <div class="tech-support-job-preview-item">
+                <span>Mobile</span>
+                <strong>
+                    ${esc(mobile)}
+                </strong>
+            </div>
+
+
+            <div class="tech-support-job-preview-item">
+                <span>Appointment</span>
+                <strong>
+                    ${esc(appointmentCode)}
+                </strong>
+            </div>
+
+
+            <div class="tech-support-job-preview-item">
+                <span>Job ID</span>
+                <strong>
+                    ${esc(jobCode)}
+                </strong>
+            </div>
+
+
+            <div class="tech-support-job-preview-item">
+                <span>Service</span>
+                <strong>
+                    ${esc(category)}
+                </strong>
+            </div>
+
+
+            <div class="tech-support-job-preview-item">
+                <span>Service Type</span>
+                <strong>
+                    ${esc(serviceType)}
+                </strong>
+            </div>
+
+
+            <div class="tech-support-job-preview-item">
+                <span>Appointment Date</span>
+                <strong>
+                    ${esc(date)}
+                </strong>
+            </div>
+
+
+            <div class="tech-support-job-preview-item">
+                <span>Appointment Time</span>
+                <strong>
+                    ${esc(time)}
+                </strong>
+            </div>
+
+
+            <div class="tech-support-job-preview-item">
+                <span>Status</span>
+                <strong>
+                    ${esc(
+                        formatSupportJobStatus(
+                            status
+                        )
+                    )}
+                </strong>
+            </div>
+
+
+            <div class="tech-support-job-preview-item tech-support-job-preview-full">
+                <span>Service Address</span>
+                <strong>
+                    ${esc(address)}
+                </strong>
+            </div>
+
+        </div>
+
+    `;
+}
+
+
+/* =========================================================
+   DATE FORMATTER
+   ========================================================= */
+
+function formatSupportJobDate(
+    value
+) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    const date =
+        new Date(
+            `${value}T00:00:00`
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return value;
+    }
+
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   TIME FORMATTER
+   ========================================================= */
+
+function formatSupportJobTime(
+    value
+) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    const parts =
+        String(value)
+            .split(":");
+
+
+    if (
+        parts.length < 2
+    ) {
+        return value;
+    }
+
+
+    const hour =
+        Number(
+            parts[0]
+        );
+
+
+    const minute =
+        Number(
+            parts[1]
+        );
+
+
+    if (
+        !Number.isFinite(hour) ||
+        !Number.isFinite(minute)
+    ) {
+        return value;
+    }
+
+
+    const date =
+        new Date();
+
+
+    date.setHours(
+        hour,
+        minute,
+        0,
+        0
     );
 
 
-    select.addEventListener(
-        "change",
-        () => {
-
-            const preview =
-                document.getElementById(
-                    "supportJobPreview"
-                );
-
-            if (preview) {
-                preview.hidden = true;
-            }
-
+    return date.toLocaleTimeString(
+        "en-IN",
+        {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
         }
+    );
+
+}
+
+
+/* =========================================================
+   STATUS FORMATTER
+   ========================================================= */
+
+function formatSupportJobStatus(
+    status
+) {
+
+    const labels = {
+
+        pending:
+            "Pending",
+
+        confirmed:
+            "Confirmed",
+
+        technician_assigned:
+            "Technician Assigned",
+
+        on_the_way:
+            "On The Way",
+
+        in_progress:
+            "In Progress",
+
+        job_id_created:
+            "Job ID Created",
+
+        rescheduled:
+            "Rescheduled"
+
+    };
+
+
+    return (
+        labels[status] ||
+        String(status || "")
+            .replaceAll(
+                "_",
+                " "
+            )
+            .replace(
+                /\b\w/g,
+                char =>
+                    char.toUpperCase()
+            )
     );
 
 }

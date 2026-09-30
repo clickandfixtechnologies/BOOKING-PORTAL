@@ -5706,3 +5706,40 @@ i[class*="fa-"]{
 
 }
 
+/* =========================================================
+   SUPPORT JOB PREVIEW - PHASE 3B
+   ========================================================= */
+
+.tech-support-job-preview-empty {
+    padding: 16px;
+    border: 1px dashed rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.tech-support-job-preview-item {
+    min-width: 0;
+}
+
+.tech-support-job-preview-item span {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.55;
+}
+
+.tech-support-job-preview-item strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.tech-support-job-preview-full {
+    grid-column: 1 / -1;
+}

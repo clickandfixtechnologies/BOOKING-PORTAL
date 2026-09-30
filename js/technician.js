@@ -4018,23 +4018,20 @@ async function loadSupport() {
 
 
     /* =========================================================
-       MY SUPPORT REQUESTS
-       ========================================================= */
+   MY SUPPORT REQUESTS
+   PHASE 4B
+   ========================================================= */
 
-    document
-        .getElementById("openMySupportRequests")
-        ?.addEventListener(
-            "click",
-            () => {
+document
+    .getElementById("openMySupportRequests")
+    ?.addEventListener(
+        "click",
+        async () => {
 
-                showSupportPhase2Placeholder(
-                    "My Support Requests",
-                    "Your support request history will be connected in the next phase."
-                );
+            await loadMySupportRequests();
 
-            }
-        );
-
+        }
+    );
 
     /* =========================================================
        SPEAK TO CLICK & FIX
@@ -4998,11 +4995,6 @@ if (submitSupportRequest) {
 
             }
         );
-
-
-    /* =====================================================
-       INITIAL JOB STATE
-       ===================================================== */
 
     
 
@@ -6061,6 +6053,854 @@ function handleSupportLocationError(
         retryButton.hidden = false;
 
     }
+
+}
+
+/* =========================================================
+   MY SUPPORT REQUESTS
+   PHASE 4B
+   LOAD TECHNICIAN SUPPORT REQUEST HISTORY
+   ========================================================= */
+
+async function loadMySupportRequests() {
+
+    const supportCenter =
+        jobs.querySelector(
+            ".tech-support-center"
+        );
+
+    if (!supportCenter) {
+        return;
+    }
+
+
+    /* =====================================================
+       LOADING STATE
+       ===================================================== */
+
+    const existingPanel =
+        supportCenter.querySelector(
+            "#mySupportRequestsPanel"
+        );
+
+    if (existingPanel) {
+
+        existingPanel.remove();
+
+    }
+
+
+    const panel =
+        document.createElement(
+            "section"
+        );
+
+    panel.id =
+        "mySupportRequestsPanel";
+
+    panel.className =
+        "tech-support-requests-panel";
+
+    panel.innerHTML = `
+        <div class="tech-support-requests-loading">
+
+            <i class="fa-solid fa-spinner fa-spin"></i>
+
+            <span>
+                Loading your support requests...
+            </span>
+
+        </div>
+    `;
+
+
+    supportCenter.appendChild(
+        panel
+    );
+
+
+    panel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+
+    try {
+
+        /* =================================================
+           BACKEND REQUEST
+           ================================================= */
+
+        const response =
+            await api(
+                "support_my_requests"
+            );
+
+
+        const requests =
+            Array.isArray(
+                response?.requests
+            )
+                ? response.requests
+                : [];
+
+
+        /* =================================================
+           EMPTY STATE
+           ================================================= */
+
+        if (!requests.length) {
+
+            panel.innerHTML = `
+
+                <div class="tech-support-requests-header">
+
+                    <div>
+
+                        <p class="tech-support-eyebrow">
+                            SUPPORT HISTORY
+                        </p>
+
+                        <h3>
+                            My Support Requests
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tech-support-empty-state">
+
+                    <div class="tech-support-empty-icon">
+
+                        <i class="fa-solid fa-clipboard-check"></i>
+
+                    </div>
+
+                    <h4>
+                        No support requests yet
+                    </h4>
+
+                    <p>
+                        You have not created any support
+                        requests yet.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        /* =================================================
+           REQUEST LIST
+           ================================================= */
+
+        panel.innerHTML = `
+
+            <div class="tech-support-requests-header">
+
+                <div>
+
+                    <p class="tech-support-eyebrow">
+                        SUPPORT HISTORY
+                    </p>
+
+                    <h3>
+                        My Support Requests
+                    </h3>
+
+                    <p>
+                        View the status and details of
+                        your submitted support requests.
+                    </p>
+
+                </div>
+
+                <div class="tech-support-request-count">
+
+                    ${requests.length}
+
+                    <span>
+                        Request${requests.length === 1 ? "" : "s"}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="tech-support-request-list"
+                id="mySupportRequestList"
+            ></div>
+
+        `;
+
+
+        const list =
+            panel.querySelector(
+                "#mySupportRequestList"
+            );
+
+
+        if (!list) {
+            return;
+        }
+
+
+        /* =================================================
+           RENDER REQUESTS
+           ================================================= */
+
+        requests.forEach(
+            (request) => {
+
+                const card =
+                    document.createElement(
+                        "article"
+                    );
+
+                card.className =
+                    "tech-support-request-item";
+
+
+                const status =
+                    String(
+                        request?.status ||
+                        "OPEN"
+                    ).toUpperCase();
+
+
+                const supportType =
+                    formatSupportType(
+                        request?.support_type
+                    );
+
+
+                const createdAt =
+                    formatSupportDate(
+                        request?.created_at
+                    );
+
+
+                const problemDetails =
+                    String(
+                        request?.problem_details ||
+                        "No problem description provided."
+                    );
+
+
+                const appointmentId =
+                    request?.appointment_id
+                        ? String(
+                            request.appointment_id
+                        )
+                        : "Not linked";
+
+
+                const supportToken =
+                    request?.support_token
+                        ? String(
+                            request.support_token
+                        )
+                        : "Unavailable";
+
+
+                card.innerHTML = `
+
+                    <div class="tech-support-request-top">
+
+                        <div>
+
+                            <span class="tech-support-request-token">
+                                ${esc(supportToken)}
+                            </span>
+
+                            <span class="tech-support-request-type">
+                                ${esc(supportType)}
+                            </span>
+
+                        </div>
+
+                        <span
+                            class="tech-support-request-status status-${esc(
+                                status.toLowerCase()
+                            )}"
+                        >
+                            ${esc(status)}
+                        </span>
+
+                    </div>
+
+
+                    <div class="tech-support-request-body">
+
+                        <p class="tech-support-request-problem">
+                            ${esc(problemDetails)}
+                        </p>
+
+                    </div>
+
+
+                    <div class="tech-support-request-meta">
+
+                        <div>
+
+                            <i class="fa-solid fa-calendar-days"></i>
+
+                            <span>
+                                ${esc(createdAt)}
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <i class="fa-solid fa-briefcase"></i>
+
+                            <span>
+                                Appointment:
+                                ${esc(appointmentId)}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="tech-support-request-actions">
+
+                        ${
+                            request?.location_url
+                                ? `
+                                    <a
+                                        href="${esc(
+                                            request.location_url
+                                        )}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="tech-support-request-action"
+                                    >
+                                        <i class="fa-solid fa-location-dot"></i>
+                                        View Location
+                                    </a>
+                                `
+                                : ""
+                        }
+
+
+                        <button
+                            type="button"
+                            class="tech-support-request-action tech-support-request-view"
+                            data-support-id="${esc(
+                                request?.id || ""
+                            )}"
+                        >
+
+                            <i class="fa-solid fa-eye"></i>
+
+                            View Details
+
+                        </button>
+
+                    </div>
+
+                `;
+
+
+                list.appendChild(
+                    card
+                );
+
+
+                const viewButton =
+                    card.querySelector(
+                        ".tech-support-request-view"
+                    );
+
+
+                viewButton?.addEventListener(
+                    "click",
+                    () => {
+
+                        showMySupportRequestDetails(
+                            request
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "My Support Requests failed:",
+            error
+        );
+
+
+        panel.innerHTML = `
+
+            <div class="tech-support-error-state">
+
+                <div class="tech-support-error-icon">
+
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+
+                </div>
+
+                <h4>
+                    Unable to load support requests
+                </h4>
+
+                <p>
+                    ${esc(
+                        error?.message ||
+                        "Something went wrong while loading your support requests."
+                    )}
+                </p>
+
+
+                <button
+                    type="button"
+                    class="tech-support-retry-button"
+                    id="retryMySupportRequests"
+                >
+
+                    <i class="fa-solid fa-rotate-right"></i>
+
+                    Try Again
+
+                </button>
+
+            </div>
+
+        `;
+
+
+        panel
+            .querySelector(
+                "#retryMySupportRequests"
+            )
+            ?.addEventListener(
+                "click",
+                () => {
+
+                    loadMySupportRequests();
+
+                }
+            );
+
+    }
+
+}
+
+/* =========================================================
+   SUPPORT TYPE FORMATTER
+   ========================================================= */
+
+function formatSupportType(
+    value
+) {
+
+    const labels = {
+
+        TECHNICAL_PROBLEM:
+            "Technical Problem",
+
+        APPOINTMENT_JOB:
+            "Appointment / Job",
+
+        CCTV_PROBLEM:
+            "CCTV Problem",
+
+        COMPUTER_LAPTOP:
+            "Computer / Laptop",
+
+        JOB_ID_BILLING:
+            "Job ID / Billing",
+
+        TECHNICIAN_SUPPORT:
+            "Technician Support",
+
+        OTHER:
+            "Other"
+
+    };
+
+
+    const key =
+        String(
+            value || ""
+        ).toUpperCase();
+
+
+    return (
+        labels[key] ||
+        key
+            .replace(/_/g, " ")
+            .replace(
+                /\b\w/g,
+                (char) =>
+                    char.toUpperCase()
+            ) ||
+        "Support Request"
+    );
+
+}
+
+
+
+/* =========================================================
+   SUPPORT DATE FORMATTER
+   ========================================================= */
+
+function formatSupportDate(
+    value
+) {
+
+    if (!value) {
+        return "Date unavailable";
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return String(
+            value
+        );
+
+    }
+
+
+    return date.toLocaleString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   SUPPORT REQUEST DETAILS
+   PHASE 4B
+   ========================================================= */
+
+function showMySupportRequestDetails(
+    request
+) {
+
+    if (!request) {
+        return;
+    }
+
+
+    const status =
+        String(
+            request.status ||
+            "OPEN"
+        ).toUpperCase();
+
+
+    const supportType =
+        formatSupportType(
+            request.support_type
+        );
+
+
+    const createdAt =
+        formatSupportDate(
+            request.created_at
+        );
+
+
+    const updatedAt =
+        formatSupportDate(
+            request.updated_at
+        );
+
+
+    const supportToken =
+        String(
+            request.support_token ||
+            "Unavailable"
+        );
+
+
+    const appointmentId =
+        request.appointment_id
+            ? String(
+                request.appointment_id
+            )
+            : "Not linked";
+
+
+    const problemDetails =
+        String(
+            request.problem_details ||
+            "No problem description provided."
+        );
+
+
+    const locationUrl =
+        request.location_url
+            ? String(
+                request.location_url
+            )
+            : "";
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.className =
+        "tech-support-request-modal";
+
+
+    modal.innerHTML = `
+
+        <div
+            class="tech-support-request-modal-backdrop"
+            data-close-support-modal="true"
+        ></div>
+
+
+        <div
+            class="tech-support-request-modal-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Support request details"
+        >
+
+            <div class="tech-support-request-modal-header">
+
+                <div>
+
+                    <p class="tech-support-eyebrow">
+                        SUPPORT REQUEST
+                    </p>
+
+                    <h3>
+                        ${esc(supportToken)}
+                    </h3>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="tech-support-request-modal-close"
+                    aria-label="Close"
+                    data-close-support-modal="true"
+                >
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </div>
+
+
+            <div class="tech-support-request-modal-status">
+
+                <span
+                    class="tech-support-request-status status-${esc(
+                        status.toLowerCase()
+                    )}"
+                >
+                    ${esc(status)}
+                </span>
+
+            </div>
+
+
+            <div class="tech-support-request-detail-grid">
+
+                <div>
+
+                    <span>
+                        Support Type
+                    </span>
+
+                    <strong>
+                        ${esc(supportType)}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Appointment
+                    </span>
+
+                    <strong>
+                        ${esc(appointmentId)}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Created
+                    </span>
+
+                    <strong>
+                        ${esc(createdAt)}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Last Updated
+                    </span>
+
+                    <strong>
+                        ${esc(updatedAt)}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="tech-support-request-detail-description">
+
+                <span>
+                    Problem Details
+                </span>
+
+                <p>
+                    ${esc(problemDetails)}
+                </p>
+
+            </div>
+
+
+            <div class="tech-support-request-modal-actions">
+
+                ${
+                    locationUrl
+                        ? `
+                            <a
+                                href="${esc(locationUrl)}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="tech-support-request-action"
+                            >
+                                <i class="fa-solid fa-location-dot"></i>
+                                Open Location
+                            </a>
+                        `
+                        : ""
+                }
+
+
+                <button
+                    type="button"
+                    class="tech-support-request-action"
+                    data-close-support-modal="true"
+                >
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                    Close
+
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    const closeModal =
+        () => {
+
+            modal.remove();
+
+        };
+
+
+    modal
+        .querySelectorAll(
+            "[data-close-support-modal]"
+        )
+        .forEach(
+            (element) => {
+
+                element.addEventListener(
+                    "click",
+                    closeModal
+                );
+
+            }
+        );
+
+
+    const escapeHandler =
+        (event) => {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeModal();
+
+                document.removeEventListener(
+                    "keydown",
+                    escapeHandler
+                );
+
+            }
+
+        };
+
+
+    document.addEventListener(
+        "keydown",
+        escapeHandler
+    );
 
 }
 

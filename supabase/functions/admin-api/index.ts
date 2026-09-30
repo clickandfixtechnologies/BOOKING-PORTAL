@@ -52,6 +52,21 @@ async function route(db:any, userId:string, body:any) {
     case "notifications": return notifications(db,userId);
     case "notification_logs": return notificationLogs(db);
     case "mark_notification_read": return markRead(db,userId,body.id);
+
+    case "support_requests": return supportRequests(db,body);
+
+    case "support_get_request":
+    return supportGetRequest(db,body);
+
+    case "support_messages":
+    return supportMessages(db,body);
+
+    case "support_message_send":
+    return sendSupportMessage(db,userId,body);
+
+    case "support_status_update":
+    return updateSupportStatus(db,userId,body);
+
     case "delete_appointment": return deleteAppointment(db,body.id);
     default: throw new Error("Unknown admin action.");
   }
@@ -451,5 +466,1147 @@ async function deleteTechnician(db:any,id:string){
 async function notifications(db:any,userId:string){const{data,error}=await db.from("admin_notifications").select("*,appointments(appointment_id)").eq("admin_id",userId).order("created_at",{ascending:false}).limit(50);if(error)throw error;return{notifications:data||[]};}
 async function notificationLogs(db:any){const{data,error}=await db.from("notifications").select("id,channel,type,status,created_at,sent_at,error,appointments(appointment_id)").order("created_at",{ascending:false}).limit(100);if(error)throw error;return{logs:data||[]};}
 async function markRead(db:any,userId:string,id:string){const{error}=await db.from("admin_notifications").update({is_read:true,read_at:new Date().toISOString()}).eq("id",id).eq("admin_id",userId);if(error)throw error;return{ok:true};}
+
+/* =========================================================
+   ADMIN SUPPORT
+   PHASE 6A.1
+   SUPPORT REQUEST LIST
+   ========================================================= */
+
+async function supportRequests(
+  db:any,
+  body:any
+) {
+
+  const filters =
+    body?.filters || {};
+
+  let query =
+    db
+      .from("support_requests")
+      .select(
+        `
+        id,
+        support_token,
+        appointment_id,
+        technician_id,
+        support_type,
+        problem_details,
+        latitude,
+        longitude,
+        location_url,
+        location_captured_at,
+        status,
+        created_at,
+        updated_at,
+        acknowledged_at,
+        resolved_at,
+        closed_at,
+
+        technicians(
+          id,
+          technician_code,
+          full_name,
+          mobile,
+          username
+        ),
+
+        appointments(
+          id,
+          appointment_id,
+          appointment_code,
+          appointment_date,
+          appointment_time,
+          customer_name,
+          mobile,
+          service_category,
+          service_type,
+          service_address,
+          job_code,
+          status
+        )
+        `,
+        {
+          count:"exact"
+        }
+      )
+      .order(
+        "created_at",
+        {
+          ascending:false
+        }
+      );
+
+  /*
+   * Status filter
+   */
+
+  if(filters.status){
+
+    const status =
+      String(
+        filters.status
+      )
+        .trim()
+        .toUpperCase();
+
+    const allowedStatuses = [
+      "OPEN",
+      "ACKNOWLEDGED",
+      "IN_PROGRESS",
+      "RESOLVED",
+      "CLOSED",
+      "CANCELLED"
+    ];
+
+    if(
+      !allowedStatuses.includes(
+        status
+      )
+    ){
+
+      throw new Error(
+        "Invalid support status."
+      );
+
+    }
+
+    query =
+      query.eq(
+        "status",
+        status
+      );
+
+  }
+
+  /*
+   * Technician filter
+   */
+
+  if(filters.technician_id){
+
+    if(
+      !isUuid(
+        filters.technician_id
+      )
+    ){
+
+      throw new Error(
+        "Invalid technician."
+      );
+
+    }
+
+    query =
+      query.eq(
+        "technician_id",
+        filters.technician_id
+      );
+
+  }
+
+  /*
+   * Support type filter
+   */
+
+  if(filters.support_type){
+
+    query =
+      query.eq(
+        "support_type",
+        String(
+          filters.support_type
+        ).trim()
+      );
+
+  }
+
+  /*
+   * Search
+   *
+   * Search support token first.
+   * Appointment / technician searching
+   * will be handled from the UI/detail
+   * layer to avoid unsafe cross-table OR syntax.
+   */
+
+  if(filters.support_token){
+
+    const token =
+      String(
+        filters.support_token
+      )
+        .trim()
+        .toUpperCase();
+
+    query =
+      query.eq(
+        "support_token",
+        token
+      );
+
+  }
+
+  const offset =
+    Math.max(
+      0,
+      Number(
+        body?.offset
+      ) || 0
+    );
+
+  const limit =
+    Math.min(
+      50,
+      Math.max(
+        1,
+        Number(
+          body?.limit
+        ) || 50
+      )
+    );
+
+  const {
+    data,
+    error,
+    count
+  } =
+    await query.range(
+      offset,
+      offset + limit - 1
+    );
+
+  if(error){
+
+    console.error(
+      "ADMIN SUPPORT REQUESTS QUERY ERROR:",
+      error
+    );
+
+    throw new Error(
+      "SUPPORT_REQUESTS_QUERY_FAILED"
+    );
+
+  }
+
+  return {
+    requests:
+      data || [],
+
+    count:
+      count || 0,
+
+    offset,
+
+    limit
+  };
+
+}
+
+/* =========================================================
+   ADMIN SUPPORT
+   PHASE 6A.2
+   SUPPORT REQUEST DETAILS
+   ========================================================= */
+
+async function supportGetRequest(
+  db:any,
+  body:any
+) {
+
+  const requestId =
+    String(
+      body?.request_id ||
+      ""
+    ).trim();
+
+  if(
+    !requestId ||
+    !isUuid(requestId)
+  ){
+
+    throw new Error(
+      "Invalid support request."
+    );
+
+  }
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("support_requests")
+      .select(
+        `
+        id,
+        support_token,
+        appointment_id,
+        technician_id,
+        support_type,
+        problem_details,
+        latitude,
+        longitude,
+        location_url,
+        location_captured_at,
+        status,
+        created_at,
+        updated_at,
+        acknowledged_at,
+        resolved_at,
+        closed_at,
+
+        technicians(
+          id,
+          technician_code,
+          full_name,
+          mobile,
+          username,
+          specialization,
+          working_days,
+          working_start,
+          working_end,
+          is_active,
+          auth_user_id,
+          profile_image_path
+        ),
+
+        appointments(
+          id,
+          appointment_id,
+          appointment_code,
+          appointment_date,
+          appointment_time,
+          customer_name,
+          mobile,
+          email,
+          service_category,
+          service_type,
+          service_location_type,
+          service_address,
+          landmark,
+          latitude,
+          longitude,
+          google_maps_url,
+          problem_description,
+          job_code,
+          status
+        )
+        `
+      )
+      .eq(
+        "id",
+        requestId
+      )
+      .maybeSingle();
+
+  if(error){
+
+    console.error(
+      "ADMIN SUPPORT REQUEST DETAIL ERROR:",
+      error
+    );
+
+    throw new Error(
+      "SUPPORT_REQUEST_DETAIL_FAILED"
+    );
+
+  }
+
+  if(!data){
+
+    throw new Error(
+      "SUPPORT_REQUEST_NOT_FOUND"
+    );
+
+  }
+
+  return {
+    request:data
+  };
+
+}
+
+/* =========================================================
+   ADMIN SUPPORT
+   PHASE 6A.3
+   SUPPORT MESSAGES
+   ========================================================= */
+
+async function supportMessages(
+  db:any,
+  body:any
+) {
+
+  const requestId =
+    String(
+      body?.support_request_id ||
+      ""
+    ).trim();
+
+  if(
+    !requestId ||
+    !isUuid(requestId)
+  ){
+
+    throw new Error(
+      "Invalid support request."
+    );
+
+  }
+
+  /*
+   * Verify that the support request exists.
+   */
+
+  const {
+    data:supportRequest,
+    error:supportRequestError
+  } =
+    await db
+      .from("support_requests")
+      .select(
+        `
+        id,
+        support_token,
+        status,
+        technician_id
+        `
+      )
+      .eq(
+        "id",
+        requestId
+      )
+      .maybeSingle();
+
+  if(supportRequestError){
+
+    console.error(
+      "ADMIN SUPPORT MESSAGE REQUEST VERIFY ERROR:",
+      supportRequestError
+    );
+
+    throw new Error(
+      "SUPPORT_REQUEST_VERIFY_FAILED"
+    );
+
+  }
+
+  if(!supportRequest){
+
+    throw new Error(
+      "SUPPORT_REQUEST_NOT_FOUND"
+    );
+
+  }
+
+  /*
+   * Load conversation.
+   */
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("support_messages")
+      .select(
+        `
+        id,
+        support_request_id,
+        sender_type,
+        sender_user_id,
+        message,
+        created_at
+        `
+      )
+      .eq(
+        "support_request_id",
+        requestId
+      )
+      .order(
+        "created_at",
+        {
+          ascending:true
+        }
+      );
+
+  if(error){
+
+    console.error(
+      "ADMIN SUPPORT MESSAGES QUERY ERROR:",
+      error
+    );
+
+    throw new Error(
+      "SUPPORT_MESSAGES_QUERY_FAILED"
+    );
+
+  }
+
+  return {
+
+    support_request:{
+      id:
+        supportRequest.id,
+
+      support_token:
+        supportRequest.support_token,
+
+      status:
+        supportRequest.status,
+
+      technician_id:
+        supportRequest.technician_id
+    },
+
+    messages:
+      data || []
+
+  };
+
+}
+
+/* =========================================================
+   ADMIN SUPPORT
+   PHASE 6A.4
+   SEND ADMIN MESSAGE
+   ========================================================= */
+
+async function sendSupportMessage(
+  db:any,
+  adminUserId:string,
+  body:any
+) {
+
+  if(
+    !isUuid(
+      adminUserId
+    )
+  ){
+
+    throw new Error(
+      "Invalid administrator."
+    );
+
+  }
+
+  const requestId =
+    String(
+      body?.support_request_id ||
+      ""
+    ).trim();
+
+  const message =
+    String(
+      body?.message ||
+      ""
+    ).trim();
+
+  if(
+    !requestId ||
+    !isUuid(requestId)
+  ){
+
+    throw new Error(
+      "Invalid support request."
+    );
+
+  }
+
+  if(!message){
+
+    throw new Error(
+      "Message is required."
+    );
+
+  }
+
+  if(message.length > 2000){
+
+    throw new Error(
+      "Message cannot exceed 2000 characters."
+    );
+
+  }
+
+  /*
+   * Verify administrator.
+   *
+   * requireAdmin() already protects
+   * the Edge Function, but this keeps
+   * the operation explicit.
+   */
+
+  const {
+    data:admin,
+    error:adminError
+  } =
+    await db
+      .from("admin_users")
+      .select(
+        "user_id"
+      )
+      .eq(
+        "user_id",
+        adminUserId
+      )
+      .maybeSingle();
+
+  if(adminError){
+
+    console.error(
+      "ADMIN SUPPORT ADMIN VERIFY ERROR:",
+      adminError
+    );
+
+    throw new Error(
+      "ADMIN_LOOKUP_FAILED"
+    );
+
+  }
+
+  if(!admin){
+
+    throw new Error(
+      "ADMIN_REQUIRED"
+    );
+
+  }
+
+  /*
+   * Verify support request.
+   */
+
+  const {
+    data:supportRequest,
+    error:supportRequestError
+  } =
+    await db
+      .from("support_requests")
+      .select(
+        `
+        id,
+        support_token,
+        technician_id,
+        status
+        `
+      )
+      .eq(
+        "id",
+        requestId
+      )
+      .maybeSingle();
+
+  if(supportRequestError){
+
+    console.error(
+      "ADMIN SEND MESSAGE REQUEST VERIFY ERROR:",
+      supportRequestError
+    );
+
+    throw new Error(
+      "SUPPORT_REQUEST_VERIFY_FAILED"
+    );
+
+  }
+
+  if(!supportRequest){
+
+    throw new Error(
+      "SUPPORT_REQUEST_NOT_FOUND"
+    );
+
+  }
+
+  const currentStatus =
+    String(
+      supportRequest.status ||
+      ""
+    ).toUpperCase();
+
+  if(
+    currentStatus === "CLOSED" ||
+    currentStatus === "CANCELLED"
+  ){
+
+    throw new Error(
+      "SUPPORT_REQUEST_CLOSED"
+    );
+
+  }
+
+  /*
+   * Insert admin message.
+   */
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("support_messages")
+      .insert({
+
+        support_request_id:
+          requestId,
+
+        sender_type:
+          "ADMIN",
+
+        sender_user_id:
+          adminUserId,
+
+        message:
+          message
+
+      })
+      .select(
+        `
+        id,
+        support_request_id,
+        sender_type,
+        sender_user_id,
+        message,
+        created_at
+        `
+      )
+      .single();
+
+  if(error){
+
+    console.error(
+      "ADMIN SUPPORT MESSAGE INSERT ERROR:",
+      error
+    );
+
+    throw new Error(
+      "SUPPORT_MESSAGE_SEND_FAILED"
+    );
+
+  }
+
+  return {
+    message:data
+  };
+
+}
+
+/* =========================================================
+   ADMIN SUPPORT
+   PHASE 6A.5
+   STATUS UPDATE
+   ========================================================= */
+
+async function updateSupportStatus(
+  db:any,
+  adminUserId:string,
+  body:any
+) {
+
+  if(
+    !isUuid(
+      adminUserId
+    )
+  ){
+
+    throw new Error(
+      "Invalid administrator."
+    );
+
+  }
+
+  const requestId =
+    String(
+      body?.support_request_id ||
+      ""
+    ).trim();
+
+  const newStatus =
+    String(
+      body?.status ||
+      ""
+    )
+      .trim()
+      .toUpperCase();
+
+  const note =
+    clean(
+      body?.note,
+      1000
+    );
+
+  if(
+    !requestId ||
+    !isUuid(requestId)
+  ){
+
+    throw new Error(
+      "Invalid support request."
+    );
+
+  }
+
+  const allowedStatuses = [
+    "OPEN",
+    "ACKNOWLEDGED",
+    "IN_PROGRESS",
+    "RESOLVED",
+    "CLOSED",
+    "CANCELLED"
+  ];
+
+  if(
+    !allowedStatuses.includes(
+      newStatus
+    )
+  ){
+
+    throw new Error(
+      "Invalid support status."
+    );
+
+  }
+
+  /*
+   * Verify admin.
+   */
+
+  const {
+    data:admin,
+    error:adminError
+  } =
+    await db
+      .from("admin_users")
+      .select(
+        "user_id"
+      )
+      .eq(
+        "user_id",
+        adminUserId
+      )
+      .maybeSingle();
+
+  if(adminError){
+
+    console.error(
+      "ADMIN SUPPORT STATUS ADMIN VERIFY ERROR:",
+      adminError
+    );
+
+    throw new Error(
+      "ADMIN_LOOKUP_FAILED"
+    );
+
+  }
+
+  if(!admin){
+
+    throw new Error(
+      "ADMIN_REQUIRED"
+    );
+
+  }
+
+  /*
+   * Load current request.
+   */
+
+  const {
+    data:supportRequest,
+    error:supportRequestError
+  } =
+    await db
+      .from("support_requests")
+      .select(
+        `
+        id,
+        support_token,
+        technician_id,
+        status,
+        acknowledged_at,
+        resolved_at,
+        closed_at
+        `
+      )
+      .eq(
+        "id",
+        requestId
+      )
+      .maybeSingle();
+
+  if(supportRequestError){
+
+    console.error(
+      "ADMIN SUPPORT STATUS REQUEST QUERY ERROR:",
+      supportRequestError
+    );
+
+    throw new Error(
+      "SUPPORT_REQUEST_VERIFY_FAILED"
+    );
+
+  }
+
+  if(!supportRequest){
+
+    throw new Error(
+      "SUPPORT_REQUEST_NOT_FOUND"
+    );
+
+  }
+
+  const currentStatus =
+    String(
+      supportRequest.status ||
+      ""
+    ).toUpperCase();
+
+  /*
+   * Same status = no-op.
+   */
+
+  if(
+    currentStatus === newStatus
+  ){
+
+    return {
+      request:supportRequest
+    };
+
+  }
+
+  /*
+   * Terminal statuses.
+   */
+
+  if(
+    currentStatus === "CLOSED" ||
+    currentStatus === "CANCELLED"
+  ){
+
+    throw new Error(
+      "SUPPORT_STATUS_TERMINAL"
+    );
+
+  }
+
+  /*
+   * Strict workflow.
+   */
+
+  const transitions:any = {
+
+    OPEN:[
+      "ACKNOWLEDGED",
+      "CANCELLED"
+    ],
+
+    ACKNOWLEDGED:[
+      "IN_PROGRESS",
+      "CANCELLED"
+    ],
+
+    IN_PROGRESS:[
+      "RESOLVED",
+      "CANCELLED"
+    ],
+
+    RESOLVED:[
+      "CLOSED"
+    ]
+
+  };
+
+  const allowedNext =
+    transitions[
+      currentStatus
+    ] || [];
+
+  if(
+    !allowedNext.includes(
+      newStatus
+    )
+  ){
+
+    throw new Error(
+      `Invalid support status transition: ${currentStatus} → ${newStatus}`
+    );
+
+  }
+
+  /*
+   * Build update.
+   */
+
+  const update:any = {
+
+    status:
+      newStatus,
+
+    updated_at:
+      new Date().toISOString()
+
+  };
+
+  const now =
+    new Date().toISOString();
+
+  if(
+    newStatus === "ACKNOWLEDGED"
+  ){
+
+    update.acknowledged_at =
+      now;
+
+  }
+
+  if(
+    newStatus === "RESOLVED"
+  ){
+
+    update.resolved_at =
+      now;
+
+  }
+
+  if(
+    newStatus === "CLOSED"
+  ){
+
+    update.closed_at =
+      now;
+
+  }
+
+  /*
+   * Update request.
+   */
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("support_requests")
+      .update(update)
+      .eq(
+        "id",
+        requestId
+      )
+      .select(
+        `
+        id,
+        support_token,
+        appointment_id,
+        technician_id,
+        support_type,
+        problem_details,
+        latitude,
+        longitude,
+        location_url,
+        location_captured_at,
+        status,
+        created_at,
+        updated_at,
+        acknowledged_at,
+        resolved_at,
+        closed_at
+        `
+      )
+      .single();
+
+  if(error){
+
+    console.error(
+      "ADMIN SUPPORT STATUS UPDATE ERROR:",
+      error
+    );
+
+    throw new Error(
+      "SUPPORT_STATUS_UPDATE_FAILED"
+    );
+
+  }
+
+  /*
+   * Optional status note.
+   *
+   * We do not create another table yet.
+   * If a note exists, add it as an ADMIN
+   * support message so the technician can
+   * see the reason/context.
+   */
+
+  if(note){
+
+    const {
+      error:noteError
+    } =
+      await db
+        .from("support_messages")
+        .insert({
+
+          support_request_id:
+            requestId,
+
+          sender_type:
+            "ADMIN",
+
+          sender_user_id:
+            adminUserId,
+
+          message:
+            `Status updated to ${newStatus}.\n${note}`
+
+        });
+
+    if(noteError){
+
+      console.error(
+        "ADMIN SUPPORT STATUS NOTE ERROR:",
+        noteError
+      );
+
+      /*
+       * Do not roll back the status update.
+       * Status has already changed successfully.
+       */
+
+    }
+
+  }
+
+  return {
+    request:data
+  };
+
+}
+
+
+
 async function deleteAppointment(db:any,id:string){if(!/^[0-9a-f-]{36}$/i.test(id||""))throw new Error("Invalid appointment.");const{error}=await db.from("appointments").delete().eq("id",id);if(error)throw error;return{ok:true};}
+
+function isUuid(
+  value:any
+){
+
+  return /^[0-9a-f-]{36}$/i.test(
+    String(
+      value || ""
+    )
+  );
+
+}
+
+function clean(
+  value:any,
+  max:number
+){
+
+  return typeof value==="string"
+    ? value.trim().slice(0,max)
+    : null;
+
+}
 function clean(value:any,max:number){return typeof value==="string"?value.trim().slice(0,max):null;}

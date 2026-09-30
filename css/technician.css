@@ -5743,3 +5743,51 @@ i[class*="fa-"]{
 .tech-support-job-preview-full {
     grid-column: 1 / -1;
 }
+
+/* =========================================================
+   SUPPORT GPS LOCATION
+   PHASE 3C
+   ========================================================= */
+
+.tech-support-location-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.tech-support-location-status i {
+    flex: 0 0 auto;
+}
+
+.tech-support-location-status.success {
+    color: #4ade80;
+}
+
+.tech-support-location-status.error {
+    color: #f87171;
+}
+
+.tech-support-location-retry {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 10px;
+    padding: 7px 11px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tech-support-location-retry:hover {
+    background: rgba(255, 255, 255, 0.10);
+}
+

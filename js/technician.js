@@ -4365,44 +4365,61 @@ function openRaiseSupportRequestModal() {
                 </div>
 
 
+                
+
                 <!-- LOCATION -->
 
-                <div class="tech-support-location-box">
+<div class="tech-support-location-box">
 
-                    <div class="tech-support-location-icon">
+    <div class="tech-support-location-icon">
 
-                        <i class="fa-solid fa-location-crosshairs"></i>
+        <i class="fa-solid fa-location-crosshairs"></i>
 
-                    </div>
+    </div>
 
 
-                    <div class="tech-support-location-content">
+    <div class="tech-support-location-content">
 
-                        <strong>
-                            Current Location
-                        </strong>
+        <strong>
+            Current Location
+        </strong>
 
-                        <span>
-                            Your current location can be attached
-                            to this support request when the request
-                            system is connected.
-                        </span>
+        <span>
+            Your current location will be attached
+            to this support request.
+        </span>
 
-                        <div
-                            class="tech-support-location-status"
-                            id="supportLocationStatus"
-                        >
 
-                            <i class="fa-solid fa-circle-info"></i>
+        <div
+            class="tech-support-location-status"
+            id="supportLocationStatus"
+        >
 
-                            Location capture will be enabled
-                            in Phase 3.
+            <i class="fa-solid fa-location-crosshairs"></i>
 
-                        </div>
+            <span>
+                Detecting your current location...
+            </span>
 
-                    </div>
+        </div>
 
-                </div>
+
+        <button
+            type="button"
+            class="tech-support-location-retry"
+            id="retrySupportLocation"
+            hidden
+        >
+
+            <i class="fa-solid fa-rotate-right"></i>
+
+            Retry Location
+
+        </button>
+
+    </div>
+
+</div>
 
 
                 <!-- ERROR -->
@@ -4451,10 +4468,12 @@ function openRaiseSupportRequestModal() {
 
 
     document.body.appendChild(
-        overlay
-    );
+    overlay
+);
 
-    populatePhase2SupportJobs(); 
+    populatePhase2SupportJobs();
+
+    captureSupportLocation();
     /* =====================================================
        ELEMENTS
        ===================================================== */
@@ -5270,6 +5289,328 @@ function renderSupportJobPreview(
     `;
 }
 
+
+/* =========================================================
+   SUPPORT GPS LOCATION
+   PHASE 3C
+   ========================================================= */
+
+function captureSupportLocation() {
+
+    const status =
+        document.getElementById(
+            "supportLocationStatus"
+        );
+
+    const retryButton =
+        document.getElementById(
+            "retrySupportLocation"
+        );
+
+
+    if (!status) {
+        return;
+    }
+
+
+    /* =====================================================
+       BROWSER SUPPORT CHECK
+       ===================================================== */
+
+    if (
+        !navigator.geolocation
+    ) {
+
+        status.innerHTML = `
+            <i class="fa-solid fa-circle-xmark"></i>
+
+            <span>
+                Location is not supported by this browser.
+            </span>
+        `;
+
+
+        status.classList.add(
+            "error"
+        );
+
+
+        if (retryButton) {
+            retryButton.hidden = true;
+        }
+
+
+        return;
+    }
+
+
+    /* =====================================================
+       LOADING STATE
+       ===================================================== */
+
+    status.classList.remove(
+        "success",
+        "error"
+    );
+
+
+    status.innerHTML = `
+        <i class="fa-solid fa-location-crosshairs"></i>
+
+        <span>
+            Detecting your current location...
+        </span>
+    `;
+
+
+    if (retryButton) {
+        retryButton.hidden = true;
+    }
+
+
+    /* =====================================================
+       REQUEST BROWSER LOCATION
+       ===================================================== */
+
+    navigator.geolocation.getCurrentPosition(
+
+        (position) => {
+
+            const latitude =
+                Number(
+                    position.coords.latitude
+                );
+
+
+            const longitude =
+                Number(
+                    position.coords.longitude
+                );
+
+
+            const accuracy =
+                Number(
+                    position.coords.accuracy
+                );
+
+
+            if (
+                !Number.isFinite(latitude) ||
+                !Number.isFinite(longitude)
+            ) {
+
+                handleSupportLocationError(
+                    "Unable to read your current location."
+                );
+
+                return;
+            }
+
+
+            /* =============================================
+               STORE LOCATION ON MODAL
+               ============================================= */
+
+            const modal =
+                document.getElementById(
+                    "raiseSupportRequestModal"
+                );
+
+
+            if (modal) {
+
+                modal.dataset.latitude =
+                    String(latitude);
+
+                modal.dataset.longitude =
+                    String(longitude);
+
+                modal.dataset.accuracy =
+                    Number.isFinite(accuracy)
+                        ? String(accuracy)
+                        : "";
+
+                modal.dataset.locationCaptured =
+                    "true";
+
+            }
+
+
+            /* =============================================
+               SUCCESS UI
+               ============================================= */
+
+            status.classList.remove(
+                "error"
+            );
+
+
+            status.classList.add(
+                "success"
+            );
+
+
+            const accuracyText =
+                Number.isFinite(accuracy)
+                    ? `Accuracy ±${Math.round(accuracy)} m`
+                    : "Location captured";
+
+
+            status.innerHTML = `
+                <i class="fa-solid fa-circle-check"></i>
+
+                <span>
+                    Location captured successfully.
+                    ${esc(accuracyText)}
+                </span>
+            `;
+
+
+            if (retryButton) {
+                retryButton.hidden = false;
+            }
+
+
+            console.log(
+                "Support GPS location captured:",
+                {
+                    latitude,
+                    longitude,
+                    accuracy
+                }
+            );
+
+        },
+
+
+        (error) => {
+
+            console.error(
+                "Support GPS capture failed:",
+                error
+            );
+
+
+            const messages = {
+
+                1:
+                    "Location permission was denied. Please allow location access.",
+
+                2:
+                    "Your current location could not be determined.",
+
+                3:
+                    "Location request timed out. Please try again."
+
+            };
+
+
+            handleSupportLocationError(
+                messages[
+                    error?.code
+                ] ||
+                "Unable to capture your current location."
+            );
+
+        },
+
+
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+
+    );
+
+}
+
+const retrySupportLocation =
+    document.getElementById(
+        "retrySupportLocation"
+    );
+
+
+if (retrySupportLocation) {
+
+    retrySupportLocation.addEventListener(
+        "click",
+        () => {
+
+            captureSupportLocation();
+
+        }
+    );
+
+}
+
+/* =========================================================
+   GPS ERROR HANDLER
+   ========================================================= */
+
+function handleSupportLocationError(
+    message
+) {
+
+    const status =
+        document.getElementById(
+            "supportLocationStatus"
+        );
+
+    const retryButton =
+        document.getElementById(
+            "retrySupportLocation"
+        );
+
+
+    const modal =
+        document.getElementById(
+            "raiseSupportRequestModal"
+        );
+
+
+    if (modal) {
+
+        modal.dataset.locationCaptured =
+            "false";
+
+        delete modal.dataset.latitude;
+        delete modal.dataset.longitude;
+        delete modal.dataset.accuracy;
+
+    }
+
+
+    if (status) {
+
+        status.classList.remove(
+            "success"
+        );
+
+
+        status.classList.add(
+            "error"
+        );
+
+
+        status.innerHTML = `
+            <i class="fa-solid fa-circle-exclamation"></i>
+
+            <span>
+                ${esc(message)}
+            </span>
+        `;
+
+    }
+
+
+    if (retryButton) {
+
+        retryButton.hidden = false;
+
+    }
+
+}
 
 /* =========================================================
    DATE FORMATTER

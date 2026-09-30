@@ -6427,9 +6427,9 @@ async function loadMySupportRequests() {
                     "click",
                     () => {
 
-                        showMySupportRequestDetails(
-                            request
-                        );
+                        viewSupportRequest(
+                         request.id
+                         );
 
                     }
                 );

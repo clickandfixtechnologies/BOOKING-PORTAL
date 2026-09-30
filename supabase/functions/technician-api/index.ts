@@ -172,6 +172,12 @@ async function route(
         technician.id
       );
 
+    case "support_get_request":
+     return supportGetRequest(
+    db,
+    technician.id,
+    body
+  );
 
     default:
       throw new Error(
@@ -1375,6 +1381,240 @@ async function supportMyRequests(
 
         }
       )
+
+  };
+
+}
+
+/* =========================================================
+   GET SUPPORT REQUEST DETAIL
+   PHASE 4C
+   ========================================================= */
+
+async function supportGetRequest(
+  db: any,
+  technicianId: string,
+  body: any
+) {
+
+  if (
+    !isUuid(technicianId)
+  ) {
+
+    throw new Error(
+      "Invalid technician."
+    );
+
+  }
+
+
+  const requestId =
+    String(
+      body?.request_id ||
+      ""
+    ).trim();
+
+
+  if (
+    !requestId ||
+    !isUuid(requestId)
+  ) {
+
+    throw new Error(
+      "Invalid support request."
+    );
+
+  }
+
+
+  const {
+    data,
+    error
+  } = await db
+    .from("support_requests")
+    .select(`
+      id,
+      support_token,
+      appointment_id,
+      technician_id,
+      support_type,
+      problem_details,
+      latitude,
+      longitude,
+      location_url,
+      location_captured_at,
+      status,
+      created_at,
+      updated_at,
+      acknowledged_at,
+      resolved_at,
+      closed_at,
+
+      appointments (
+        appointment_id,
+        appointment_code,
+        appointment_date,
+        appointment_time,
+        customer_name,
+        mobile,
+        service_category,
+        service_type,
+        service_address,
+        problem_description,
+        status,
+        job_code,
+        google_maps_url
+      )
+    `)
+    .eq(
+      "id",
+      requestId
+    )
+    .eq(
+      "technician_id",
+      technicianId
+    )
+    .maybeSingle();
+
+
+  if (error) {
+
+    console.error(
+      "SUPPORT REQUEST DETAIL QUERY ERROR:",
+      {
+        message:
+          error.message,
+
+        details:
+          error.details,
+
+        hint:
+          error.hint,
+
+        code:
+          error.code
+      }
+    );
+
+
+    throw new Error(
+      "SUPPORT_REQUEST_DETAIL_QUERY_FAILED"
+    );
+
+  }
+
+
+  if (!data) {
+
+    throw new Error(
+      "SUPPORT_REQUEST_NOT_FOUND"
+    );
+
+  }
+
+
+  const appointment =
+    Array.isArray(
+      data.appointments
+    )
+      ? (
+          data.appointments[0] ||
+          null
+        )
+      : data.appointments;
+
+
+  return {
+
+    request: {
+
+      id:
+        data.id,
+
+      support_token:
+        data.support_token,
+
+      appointment_id:
+        data.appointment_id,
+
+      appointment_reference:
+        appointment?.appointment_id ||
+        appointment?.appointment_code ||
+        null,
+
+      appointment_code:
+        appointment?.appointment_code ||
+        null,
+
+      appointment_date:
+        appointment?.appointment_date ||
+        null,
+
+      appointment_time:
+        appointment?.appointment_time ||
+        null,
+
+      customer_name:
+        appointment?.customer_name ||
+        null,
+
+      mobile:
+        appointment?.mobile ||
+        null,
+
+      service_category:
+        appointment?.service_category ||
+        null,
+
+      service_type:
+        appointment?.service_type ||
+        null,
+
+      service_address:
+        appointment?.service_address ||
+        null,
+
+      job_code:
+        appointment?.job_code ||
+        null,
+
+      support_type:
+        data.support_type,
+
+      problem_details:
+        data.problem_details,
+
+      latitude:
+        data.latitude,
+
+      longitude:
+        data.longitude,
+
+      location_url:
+        data.location_url,
+
+      location_captured_at:
+        data.location_captured_at,
+
+      status:
+        data.status,
+
+      created_at:
+        data.created_at,
+
+      updated_at:
+        data.updated_at,
+
+      acknowledged_at:
+        data.acknowledged_at,
+
+      resolved_at:
+        data.resolved_at,
+
+      closed_at:
+        data.closed_at
+
+    }
 
   };
 

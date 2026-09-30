@@ -3981,6 +3981,22 @@ async function loadSupport() {
         </section>
     `;
 
+    /* =========================================================
+   SUPPORT CHAT
+   PHASE 5B
+   ========================================================= */
+
+document
+    .getElementById("openSupportChat")
+    ?.addEventListener(
+        "click",
+        async () => {
+
+            await openSupportChat();
+
+        }
+    );
+
 
     /* =========================================================
        RAISE SUPPORT REQUEST
@@ -6885,6 +6901,1453 @@ function showMySupportRequestDetailsError(
 
 }
 
+/* =========================================================
+   SUPPORT CHAT
+   OPEN CHAT
+   PHASE 5B
+   ========================================================= */
+
+async function openSupportChat() {
+
+    showSupportChatLoading();
+
+    try {
+
+        const response = await api(
+            "support_my_requests"
+        );
+
+        const requests =
+            Array.isArray(response?.requests)
+                ? response.requests
+                : [];
+
+        /*
+         * Only support requests that are
+         * still relevant for conversation.
+         */
+
+        const activeRequests =
+            requests.filter(
+                request => {
+
+                    const status =
+                        String(
+                            request?.status || ""
+                        ).toUpperCase();
+
+                    return (
+                        status !== "CLOSED" &&
+                        status !== "CANCELLED"
+                    );
+
+                }
+            );
+
+        if (!activeRequests.length) {
+
+            showSupportChatEmpty();
+
+            return;
+
+        }
+
+        /*
+         * If only one active support request exists,
+         * open it directly.
+         */
+
+        if (
+            activeRequests.length === 1
+        ) {
+
+            await openSupportRequestChat(
+                activeRequests[0].id
+            );
+
+            return;
+
+        }
+
+        /*
+         * Multiple active requests.
+         * Let technician choose one.
+         */
+
+        showSupportChatRequestPicker(
+            activeRequests
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Support chat request load failed:",
+            error
+        );
+
+        showSupportChatError(
+            error?.message ||
+            "Unable to load support requests."
+        );
+
+    }
+
+}
+
+/* =========================================================
+   SUPPORT CHAT
+   LOADING
+   ========================================================= */
+
+function showSupportChatLoading() {
+
+    removeSupportChatModal();
+
+    const modal =
+        document.createElement("div");
+
+    modal.id =
+        "techSupportChatModal";
+
+    modal.className =
+        "tech-support-chat-modal";
+
+    modal.innerHTML = `
+
+        <div
+            class="tech-support-chat-modal-backdrop"
+            data-close-support-chat="true"
+        ></div>
+
+        <div
+            class="tech-support-chat-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Support Chat"
+        >
+
+            <div class="tech-support-chat-header">
+
+                <div>
+
+                    <span class="tech-support-chat-eyebrow">
+                        TECHNICIAN SUPPORT
+                    </span>
+
+                    <h3>
+                        Support Chat
+                    </h3>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="tech-support-chat-close"
+                    data-close-support-chat="true"
+                    aria-label="Close"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+            <div class="tech-support-chat-loading">
+
+                <div class="tech-support-chat-spinner">
+                    <i class="fa-solid fa-spinner"></i>
+                </div>
+
+                <p>
+                    Loading support requests...
+                </p>
+
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    bindSupportChatClose(modal);
+
+}
+
+/* =========================================================
+   SUPPORT CHAT
+   REQUEST PICKER
+   ========================================================= */
+
+function showSupportChatRequestPicker(
+    requests
+) {
+
+    removeSupportChatModal();
+
+    const modal =
+        document.createElement("div");
+
+    modal.id =
+        "techSupportChatModal";
+
+    modal.className =
+        "tech-support-chat-modal";
+
+    const requestCards =
+        requests
+            .map(
+                request => {
+
+                    const status =
+                        String(
+                            request?.status ||
+                            "OPEN"
+                        ).toUpperCase();
+
+                    const appointment =
+                        request?.appointment_reference ||
+                        request?.appointment_code ||
+                        "Service Request";
+
+                    const supportToken =
+                        request?.support_token ||
+                        "—";
+
+                    const supportType =
+                        formatSupportType(
+                            request?.support_type
+                        );
+
+                    return `
+
+                        <button
+                            type="button"
+                            class="tech-support-chat-request"
+                            data-support-request-id="${escapeHtml(
+                                request.id
+                            )}"
+                        >
+
+                            <div
+                                class="tech-support-chat-request-icon"
+                            >
+                                <i class="fa-solid fa-comments"></i>
+                            </div>
+
+                            <div
+                                class="tech-support-chat-request-content"
+                            >
+
+                                <div
+                                    class="tech-support-chat-request-top"
+                                >
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            appointment
+                                        )}
+                                    </strong>
+
+                                    <span
+                                        class="
+                                            tech-support-chat-status
+                                            ${getSupportStatusClass(status)}
+                                        "
+                                    >
+                                        ${escapeHtml(status)}
+                                    </span>
+
+                                </div>
+
+                                <span>
+                                    ${escapeHtml(
+                                        supportToken
+                                    )}
+                                </span>
+
+                                <small>
+                                    ${escapeHtml(
+                                        supportType
+                                    )}
+                                </small>
+
+                            </div>
+
+                            <i
+                                class="fa-solid fa-chevron-right
+                                       tech-support-chat-request-arrow"
+                            ></i>
+
+                        </button>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+    modal.innerHTML = `
+
+        <div
+            class="tech-support-chat-modal-backdrop"
+            data-close-support-chat="true"
+        ></div>
+
+        <div
+            class="tech-support-chat-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Select Support Request"
+        >
+
+            <div class="tech-support-chat-header">
+
+                <div>
+
+                    <span class="tech-support-chat-eyebrow">
+                        TECHNICIAN SUPPORT
+                    </span>
+
+                    <h3>
+                        Select Support Request
+                    </h3>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="tech-support-chat-close"
+                    data-close-support-chat="true"
+                    aria-label="Close"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+            <div class="tech-support-chat-picker">
+
+                <p class="tech-support-chat-picker-intro">
+                    Select the support request you want
+                    to continue the conversation for.
+                </p>
+
+                <div class="tech-support-chat-request-list">
+
+                    ${requestCards}
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    bindSupportChatClose(modal);
+
+    modal
+        .querySelectorAll(
+            "[data-support-request-id]"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        const requestId =
+                            button.getAttribute(
+                                "data-support-request-id"
+                            );
+
+                        if (!requestId) {
+                            return;
+                        }
+
+                        await openSupportRequestChat(
+                            requestId
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+/* =========================================================
+   SUPPORT CHAT
+   OPEN REQUEST CHAT
+   ========================================================= */
+
+async function openSupportRequestChat(
+    requestId
+) {
+
+    const id =
+        String(
+            requestId || ""
+        ).trim();
+
+    if (!id) {
+
+        showSupportChatError(
+            "Invalid support request."
+        );
+
+        return;
+
+    }
+
+    showSupportChatLoading();
+
+    try {
+
+        /*
+         * Load request details.
+         */
+
+        const requestResponse =
+            await api(
+                "support_get_request",
+                {
+                    request_id: id
+                }
+            );
+
+        const request =
+            requestResponse?.request;
+
+        if (
+            !request ||
+            !request.id
+        ) {
+
+            throw new Error(
+                "Support request could not be loaded."
+            );
+
+        }
+
+        /*
+         * Load messages.
+         */
+
+        const messageResponse =
+            await api(
+                "support_messages",
+                {
+                    support_request_id: id
+                }
+            );
+
+        const messages =
+            Array.isArray(
+                messageResponse?.messages
+            )
+                ? messageResponse.messages
+                : [];
+
+        renderSupportChat(
+            request,
+            messages
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Support chat load failed:",
+            error
+        );
+
+        showSupportChatError(
+            error?.message ||
+            "Unable to load support chat."
+        );
+
+    }
+
+}
+
+/* =========================================================
+   SUPPORT CHAT
+   RENDER CHAT
+   ========================================================= */
+
+function renderSupportChat(
+    request,
+    messages
+) {
+
+    removeSupportChatModal();
+
+    const modal =
+        document.createElement("div");
+
+    modal.id =
+        "techSupportChatModal";
+
+    modal.className =
+        "tech-support-chat-modal";
+
+    const status =
+        String(
+            request?.status ||
+            "OPEN"
+        ).toUpperCase();
+
+    const appointment =
+        request?.appointment_reference ||
+        request?.appointment_code ||
+        "Service Request";
+
+    const supportToken =
+        request?.support_token ||
+        "—";
+
+    const supportType =
+        formatSupportType(
+            request?.support_type
+        );
+
+    const isClosed =
+        status === "CLOSED" ||
+        status === "CANCELLED";
+
+    modal.innerHTML = `
+
+        <div
+            class="tech-support-chat-modal-backdrop"
+            data-close-support-chat="true"
+        ></div>
+
+        <div
+            class="tech-support-chat-dialog
+                   tech-support-chat-dialog-live"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Support Chat"
+        >
+
+            <!-- HEADER -->
+
+            <div class="tech-support-chat-header">
+
+                <div
+                    class="tech-support-chat-header-main"
+                >
+
+                    <span class="tech-support-chat-eyebrow">
+                        SUPPORT CONVERSATION
+                    </span>
+
+                    <h3>
+                        ${escapeHtml(
+                            appointment
+                        )}
+                    </h3>
+
+                    <div
+                        class="tech-support-chat-meta"
+                    >
+
+                        <span>
+                            ${escapeHtml(
+                                supportToken
+                            )}
+                        </span>
+
+                        <span>
+                            ${escapeHtml(
+                                supportType
+                            )}
+                        </span>
+
+                        <span
+                            class="
+                                tech-support-chat-status
+                                ${getSupportStatusClass(status)}
+                            "
+                        >
+                            ${escapeHtml(status)}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="tech-support-chat-close"
+                    data-close-support-chat="true"
+                    aria-label="Close"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+
+            <!-- MESSAGES -->
+
+            <div
+                class="tech-support-chat-messages"
+                id="supportChatMessages"
+            ></div>
+
+
+            <!-- COMPOSER -->
+
+            <div
+                class="tech-support-chat-composer"
+                ${isClosed ? "data-chat-closed='true'" : ""}
+            >
+
+                ${
+                    isClosed
+                        ? `
+                            <div
+                                class="tech-support-chat-closed"
+                            >
+
+                                <i
+                                    class="fa-solid fa-lock"
+                                ></i>
+
+                                <span>
+                                    This support request is
+                                    ${escapeHtml(
+                                        status.toLowerCase()
+                                    )}.
+                                    New messages are not available.
+                                </span>
+
+                            </div>
+                        `
+                        : `
+                            <form
+                                id="supportChatForm"
+                                class="tech-support-chat-form"
+                            >
+
+                                <textarea
+                                    id="supportChatInput"
+                                    class="tech-support-chat-input"
+                                    rows="1"
+                                    maxlength="2000"
+                                    placeholder="Type your message..."
+                                    autocomplete="off"
+                                ></textarea>
+
+                                <button
+                                    type="submit"
+                                    class="tech-support-chat-send"
+                                    id="supportChatSend"
+                                    aria-label="Send message"
+                                >
+                                    <i
+                                        class="fa-solid fa-paper-plane"
+                                    ></i>
+                                </button>
+
+                            </form>
+
+                            <div
+                                class="tech-support-chat-compose-hint"
+                            >
+                                Maximum 2000 characters
+                            </div>
+                        `
+                }
+
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    bindSupportChatClose(modal);
+
+    renderSupportChatMessages(
+        messages
+    );
+
+    if (!isClosed) {
+
+        bindSupportChatComposer(
+            modal,
+            request.id
+        );
+
+    }
+
+}
+
+/* =========================================================
+   SUPPORT CHAT
+   RENDER MESSAGES
+   ========================================================= */
+
+function renderSupportChatMessages(
+    messages
+) {
+
+    const container =
+        document.getElementById(
+            "supportChatMessages"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    if (
+        !Array.isArray(messages) ||
+        !messages.length
+    ) {
+
+        container.innerHTML = `
+
+            <div
+                class="tech-support-chat-empty"
+            >
+
+                <div
+                    class="tech-support-chat-empty-icon"
+                >
+                    <i class="fa-solid fa-comments"></i>
+                </div>
+
+                <h4>
+                    No messages yet
+                </h4>
+
+                <p>
+                    Send a message to start the
+                    conversation with Click &amp; Fix support.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+    container.innerHTML =
+        messages
+            .map(
+                message => {
+
+                    const senderType =
+                        String(
+                            message?.sender_type ||
+                            ""
+                        ).toUpperCase();
+
+                    const isTechnician =
+                        senderType === "TECHNICIAN";
+
+                    const senderLabel =
+                        isTechnician
+                            ? "You"
+                            : senderType === "BOT"
+                                ? "Click & Fix Bot"
+                                : "Click & Fix Support";
+
+                    const time =
+                        formatSupportChatTime(
+                            message?.created_at
+                        );
+
+                    return `
+
+                        <div
+                            class="
+                                tech-support-chat-message
+                                ${isTechnician
+                                    ? "is-technician"
+                                    : "is-support"
+                                }
+                            "
+                        >
+
+                            <div
+                                class="tech-support-chat-message-label"
+                            >
+                                ${escapeHtml(
+                                    senderLabel
+                                )}
+
+                                <span>
+                                    ${escapeHtml(
+                                        time
+                                    )}
+                                </span>
+                            </div>
+
+                            <div
+                                class="tech-support-chat-bubble"
+                            >
+                                ${escapeHtml(
+                                    message?.message || ""
+                                ).replace(
+                                    /\n/g,
+                                    "<br>"
+                                )}
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+    requestAnimationFrame(
+        () => {
+
+            container.scrollTop =
+                container.scrollHeight;
+
+        }
+    );
+
+}
+
+/* =========================================================
+   SUPPORT CHAT
+   SEND MESSAGE
+   ========================================================= */
+
+function bindSupportChatComposer(
+    modal,
+    requestId
+) {
+
+    const form =
+        modal.querySelector(
+            "#supportChatForm"
+        );
+
+    const input =
+        modal.querySelector(
+            "#supportChatInput"
+        );
+
+    const sendButton =
+        modal.querySelector(
+            "#supportChatSend"
+        );
+
+    if (
+        !form ||
+        !input ||
+        !sendButton
+    ) {
+        return;
+    }
+
+    form.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            const message =
+                String(
+                    input.value || ""
+                ).trim();
+
+            if (!message) {
+
+                input.focus();
+
+                return;
+
+            }
+
+            if (
+                message.length > 2000
+            ) {
+
+                alert(
+    "Message cannot exceed 2000 characters."
+);
+
+                return;
+
+            }
+
+            input.disabled = true;
+            sendButton.disabled = true;
+
+            try {
+
+                const response =
+                    await api(
+                        "support_message_send",
+                        {
+                            support_request_id:
+                                requestId,
+
+                            message:
+                                message
+                        }
+                    );
+
+                const newMessage =
+                    response?.message;
+
+                if (
+                    !newMessage ||
+                    !newMessage.id
+                ) {
+
+                    throw new Error(
+                        "Message was not sent."
+                    );
+
+                }
+
+                /*
+                 * Add message immediately.
+                 * Realtime will be handled in Phase 5C.
+                 */
+
+                appendSupportChatMessage(
+                    newMessage
+                );
+
+                input.value = "";
+
+                input.style.height =
+                    "auto";
+
+            } catch (error) {
+
+                console.error(
+                    "Support message send failed:",
+                    error
+                );
+
+                alert(
+    error?.message ||
+    "Unable to send message."
+);
+
+            } finally {
+
+                input.disabled = false;
+                sendButton.disabled = false;
+
+                input.focus();
+
+            }
+
+        }
+    );
+
+    /*
+     * Enter = send
+     * Shift + Enter = new line
+     */
+
+    input.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+
+                event.preventDefault();
+
+                form.requestSubmit();
+
+            }
+
+        }
+    );
+
+    /*
+     * Auto-grow textarea.
+     */
+
+    input.addEventListener(
+        "input",
+        () => {
+
+            input.style.height =
+                "auto";
+
+            input.style.height =
+                Math.min(
+                    input.scrollHeight,
+                    140
+                ) + "px";
+
+        }
+    );
+
+}
+
+/* =========================================================
+   SUPPORT CHAT
+   APPEND NEW MESSAGE
+   ========================================================= */
+
+function appendSupportChatMessage(
+    message
+) {
+
+    const container =
+        document.getElementById(
+            "supportChatMessages"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    /*
+     * Remove empty state if present.
+     */
+
+    const emptyState =
+        container.querySelector(
+            ".tech-support-chat-empty"
+        );
+
+    if (emptyState) {
+        emptyState.remove();
+    }
+
+    const senderType =
+        String(
+            message?.sender_type ||
+            ""
+        ).toUpperCase();
+
+    const isTechnician =
+        senderType === "TECHNICIAN";
+
+    const senderLabel =
+        isTechnician
+            ? "You"
+            : senderType === "BOT"
+                ? "Click & Fix Bot"
+                : "Click & Fix Support";
+
+    const time =
+        formatSupportChatTime(
+            message?.created_at
+        );
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        `tech-support-chat-message ${
+            isTechnician
+                ? "is-technician"
+                : "is-support"
+        }`;
+
+    wrapper.dataset.messageId =
+        message?.id || "";
+
+    wrapper.innerHTML = `
+
+        <div
+            class="tech-support-chat-message-label"
+        >
+            ${escapeHtml(senderLabel)}
+
+            <span>
+                ${escapeHtml(time)}
+            </span>
+        </div>
+
+        <div
+            class="tech-support-chat-bubble"
+        >
+            ${escapeHtml(
+                message?.message || ""
+            ).replace(
+                /\n/g,
+                "<br>"
+            )}
+        </div>
+
+    `;
+
+    container.appendChild(
+        wrapper
+    );
+
+    requestAnimationFrame(
+        () => {
+
+            container.scrollTop =
+                container.scrollHeight;
+
+        }
+    );
+
+}
+
+/* =========================================================
+   SUPPORT CHAT
+   EMPTY STATE
+   ========================================================= */
+
+function showSupportChatEmpty() {
+
+    removeSupportChatModal();
+
+    const modal =
+        document.createElement("div");
+
+    modal.id =
+        "techSupportChatModal";
+
+    modal.className =
+        "tech-support-chat-modal";
+
+    modal.innerHTML = `
+
+        <div
+            class="tech-support-chat-modal-backdrop"
+            data-close-support-chat="true"
+        ></div>
+
+        <div
+            class="tech-support-chat-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Support Chat"
+        >
+
+            <div class="tech-support-chat-header">
+
+                <div>
+
+                    <span class="tech-support-chat-eyebrow">
+                        TECHNICIAN SUPPORT
+                    </span>
+
+                    <h3>
+                        Support Chat
+                    </h3>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="tech-support-chat-close"
+                    data-close-support-chat="true"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+            <div class="tech-support-chat-empty-state">
+
+                <div class="tech-support-chat-empty-icon">
+                    <i class="fa-solid fa-comments"></i>
+                </div>
+
+                <h3>
+                    No Active Support Request
+                </h3>
+
+                <p>
+                    You don't have an active support request
+                    available for chat.
+                </p>
+
+                <button
+                    type="button"
+                    class="tech-support-chat-primary-button"
+                    data-close-support-chat="true"
+                >
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(
+        modal
+    );
+
+    bindSupportChatClose(
+        modal
+    );
+
+}
+
+/* =========================================================
+   SUPPORT CHAT
+   ERROR STATE
+   ========================================================= */
+
+function showSupportChatError(
+    message
+) {
+
+    removeSupportChatModal();
+
+    const modal =
+        document.createElement("div");
+
+    modal.id =
+        "techSupportChatModal";
+
+    modal.className =
+        "tech-support-chat-modal";
+
+    modal.innerHTML = `
+
+        <div
+            class="tech-support-chat-modal-backdrop"
+            data-close-support-chat="true"
+        ></div>
+
+        <div
+            class="tech-support-chat-dialog"
+            role="dialog"
+            aria-modal="true"
+        >
+
+            <div class="tech-support-chat-header">
+
+                <div>
+
+                    <span class="tech-support-chat-eyebrow">
+                        TECHNICIAN SUPPORT
+                    </span>
+
+                    <h3>
+                        Support Chat
+                    </h3>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="tech-support-chat-close"
+                    data-close-support-chat="true"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+            <div class="tech-support-chat-error">
+
+                <div class="tech-support-chat-error-icon">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+
+                <h3>
+                    Unable to load chat
+                </h3>
+
+                <p>
+                    ${escapeHtml(
+                        message ||
+                        "Something went wrong."
+                    )}
+                </p>
+
+                <button
+                    type="button"
+                    class="tech-support-chat-primary-button"
+                    data-close-support-chat="true"
+                >
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(
+        modal
+    );
+
+    bindSupportChatClose(
+        modal
+    );
+
+}
+
+/* =========================================================
+   SUPPORT CHAT
+   CLOSE MODAL
+   ========================================================= */
+
+function bindSupportChatClose(
+    modal
+) {
+
+    if (!modal) {
+        return;
+    }
+
+    modal
+        .querySelectorAll(
+            "[data-close-support-chat='true']"
+        )
+        .forEach(
+            element => {
+
+                element.addEventListener(
+                    "click",
+                    () => {
+
+                        removeSupportChatModal();
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+function removeSupportChatModal() {
+
+    document
+        .getElementById(
+            "techSupportChatModal"
+        )
+        ?.remove();
+
+}
+
+/* =========================================================
+   SUPPORT CHAT
+   HELPERS
+   ========================================================= */
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+function formatSupportType(
+    type
+) {
+
+    const value =
+        String(
+            type || ""
+        ).trim();
+
+    if (!value) {
+        return "Support Request";
+    }
+
+    return value
+        .toLowerCase()
+        .replace(
+            /_/g,
+            " "
+        )
+        .replace(
+            /\b\w/g,
+            char =>
+                char.toUpperCase()
+        );
+
+}
+
+
+function getSupportStatusClass(
+    status
+) {
+
+    const value =
+        String(
+            status || ""
+        )
+            .toLowerCase();
+
+    return `status-${value}`;
+
+}
+
+
+function formatSupportChatTime(
+    value
+) {
+
+    if (!value) {
+        return "";
+    }
+
+    const date =
+        new Date(value);
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return "";
+    }
+
+    return date.toLocaleString(
+        undefined,
+        {
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
 
 /* =========================================================
    SUPPORT DATE FORMATTER

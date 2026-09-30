@@ -5906,4 +5906,779 @@ i[class*="fa-"]{
 
 }
 
+/* =========================================================
+   TECHNICIAN SUPPORT REQUESTS
+   PHASE 4B
+   ========================================================= */
+
+.tech-support-requests-panel {
+    width: 100%;
+    margin-top: 28px;
+    padding: 26px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 24px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.075),
+            rgba(255, 255, 255, 0.035)
+        );
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.16);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   REQUESTS HEADER
+   ========================================================= */
+
+.tech-support-requests-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.tech-support-requests-header > div:first-child {
+    min-width: 0;
+}
+
+.tech-support-requests-header .tech-support-eyebrow {
+    margin: 0 0 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.65;
+}
+
+.tech-support-requests-header h3 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 750;
+}
+
+.tech-support-requests-header p:not(.tech-support-eyebrow) {
+    margin: 7px 0 0;
+    font-size: 14px;
+    line-height: 1.6;
+    opacity: 0.68;
+}
+
+
+/* =========================================================
+   REQUEST COUNT
+   ========================================================= */
+
+.tech-support-request-count {
+    flex: 0 0 auto;
+    min-width: 72px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.055);
+}
+
+.tech-support-request-count span {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+
+/* =========================================================
+   REQUEST LIST
+   ========================================================= */
+
+.tech-support-request-list {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(320px, 1fr)
+    );
+    gap: 16px;
+}
+
+
+/* =========================================================
+   REQUEST CARD
+   ========================================================= */
+
+.tech-support-request-item {
+    position: relative;
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.085);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.045);
+    transition:
+        transform 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease,
+        background 0.22s ease;
+}
+
+.tech-support-request-item:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.065);
+    box-shadow:
+        0 14px 35px rgba(0, 0, 0, 0.13);
+}
+
+
+/* =========================================================
+   REQUEST TOP
+   ========================================================= */
+
+.tech-support-request-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.tech-support-request-top > div:first-child {
+    min-width: 0;
+}
+
+.tech-support-request-token {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.035em;
+    word-break: break-word;
+}
+
+.tech-support-request-type {
+    display: inline-block;
+    max-width: 100%;
+    padding: 5px 9px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.07);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+    opacity: 0.72;
+}
+
+
+/* =========================================================
+   STATUS BADGE
+   ========================================================= */
+
+.tech-support-request-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-height: 28px;
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.055);
+}
+
+
+/* Status variants */
+
+.tech-support-request-status.status-open {
+    border-color: rgba(59, 130, 246, 0.25);
+    background: rgba(59, 130, 246, 0.10);
+}
+
+.tech-support-request-status.status-acknowledged {
+    border-color: rgba(168, 85, 247, 0.25);
+    background: rgba(168, 85, 247, 0.10);
+}
+
+.tech-support-request-status.status-in_progress {
+    border-color: rgba(245, 158, 11, 0.28);
+    background: rgba(245, 158, 11, 0.10);
+}
+
+.tech-support-request-status.status-resolved {
+    border-color: rgba(34, 197, 94, 0.28);
+    background: rgba(34, 197, 94, 0.10);
+}
+
+.tech-support-request-status.status-closed {
+    border-color: rgba(16, 185, 129, 0.28);
+    background: rgba(16, 185, 129, 0.10);
+}
+
+.tech-support-request-status.status-cancelled {
+    border-color: rgba(239, 68, 68, 0.28);
+    background: rgba(239, 68, 68, 0.10);
+}
+
+
+/* =========================================================
+   REQUEST BODY
+   ========================================================= */
+
+.tech-support-request-body {
+    margin-bottom: 18px;
+}
+
+.tech-support-request-problem {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 1.65;
+    opacity: 0.78;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+
+/* =========================================================
+   REQUEST META
+   ========================================================= */
+
+.tech-support-request-meta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 14px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.075);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+}
+
+.tech-support-request-meta > div {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    min-width: 0;
+    font-size: 11px;
+    line-height: 1.45;
+    opacity: 0.68;
+}
+
+.tech-support-request-meta i {
+    flex: 0 0 14px;
+    width: 14px;
+    margin-top: 2px;
+    text-align: center;
+}
+
+.tech-support-request-meta span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   REQUEST ACTIONS
+   ========================================================= */
+
+.tech-support-request-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 16px;
+}
+
+.tech-support-request-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 8px 13px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.055);
+    color: inherit;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+    box-sizing: border-box;
+}
+
+.tech-support-request-action:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.18);
+    transform: translateY(-1px);
+}
+
+.tech-support-request-action i {
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   LOADING STATE
+   ========================================================= */
+
+.tech-support-requests-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    min-height: 150px;
+    font-size: 13px;
+    opacity: 0.68;
+}
+
+.tech-support-requests-loading i {
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.tech-support-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.tech-support-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.055);
+    font-size: 21px;
+    opacity: 0.75;
+}
+
+.tech-support-empty-state h4 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 750;
+}
+
+.tech-support-empty-state p {
+    max-width: 420px;
+    margin: 8px 0 0;
+    font-size: 13px;
+    line-height: 1.6;
+    opacity: 0.62;
+}
+
+
+/* =========================================================
+   ERROR STATE
+   ========================================================= */
+
+.tech-support-error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 230px;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.tech-support-error-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(239, 68, 68, 0.20);
+    border-radius: 18px;
+    background: rgba(239, 68, 68, 0.08);
+    font-size: 20px;
+}
+
+.tech-support-error-state h4 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 750;
+}
+
+.tech-support-error-state p {
+    max-width: 500px;
+    margin: 8px 0 18px;
+    font-size: 13px;
+    line-height: 1.6;
+    opacity: 0.65;
+}
+
+.tech-support-retry-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.065);
+    color: inherit;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.tech-support-retry-button:hover {
+    background: rgba(255, 255, 255, 0.10);
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   REQUEST DETAILS MODAL
+   ========================================================= */
+
+.tech-support-request-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+}
+
+.tech-support-request-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.tech-support-request-modal-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(
+        calc(100% - 32px),
+        620px
+    );
+    max-height: calc(100vh - 40px);
+    margin: 20px auto;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(32, 35, 45, 0.97),
+            rgba(20, 22, 30, 0.97)
+        );
+    box-shadow:
+        0 30px 90px rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   MODAL HEADER
+   ========================================================= */
+
+.tech-support-request-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 24px 24px 16px;
+}
+
+.tech-support-request-modal-header .tech-support-eyebrow {
+    margin: 0 0 6px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.58;
+}
+
+.tech-support-request-modal-header h3 {
+    margin: 0;
+    font-size: 21px;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.tech-support-request-modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.055);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.tech-support-request-modal-close:hover {
+    background: rgba(255, 255, 255, 0.10);
+    transform: rotate(3deg);
+}
+
+
+/* =========================================================
+   MODAL STATUS
+   ========================================================= */
+
+.tech-support-request-modal-status {
+    padding: 0 24px 20px;
+}
+
+
+/* =========================================================
+   DETAIL GRID
+   ========================================================= */
+
+.tech-support-request-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        2,
+        minmax(0, 1fr)
+    );
+    gap: 1px;
+    margin: 0 24px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.055);
+}
+
+.tech-support-request-detail-grid > div {
+    min-width: 0;
+    padding: 14px;
+    background: rgba(20, 22, 30, 0.62);
+}
+
+.tech-support-request-detail-grid span {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0.50;
+}
+
+.tech-support-request-detail-grid strong {
+    display: block;
+    font-size: 12px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   DETAIL DESCRIPTION
+   ========================================================= */
+
+.tech-support-request-detail-description {
+    margin: 20px 24px 0;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.tech-support-request-detail-description > span {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.50;
+}
+
+.tech-support-request-detail-description p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    opacity: 0.82;
+}
+
+
+/* =========================================================
+   MODAL ACTIONS
+   ========================================================= */
+
+.tech-support-request-modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 9px;
+    padding: 20px 24px 24px;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .tech-support-requests-panel {
+        margin-top: 20px;
+        padding: 18px;
+        border-radius: 20px;
+    }
+
+
+    .tech-support-requests-header {
+        align-items: flex-start;
+    }
+
+
+    .tech-support-requests-header h3 {
+        font-size: 20px;
+    }
+
+
+    .tech-support-request-count {
+        min-width: 58px;
+        padding: 9px 10px;
+        font-size: 17px;
+        border-radius: 13px;
+    }
+
+
+    .tech-support-request-list {
+        grid-template-columns: 1fr;
+    }
+
+
+    .tech-support-request-item {
+        padding: 17px;
+        border-radius: 17px;
+    }
+
+
+    .tech-support-request-top {
+        gap: 10px;
+    }
+
+
+    .tech-support-request-status {
+        padding: 5px 8px;
+        font-size: 9px;
+    }
+
+
+    .tech-support-request-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+
+    .tech-support-request-action {
+        width: 100%;
+    }
+
+
+    .tech-support-request-modal-dialog {
+        width: calc(100% - 20px);
+        max-height: calc(100vh - 20px);
+        margin: 10px auto;
+        border-radius: 20px;
+    }
+
+
+    .tech-support-request-modal-header {
+        padding: 20px 18px 14px;
+    }
+
+
+    .tech-support-request-modal-status {
+        padding: 0 18px 17px;
+    }
+
+
+    .tech-support-request-detail-grid {
+        grid-template-columns: 1fr;
+        margin: 0 18px;
+    }
+
+
+    .tech-support-request-detail-description {
+        margin-left: 18px;
+        margin-right: 18px;
+    }
+
+
+    .tech-support-request-modal-actions {
+        flex-direction: column;
+        padding: 18px;
+    }
+
+}
+
+
+@media (max-width: 420px) {
+
+    .tech-support-requests-header {
+        flex-direction: column;
+    }
+
+
+    .tech-support-request-count {
+        align-self: flex-start;
+    }
+
+
+    .tech-support-request-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+
+    .tech-support-request-status {
+        align-self: flex-start;
+    }
+
+}
 

@@ -179,6 +179,20 @@ async function route(
     body
   );
 
+  case "support_messages":
+  return supportMessages(
+    db,
+    technician.id,
+    body
+  );
+
+case "support_message_send":
+  return sendSupportMessage(
+    db,
+    technician.id,
+    body
+  );
+
     default:
       throw new Error(
         "Unknown technician action."
@@ -1619,6 +1633,426 @@ async function supportGetRequest(
   };
 
 }
+
+/* =========================================================
+   SUPPORT CHAT
+   LOAD MESSAGES
+   PHASE 5A
+   ========================================================= */
+
+async function supportMessages(
+  db: any,
+  technicianId: string,
+  body: any
+) {
+
+  if (
+    !isUuid(technicianId)
+  ) {
+
+    throw new Error(
+      "Invalid technician."
+    );
+
+  }
+
+
+  const requestId =
+    String(
+      body?.support_request_id ||
+      ""
+    ).trim();
+
+
+  if (
+    !requestId ||
+    !isUuid(requestId)
+  ) {
+
+    throw new Error(
+      "Invalid support request."
+    );
+
+  }
+
+
+  /*
+   * Verify that this support request
+   * belongs to the logged-in technician.
+   */
+
+  const {
+    data: supportRequest,
+    error: supportRequestError
+  } = await db
+    .from("support_requests")
+    .select(`
+      id,
+      support_token,
+      technician_id,
+      status
+    `)
+    .eq(
+      "id",
+      requestId
+    )
+    .eq(
+      "technician_id",
+      technicianId
+    )
+    .maybeSingle();
+
+
+  if (
+    supportRequestError
+  ) {
+
+    console.error(
+      "SUPPORT MESSAGE REQUEST VERIFY ERROR:",
+      {
+        message:
+          supportRequestError.message,
+
+        details:
+          supportRequestError.details,
+
+        hint:
+          supportRequestError.hint,
+
+        code:
+          supportRequestError.code
+      }
+    );
+
+
+    throw new Error(
+      "SUPPORT_REQUEST_VERIFY_FAILED"
+    );
+
+  }
+
+
+  if (!supportRequest) {
+
+    throw new Error(
+      "SUPPORT_REQUEST_NOT_FOUND"
+    );
+
+  }
+
+
+  /*
+   * Load messages.
+   */
+
+  const {
+    data,
+    error
+  } = await db
+    .from("support_messages")
+    .select(`
+      id,
+      support_request_id,
+      sender_type,
+      sender_user_id,
+      message,
+      created_at
+    `)
+    .eq(
+      "support_request_id",
+      requestId
+    )
+    .order(
+      "created_at",
+      {
+        ascending: true
+      }
+    );
+
+
+  if (error) {
+
+    console.error(
+      "SUPPORT MESSAGES QUERY ERROR:",
+      {
+        message:
+          error.message,
+
+        details:
+          error.details,
+
+        hint:
+          error.hint,
+
+        code:
+          error.code
+      }
+    );
+
+
+    throw new Error(
+      "SUPPORT_MESSAGES_QUERY_FAILED"
+    );
+
+  }
+
+
+  return {
+
+    support_request: {
+
+      id:
+        supportRequest.id,
+
+      support_token:
+        supportRequest.support_token,
+
+      status:
+        supportRequest.status
+
+    },
+
+    messages:
+      data || []
+
+  };
+
+}
+
+/* =========================================================
+   SUPPORT CHAT
+   SEND MESSAGE
+   PHASE 5A
+   ========================================================= */
+
+async function sendSupportMessage(
+  db: any,
+  technicianId: string,
+  body: any
+) {
+
+  if (
+    !isUuid(technicianId)
+  ) {
+
+    throw new Error(
+      "Invalid technician."
+    );
+
+  }
+
+
+  const requestId =
+    String(
+      body?.support_request_id ||
+      ""
+    ).trim();
+
+
+  const message =
+    String(
+      body?.message ||
+      ""
+    ).trim();
+
+
+  if (
+    !requestId ||
+    !isUuid(requestId)
+  ) {
+
+    throw new Error(
+      "Invalid support request."
+    );
+
+  }
+
+
+  if (!message) {
+
+    throw new Error(
+      "Message is required."
+    );
+
+  }
+
+
+  if (
+    message.length > 2000
+  ) {
+
+    throw new Error(
+      "Message cannot exceed 2000 characters."
+    );
+
+  }
+
+
+  /*
+   * Verify ownership.
+   */
+
+  const {
+    data: supportRequest,
+    error: supportRequestError
+  } = await db
+    .from("support_requests")
+    .select(`
+      id,
+      support_token,
+      technician_id,
+      status
+    `)
+    .eq(
+      "id",
+      requestId
+    )
+    .eq(
+      "technician_id",
+      technicianId
+    )
+    .maybeSingle();
+
+
+  if (
+    supportRequestError
+  ) {
+
+    console.error(
+      "SEND MESSAGE REQUEST VERIFY ERROR:",
+      {
+        message:
+          supportRequestError.message,
+
+        details:
+          supportRequestError.details,
+
+        hint:
+          supportRequestError.hint,
+
+        code:
+          supportRequestError.code
+      }
+    );
+
+
+    throw new Error(
+      "SUPPORT_REQUEST_VERIFY_FAILED"
+    );
+
+  }
+
+
+  if (!supportRequest) {
+
+    throw new Error(
+      "SUPPORT_REQUEST_NOT_FOUND"
+    );
+
+  }
+
+
+  /*
+   * Technician cannot send messages
+   * to closed/cancelled requests.
+   */
+
+  const currentStatus =
+    String(
+      supportRequest.status ||
+      ""
+    ).toUpperCase();
+
+
+  if (
+    currentStatus === "CLOSED" ||
+    currentStatus === "CANCELLED"
+  ) {
+
+    throw new Error(
+      "SUPPORT_REQUEST_CLOSED"
+    );
+
+  }
+
+
+  /*
+   * Insert message.
+   *
+   * IMPORTANT:
+   * sender_type is NEVER accepted from frontend.
+   *
+   * It is always forced to TECHNICIAN.
+   */
+
+  const {
+    data,
+    error
+  } = await db
+    .from("support_messages")
+    .insert({
+
+      support_request_id:
+        requestId,
+
+      sender_type:
+        "TECHNICIAN",
+
+      sender_user_id:
+        technicianId,
+
+      message:
+        message
+
+    })
+    .select(`
+      id,
+      support_request_id,
+      sender_type,
+      sender_user_id,
+      message,
+      created_at
+    `)
+    .single();
+
+
+  if (error) {
+
+    console.error(
+      "SUPPORT MESSAGE INSERT ERROR:",
+      {
+        message:
+          error.message,
+
+        details:
+          error.details,
+
+        hint:
+          error.hint,
+
+        code:
+          error.code
+      }
+    );
+
+
+    throw new Error(
+      "SUPPORT_MESSAGE_SEND_FAILED"
+    );
+
+  }
+
+
+  return {
+
+    message:
+      data
+
+  };
+
+}
+
+
 
 /* =========================================================
    SUPPORT TOKEN GENERATOR

@@ -3638,141 +3638,341 @@ async function loadHistory() {
     }
 }
 
+/* =========================================================
+   TECHNICIAN SUPPORT CENTER
+   PHASE 2B
+   INTERACTIVE SUPPORT REQUEST UI
+   ========================================================= */
+
 async function loadSupport() {
 
     jobs.innerHTML = `
-        <div class="tech-loading-message">
-            Loading support...
-        </div>
-    `;
+        <section class="tech-support-center">
 
-    detail.innerHTML = "";
+            <!-- =================================================
+                 HERO
+                 ================================================= -->
 
-    const result = await api("support");
+            <div class="tech-support-hero">
 
-    const support = result?.support;
+                <div class="tech-support-hero-icon">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
 
-    if (!support) {
-        throw new Error("Support information was not returned.");
-    }
+                <div class="tech-support-hero-content">
 
-    const company = support.company || {};
-    const contact = support.contact || {};
-    const channels = support.channels || {};
-
-    jobs.innerHTML = `
-
-        <section class="tech-detail-card">
-
-            <div class="tech-detail-header">
-
-                <div>
-
-                    <p class="tech-detail-label">
+                    <p class="tech-support-eyebrow">
                         TECHNICIAN SUPPORT
                     </p>
 
-                    <h2 class="tech-detail-title">
-                        Support Center
+                    <h2>
+                        Need help with a service?
                     </h2>
 
-                </div>
+                    <p>
+                        Get assistance from Click &amp; Fix Technologies
+                        whenever you need support during a job.
+                    </p>
 
-                <div class="tech-summary-main-icon">
-                    <i class="fa-solid fa-circle-question"></i>
                 </div>
 
             </div>
 
 
-            <div class="tech-detail-body">
+            <!-- =================================================
+                 SUPPORT ACTIONS
+                 ================================================= -->
 
-                <div class="tech-detail-section">
-
-                    <h3>
-                        Company Support
-                    </h3>
-
-                    <p class="tech-detail-description">
-                        Need help with your technician account,
-                        assigned service, or portal access?
-                        Contact Click &amp; Fix Technologies.
-                    </p>
-
-                </div>
+            <div class="tech-support-grid">
 
 
-                <div class="tech-detail-section">
+                <!-- Raise Support Request -->
 
-                    <h3>
-                        Contact
-                    </h3>
+                <button
+                    type="button"
+                    class="tech-support-card tech-support-card-primary"
+                    id="raiseSupportRequest"
+                >
 
-                    <div class="tech-detail-info-grid">
+                    <div class="tech-support-card-icon">
+                        <i class="fa-solid fa-life-ring"></i>
+                    </div>
 
-                        <div>
-                            <span>Company</span>
-                            <strong>
-                                ${esc(company.name || "—")}
-                            </strong>
-                        </div>
+                    <div class="tech-support-card-content">
 
-                        <div>
-                            <span>Phone</span>
-                            <strong>
-                                ${esc(contact.phone || "—")}
-                            </strong>
-                        </div>
+                        <h3>
+                            Raise Support Request
+                        </h3>
 
-                        <div>
-                            <span>Email</span>
-                            <strong>
-                                ${esc(contact.email || "—")}
-                            </strong>
-                        </div>
+                        <p>
+                            Report a technical problem or get help
+                            with your assigned service.
+                        </p>
+
+                        <span class="tech-support-card-link">
+                            Create Request
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </span>
+
+                    </div>
+
+                </button>
+
+
+                <!-- Support Chat -->
+
+                <button
+                    type="button"
+                    class="tech-support-card"
+                    id="openSupportChat"
+                >
+
+                    <div class="tech-support-card-icon">
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+
+                    <div class="tech-support-card-content">
+
+                        <h3>
+                            Support Chat
+                        </h3>
+
+                        <p>
+                            Chat with Click &amp; Fix support regarding
+                            your current service.
+                        </p>
+
+                        <span class="tech-support-card-link">
+                            Open Chat
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </span>
+
+                    </div>
+
+                </button>
+
+
+                <!-- My Support Requests -->
+
+                <button
+                    type="button"
+                    class="tech-support-card"
+                    id="openMySupportRequests"
+                >
+
+                    <div class="tech-support-card-icon">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </div>
+
+                    <div class="tech-support-card-content">
+
+                        <h3>
+                            My Support Requests
+                        </h3>
+
+                        <p>
+                            View your previous support requests,
+                            status and conversations.
+                        </p>
+
+                        <span class="tech-support-card-link">
+                            View Requests
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </span>
+
+                    </div>
+
+                </button>
+
+
+                <!-- Speak to Click & Fix -->
+
+                <button
+                    type="button"
+                    class="tech-support-card"
+                    id="openCompanySupport"
+                >
+
+                    <div class="tech-support-card-icon">
+                        <i class="fa-solid fa-phone-volume"></i>
+                    </div>
+
+                    <div class="tech-support-card-content">
+
+                        <h3>
+                            Speak to Click &amp; Fix
+                        </h3>
+
+                        <p>
+                            Need immediate assistance?
+                            Contact Click &amp; Fix support directly.
+                        </p>
+
+                        <span class="tech-support-card-link">
+                            Contact Support
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </span>
+
+                    </div>
+
+                </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 SUPPORT INFORMATION
+                 ================================================= -->
+
+            <div class="tech-support-info-grid">
+
+                <div class="tech-support-info-card">
+
+                    <div class="tech-support-info-icon">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Fast Assistance
+                        </strong>
+
+                        <span>
+                            Support requests are handled by
+                            Click &amp; Fix support.
+                        </span>
 
                     </div>
 
                 </div>
 
 
-                <div class="tech-detail-section">
+                <div class="tech-support-info-card">
 
-                    <h3>
-                        Contact Support
-                    </h3>
+                    <div class="tech-support-info-icon">
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                    </div>
 
-                    <div class="tech-action-row">
+                    <div>
 
-                        <a
-                            class="tech-action-button"
-                            href="${esc(channels.phone || "#")}"
-                        >
-                            <i class="fa-solid fa-phone"></i>
-                            Call
-                        </a>
+                        <strong>
+                            Job-Based Support
+                        </strong>
 
-
-                        <a
-                            class="tech-action-button"
-                            href="${esc(channels.whatsapp || "#")}"
-                            target="_blank"
-                            rel="noopener"
-                        >
-                            <i class="fa-brands fa-whatsapp"></i>
-                            WhatsApp
-                        </a>
-
-
-                        <a
-                            class="tech-action-button"
-                            href="${esc(channels.email || "#")}"
-                        >
-                            <i class="fa-solid fa-envelope"></i>
-                            Email
-                        </a>
+                        <span>
+                            Support can be linked directly
+                            to your assigned service.
+                        </span>
 
                     </div>
+
+                </div>
+
+
+                <div class="tech-support-info-card">
+
+                    <div class="tech-support-info-icon">
+                        <i class="fa-solid fa-message"></i>
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Live Conversation
+                        </strong>
+
+                        <span>
+                            Continue your support conversation
+                            from the portal.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 COMPANY CONTACT
+                 ================================================= -->
+
+            <div
+                class="tech-support-contact"
+                id="supportContactPanel"
+            >
+
+                <div class="tech-support-contact-main">
+
+                    <div class="tech-support-contact-icon">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+
+                    <div>
+
+                        <p>
+                            Need immediate help?
+                        </p>
+
+                        <h3>
+                            Speak to Click &amp; Fix Technologies
+                        </h3>
+
+                        <span>
+                            Your support contact number is hidden
+                            until you choose to reveal it.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tech-support-contact-actions">
+
+                    <button
+                        type="button"
+                        class="tech-support-contact-button"
+                        id="revealSupportPhone"
+                    >
+
+                        <i class="fa-solid fa-phone"></i>
+
+                        Speak to Click &amp; Fix
+
+                    </button>
+
+
+                    <a
+                        href="https://wa.me/917098889990"
+                        target="_blank"
+                        rel="noopener"
+                        class="tech-support-whatsapp-button"
+                    >
+
+                        <i class="fa-brands fa-whatsapp"></i>
+
+                        WhatsApp
+
+                    </a>
+
+                </div>
+
+
+                <div
+                    class="tech-support-phone-revealed"
+                    id="supportPhoneRevealed"
+                    hidden
+                >
+
+                    <span>
+                        Click &amp; Fix Support
+                    </span>
+
+                    <a href="tel:+917098889990">
+                        +91 70988 89990
+                    </a>
 
                 </div>
 
@@ -3780,7 +3980,915 @@ async function loadSupport() {
 
         </section>
     `;
+
+
+    /* =========================================================
+       RAISE SUPPORT REQUEST
+       ========================================================= */
+
+    document
+        .getElementById("raiseSupportRequest")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                openRaiseSupportRequestModal();
+
+            }
+        );
+
+
+    /* =========================================================
+       SUPPORT CHAT
+       ========================================================= */
+
+    document
+        .getElementById("openSupportChat")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                showSupportPhase2Placeholder(
+                    "Support Chat",
+                    "Live support chat will be connected after the support request flow is completed."
+                );
+
+            }
+        );
+
+
+    /* =========================================================
+       MY SUPPORT REQUESTS
+       ========================================================= */
+
+    document
+        .getElementById("openMySupportRequests")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                showSupportPhase2Placeholder(
+                    "My Support Requests",
+                    "Your support request history will be connected in the next phase."
+                );
+
+            }
+        );
+
+
+    /* =========================================================
+       SPEAK TO CLICK & FIX
+       ========================================================= */
+
+    document
+        .getElementById("openCompanySupport")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                document
+                    .getElementById("supportContactPanel")
+                    ?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+
+            }
+        );
+
+
+    /* =========================================================
+       REVEAL PHONE
+       ========================================================= */
+
+    document
+        .getElementById("revealSupportPhone")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                const phone =
+                    document.getElementById(
+                        "supportPhoneRevealed"
+                    );
+
+                const button =
+                    document.getElementById(
+                        "revealSupportPhone"
+                    );
+
+                if (!phone || !button) {
+                    return;
+                }
+
+                phone.hidden = false;
+
+                button.classList.add(
+                    "is-revealed"
+                );
+
+            }
+        );
+
 }
+
+/* =========================================================
+   PHASE 2B
+   RAISE SUPPORT REQUEST MODAL
+   UI ONLY
+   ========================================================= */
+
+function openRaiseSupportRequestModal() {
+
+    const existing =
+        document.getElementById(
+            "raiseSupportRequestModal"
+        );
+
+    if (existing) {
+        existing.remove();
+    }
+
+
+    const overlay =
+        document.createElement("div");
+
+    overlay.id =
+        "raiseSupportRequestModal";
+
+    overlay.className =
+        "tech-support-modal";
+
+
+    overlay.innerHTML = `
+
+        <div
+            class="tech-support-modal-box"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="raiseSupportTitle"
+        >
+
+            <!-- HEADER -->
+
+            <div class="tech-support-modal-header">
+
+                <div>
+
+                    <p class="tech-support-modal-eyebrow">
+                        TECHNICIAN SUPPORT
+                    </p>
+
+                    <h2 id="raiseSupportTitle">
+                        Raise Support Request
+                    </h2>
+
+                    <p>
+                        Tell us what help you need with your service.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="tech-support-modal-close"
+                    id="closeRaiseSupportModal"
+                    aria-label="Close"
+                >
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+
+            <div class="tech-support-modal-body">
+
+
+                <!-- JOB -->
+
+                <div class="tech-support-form-group">
+
+                    <label for="supportJobSelect">
+                        Select Service / Job
+                        <span>*</span>
+                    </label>
+
+                    <select
+                        id="supportJobSelect"
+                        class="tech-support-form-control"
+                    >
+
+                        <option value="">
+                            Select your assigned service
+                        </option>
+
+                    </select>
+
+                    <small>
+                        Your assigned service will be available here.
+                    </small>
+
+                </div>
+
+
+                <!-- CUSTOMER PREVIEW -->
+
+                <div
+                    class="tech-support-job-preview"
+                    id="supportJobPreview"
+                    hidden
+                >
+
+                    <div class="tech-support-job-preview-header">
+
+                        <i class="fa-solid fa-briefcase"></i>
+
+                        <strong>
+                            Selected Service
+                        </strong>
+
+                    </div>
+
+
+                    <div class="tech-support-job-preview-grid">
+
+                        <div>
+
+                            <span>
+                                Customer
+                            </span>
+
+                            <strong
+                                id="supportPreviewCustomer"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Mobile
+                            </span>
+
+                            <strong
+                                id="supportPreviewMobile"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Service
+                            </span>
+
+                            <strong
+                                id="supportPreviewService"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Appointment
+                            </span>
+
+                            <strong
+                                id="supportPreviewAppointment"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SUPPORT TYPE -->
+
+                <div class="tech-support-form-group">
+
+                    <label for="supportTypeSelect">
+                        Support Type
+                        <span>*</span>
+                    </label>
+
+                    <select
+                        id="supportTypeSelect"
+                        class="tech-support-form-control"
+                    >
+
+                        <option value="">
+                            Select support type
+                        </option>
+
+                        <option value="TECHNICAL_PROBLEM">
+                            Technical Problem
+                        </option>
+
+                        <option value="APPOINTMENT_JOB">
+                            Appointment / Job
+                        </option>
+
+                        <option value="CCTV_PROBLEM">
+                            CCTV Problem
+                        </option>
+
+                        <option value="COMPUTER_LAPTOP">
+                            Computer / Laptop
+                        </option>
+
+                        <option value="JOB_ID_BILLING">
+                            Job ID / Billing
+                        </option>
+
+                        <option value="TECHNICIAN_SUPPORT">
+                            Technician Support
+                        </option>
+
+                        <option value="OTHER">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- PROBLEM DETAILS -->
+
+                <div class="tech-support-form-group">
+
+                    <label for="supportProblemDetails">
+                        Problem Details
+                        <span>*</span>
+                    </label>
+
+                    <textarea
+                        id="supportProblemDetails"
+                        class="tech-support-form-control tech-support-textarea"
+                        rows="6"
+                        maxlength="2000"
+                        placeholder="Describe the problem clearly..."
+                    ></textarea>
+
+                    <div class="tech-support-character-count">
+
+                        <span>
+                            Please provide enough details
+                            for our support team.
+                        </span>
+
+                        <strong id="supportProblemCount">
+                            0 / 2000
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- LOCATION -->
+
+                <div class="tech-support-location-box">
+
+                    <div class="tech-support-location-icon">
+
+                        <i class="fa-solid fa-location-crosshairs"></i>
+
+                    </div>
+
+
+                    <div class="tech-support-location-content">
+
+                        <strong>
+                            Current Location
+                        </strong>
+
+                        <span>
+                            Your current location can be attached
+                            to this support request when the request
+                            system is connected.
+                        </span>
+
+                        <div
+                            class="tech-support-location-status"
+                            id="supportLocationStatus"
+                        >
+
+                            <i class="fa-solid fa-circle-info"></i>
+
+                            Location capture will be enabled
+                            in Phase 3.
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ERROR -->
+
+                <div
+                    class="tech-support-form-error"
+                    id="supportRequestFormError"
+                    hidden
+                ></div>
+
+
+                <!-- ACTIONS -->
+
+                <div class="tech-support-modal-actions">
+
+                    <button
+                        type="button"
+                        class="tech-support-modal-secondary"
+                        id="cancelRaiseSupport"
+                    >
+
+                        Cancel
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="tech-support-modal-primary"
+                        id="submitSupportRequest"
+                    >
+
+                        <i class="fa-solid fa-paper-plane"></i>
+
+                        Submit Support Request
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+    /* =====================================================
+       ELEMENTS
+       ===================================================== */
+
+    const closeButton =
+        document.getElementById(
+            "closeRaiseSupportModal"
+        );
+
+    const cancelButton =
+        document.getElementById(
+            "cancelRaiseSupport"
+        );
+
+    const problemTextarea =
+        document.getElementById(
+            "supportProblemDetails"
+        );
+
+    const problemCount =
+        document.getElementById(
+            "supportProblemCount"
+        );
+
+    const submitButton =
+        document.getElementById(
+            "submitSupportRequest"
+        );
+
+
+    /* =====================================================
+       CLOSE
+       ===================================================== */
+
+    const closeModal =
+        () => {
+
+            overlay.remove();
+
+            document.removeEventListener(
+                "keydown",
+                escapeHandler
+            );
+
+        };
+
+
+    const escapeHandler =
+        event => {
+
+            if (
+                event.key === "Escape"
+            ) {
+                closeModal();
+            }
+
+        };
+
+
+    closeButton
+        ?.addEventListener(
+            "click",
+            closeModal
+        );
+
+
+    cancelButton
+        ?.addEventListener(
+            "click",
+            closeModal
+        );
+
+
+    overlay.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === overlay
+            ) {
+                closeModal();
+            }
+
+        }
+    );
+
+
+    document.addEventListener(
+        "keydown",
+        escapeHandler
+    );
+
+
+    /* =====================================================
+       CHARACTER COUNTER
+       ===================================================== */
+
+    problemTextarea
+        ?.addEventListener(
+            "input",
+            () => {
+
+                const length =
+                    problemTextarea.value.length;
+
+                if (problemCount) {
+
+                    problemCount.textContent =
+                        `${length} / 2000`;
+
+                }
+
+            }
+        );
+
+
+    /* =====================================================
+       SUBMIT
+       PHASE 2B = UI VALIDATION ONLY
+       ===================================================== */
+
+    submitButton
+        ?.addEventListener(
+            "click",
+            () => {
+
+                const job =
+                    document.getElementById(
+                        "supportJobSelect"
+                    )?.value
+                    ?.trim();
+
+
+                const type =
+                    document.getElementById(
+                        "supportTypeSelect"
+                    )?.value
+                    ?.trim();
+
+
+                const problem =
+                    document.getElementById(
+                        "supportProblemDetails"
+                    )?.value
+                    ?.trim();
+
+
+                const errorBox =
+                    document.getElementById(
+                        "supportRequestFormError"
+                    );
+
+
+                if (!job) {
+
+                    showSupportRequestError(
+                        errorBox,
+                        "Please select the service or job for which you need support."
+                    );
+
+                    return;
+
+                }
+
+
+                if (!type) {
+
+                    showSupportRequestError(
+                        errorBox,
+                        "Please select a support type."
+                    );
+
+                    return;
+
+                }
+
+
+                if (!problem) {
+
+                    showSupportRequestError(
+                        errorBox,
+                        "Please describe the problem before submitting the request."
+                    );
+
+                    return;
+
+                }
+
+
+                if (problem.length < 10) {
+
+                    showSupportRequestError(
+                        errorBox,
+                        "Please provide a little more detail about the problem."
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                 * IMPORTANT:
+                 * Phase 2B does NOT send anything to Supabase.
+                 *
+                 * Phase 3 will replace this section with:
+                 *
+                 * 1. Appointment validation
+                 * 2. GPS capture
+                 * 3. support_requests INSERT
+                 * 4. support token generation
+                 * 5. success screen
+                 */
+
+                showSupportRequestSuccessPreview(
+                    closeModal
+                );
+
+            }
+        );
+
+
+    /* =====================================================
+       INITIAL JOB STATE
+       ===================================================== */
+
+    populatePhase2SupportJobs();
+
+}
+
+/* =========================================================
+   PHASE 2B
+   SUPPORT REQUEST ERROR
+   ========================================================= */
+
+function showSupportRequestError(
+    errorBox,
+    message
+) {
+
+    if (!errorBox) {
+        return;
+    }
+
+    errorBox.hidden = false;
+
+    errorBox.innerHTML = `
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>
+            ${esc(message)}
+        </span>
+    `;
+
+}
+
+
+/* =========================================================
+   PHASE 2B
+   TEMPORARY SUCCESS PREVIEW
+   ========================================================= */
+
+function showSupportRequestSuccessPreview(
+    closeModal
+) {
+
+    const modal =
+        document.getElementById(
+            "raiseSupportRequestModal"
+        );
+
+    if (!modal) {
+        return;
+    }
+
+
+    const box =
+        modal.querySelector(
+            ".tech-support-modal-box"
+        );
+
+    if (!box) {
+        return;
+    }
+
+
+    box.innerHTML = `
+
+        <div class="tech-support-request-success">
+
+            <div class="tech-support-request-success-icon">
+
+                <i class="fa-solid fa-check"></i>
+
+            </div>
+
+
+            <p class="tech-support-modal-eyebrow">
+                SUPPORT REQUEST
+            </p>
+
+
+            <h2>
+                Request Form Ready
+            </h2>
+
+
+            <p>
+                Your support request has passed the
+                frontend validation successfully.
+            </p>
+
+
+            <div class="tech-support-phase-note">
+
+                <i class="fa-solid fa-code-branch"></i>
+
+                <div>
+
+                    <strong>
+                        Phase 2B UI Preview
+                    </strong>
+
+                    <span>
+                        The request has NOT been submitted
+                        to the server yet.
+                        Supabase, GPS and support token
+                        creation will be connected in Phase 3.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="tech-support-modal-primary"
+                id="closeSupportPreview"
+            >
+
+                Continue
+
+            </button>
+
+        </div>
+
+    `;
+
+
+    document
+        .getElementById(
+            "closeSupportPreview"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                if (typeof closeModal === "function") {
+                    closeModal();
+                } else {
+                    modal.remove();
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   PHASE 2B
+   TEMPORARY JOB DATA
+   ========================================================= */
+
+function populatePhase2SupportJobs() {
+
+    const select =
+        document.getElementById(
+            "supportJobSelect"
+        );
+
+    if (!select) {
+        return;
+    }
+
+
+    /*
+     * IMPORTANT:
+     * This is intentionally a UI placeholder.
+     *
+     * We are NOT querying Supabase here.
+     *
+     * Phase 3 will populate this dropdown from
+     * the technician's legitimate assigned appointments.
+     */
+
+
+    const option =
+        document.createElement(
+            "option"
+        );
+
+    option.value = "";
+
+    option.textContent =
+        "Assigned services will appear here";
+
+    option.disabled = true;
+
+
+    select.appendChild(
+        option
+    );
+
+
+    select.addEventListener(
+        "change",
+        () => {
+
+            const preview =
+                document.getElementById(
+                    "supportJobPreview"
+                );
+
+            if (preview) {
+                preview.hidden = true;
+            }
+
+        }
+    );
+
+}
+
+
 
 async function loadDetail(
     id,

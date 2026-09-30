@@ -158,7 +158,7 @@ async function route(
        CREATE SUPPORT REQUEST
        ===================================================== */
 
-    case "support_create":
+        case "support_create":
       return createSupportRequest(
         db,
         technician.id,
@@ -166,13 +166,17 @@ async function route(
       );
 
 
+    case "support_my_requests":
+      return supportMyRequests(
+        db,
+        technician.id
+      );
+
+
     default:
       throw new Error(
         "Unknown technician action."
       );
-  }
-}
-
 
 /* =========================================================
    DASHBOARD
@@ -1174,6 +1178,149 @@ async function createSupportRequest(
   };
 }
 
+/* =========================================================
+   MY SUPPORT REQUESTS
+   PHASE 4A
+   RETURN ONLY THIS TECHNICIAN'S SUPPORT REQUESTS
+   ========================================================= */
+
+async function supportMyRequests(
+  db: any,
+  technicianId: string
+) {
+
+  if (
+    !isUuid(technicianId)
+  ) {
+    throw new Error(
+      "Invalid technician."
+    );
+  }
+
+
+  const {
+    data,
+    error
+  } = await db
+    .from("support_requests")
+    .select(`
+      id,
+      support_token,
+      appointment_id,
+      technician_id,
+      support_type,
+      problem_details,
+      latitude,
+      longitude,
+      location_url,
+      location_captured_at,
+      status,
+      created_at,
+      updated_at,
+      acknowledged_at,
+      resolved_at,
+      closed_at
+    `)
+    .eq(
+      "technician_id",
+      technicianId
+    )
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
+
+
+  if (error) {
+
+    console.error(
+      "MY SUPPORT REQUESTS QUERY ERROR:",
+      {
+        message:
+          error.message,
+
+        details:
+          error.details,
+
+        hint:
+          error.hint,
+
+        code:
+          error.code
+      }
+    );
+
+    throw new Error(
+      "SUPPORT_REQUESTS_QUERY_FAILED"
+    );
+  }
+
+
+  const requests =
+    data || [];
+
+
+  return {
+
+    requests:
+      requests.map(
+        (request: any) => ({
+
+          id:
+            request.id,
+
+          support_token:
+            request.support_token,
+
+          appointment_id:
+            request.appointment_id,
+
+          technician_id:
+            request.technician_id,
+
+          support_type:
+            request.support_type,
+
+          problem_details:
+            request.problem_details,
+
+          latitude:
+            request.latitude,
+
+          longitude:
+            request.longitude,
+
+          location_url:
+            request.location_url,
+
+          location_captured_at:
+            request.location_captured_at,
+
+          status:
+            request.status,
+
+          created_at:
+            request.created_at,
+
+          updated_at:
+            request.updated_at,
+
+          acknowledged_at:
+            request.acknowledged_at,
+
+          resolved_at:
+            request.resolved_at,
+
+          closed_at:
+            request.closed_at
+
+        })
+      )
+
+  };
+}
 
 /* =========================================================
    SUPPORT TOKEN GENERATOR

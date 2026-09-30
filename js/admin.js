@@ -233,7 +233,24 @@ async function set(id, status, extra = {}) {
     }
 }
 
-signIn.onclick=async()=>{try{let{error:x}=await s.auth.signInWithPassword({email:email.value,password:password.value});if(x)throw x;login.hidden=true;panel.hidden=false;dashboard()}catch(x){error.textContent=x.message}};signOut.onclick=()=>s.auth.signOut().then(()=>location.reload());document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav-link").forEach(x=>x.classList.remove("active"));b.classList.add("active");({dashboard,appointments:dashboard,calendar:calendarView,availability:availabilityView,technicians:techniciansView,notifications:notificationsView}[b.dataset.view]||dashboard)()});menuToggle.onclick=()=>document.querySelector(".admin-sidebar").classList.toggle("open");s?.auth.getSession().then(({data:{session}})=>{if(session){login.hidden=true;panel.hidden=false;dashboard()}});
+signIn.onclick=async()=>{try{let{error:x}=await s.auth.signInWithPassword({email:email.value,password:password.value});if(x)throw x;login.hidden=true;panel.hidden=false;dashboard()}catch(x){error.textContent=x.message}};signOut.onclick=()=>s.auth.signOut().then(()=>location.reload())
+    
+    document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav-link").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+        
+        ({
+            
+            dashboard,
+            appointments:dashboard,
+            calendar:calendarView,
+            availability:availabilityView,
+            technicians:techniciansView,
+            notifications:notificationsView,
+            support:supportCenterView,
+            }[b.dataset.view]||dashboard)()
+
+});
+
+menuToggle.onclick=()=>document.querySelector(".admin-sidebar").classList.toggle("open");s?.auth.getSession().then(({data:{session}})=>{if(session){login.hidden=true;panel.hidden=false;dashboard()}});
 async function calendarView(){pageTitle.textContent="Calendar";let a=(await api("appointments",{filters:{}})).appointments;q.innerHTML=`<div class="admin-card"><h2 class="h6">Appointments by date</h2>${a.map(x=>`<button class="btn btn-light w-100 text-start mb-1" data-view-id="${x.id}">${e(formatAppointmentDateTime(x.appointment_date, x.appointment_time))} · ${e(x.customer_name)} · ${L(x.status)}</button>`).join("")||"No appointments."}</div>`;document.querySelectorAll("[data-view-id]").forEach(b=>b.onclick=()=>detail(b.dataset.viewId))}
 async function availabilityView(){pageTitle.textContent="Availability";let x=await api("availability");let z=x.settings;q.innerHTML=`<div class="admin-card"><h2 class="h6">Business settings</h2><div class="row g-2"><div class="col-12"><label>Business days (1=Mon … 7=Sun)</label><input id="days" class="form-control" value="${z.business_days.join(",")}"></div>${[["open","Opening time",z.opening_time],["close","Closing time",z.closing_time],["duration","Slot minutes",z.slot_duration_minutes],["buffer","Buffer minutes",z.buffer_minutes],["capacity","Maximum appointments",z.max_appointments_per_slot],["advance","Minimum advance minutes",z.minimum_advance_minutes],["future","Maximum future days",z.maximum_future_days]].map(v=>`<div class="col-md-4"><label>${v[1]}</label><input id="${v[0]}" class="form-control" value="${v[2]}"></div>`).join("")}</div><button id="saveAvailability" class="btn btn-primary mt-3">Save settings</button></div><div class="admin-card mt-3"><h2 class="h6">Holiday / blocked date or slot</h2><input id="blockDate" type="date" class="form-control mb-2"><input id="blockStart" type="time" class="form-control mb-2"><input id="blockEnd" type="time" class="form-control mb-2"><input id="blockReason" class="form-control mb-2" placeholder="Reason"><button id="addBlock" class="btn btn-outline-primary">Save block</button><ul class="mt-3">${x.blocks.map(b=>`<li>${e(b.block_date)} ${e(b.starts_at||"All day")} ${e(b.reason)} <button class="btn btn-sm btn-link" data-delete-block="${b.id}">Delete</button></li>`).join("")}</ul></div>`;saveAvailability.onclick=async()=>{await api("save_availability",{settings:{business_days:days.value.split(",").map(Number),opening_time:open.value,closing_time:close.value,slot_duration_minutes:duration.value,buffer_minutes:buffer.value,max_appointments_per_slot:capacity.value,minimum_advance_minutes:advance.value,maximum_future_days:future.value}});flash("Availability saved");availabilityView()};addBlock.onclick=async()=>{await api("save_block",{block:{block_date:blockDate.value,starts_at:blockStart.value||null,ends_at:blockEnd.value||null,reason:blockReason.value}});availabilityView()};document.querySelectorAll("[data-delete-block]").forEach(b=>b.onclick=async()=>{await api("delete_block",{id:b.dataset.deleteBlock});availabilityView()})}
 async function notificationsView(){pageTitle.textContent="Notifications";let[n,l]=await Promise.all([api("notifications"),api("notification_logs")]);n=n.notifications;q.innerHTML=`<div class="admin-card"><h2 class="h6">Appointment notifications</h2><p>Permission: <b>${Notification.permission==="granted"?"Enabled":"Not Enabled"}</b></p><button id="enablePush" class="btn btn-primary">Enable Appointment Notifications</button></div><div class="admin-card mt-3"><h2 class="h6">Admin inbox</h2>${n.map(x=>`<div class="border rounded p-2 mb-2"><b>${e(x.title)}</b> · ${x.is_read?"Read":"Unread"}<br><small>${e(x.body)} · ${new Date(x.created_at).toLocaleString()}</small><div class="actions mt-1">${x.appointments?.appointment_id?`<button class="btn btn-sm btn-outline-primary" data-notification-appointment="${x.appointment_id}">View appointment</button>`:""}${!x.is_read?`<button class="btn btn-sm btn-outline-secondary" data-read="${x.id}">Mark as read</button>`:""}</div></div>`).join("")||"No notifications yet."}</div><div class="admin-card mt-3"><h2 class="h6">Delivery log</h2><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Type</th><th>Channel</th><th>Status</th><th>Appointment</th><th>Created</th><th>Sent</th><th>Error</th></tr></thead><tbody>${l.logs.map(x=>`<tr><td>${e(x.type)}</td><td>${e(x.channel)}</td><td>${e(x.status)}</td><td>${e(x.appointments?.appointment_id)}</td><td>${new Date(x.created_at).toLocaleString()}</td><td>${x.sent_at?new Date(x.sent_at).toLocaleString():"—"}</td><td>${e(x.error)}</td></tr>`).join("")||'<tr><td colspan="7" class="text-muted">No delivery attempts recorded.</td></tr>'}</tbody></table></div></div>`;document.getElementById("enablePush").onclick=enablePushNotifications;document.querySelectorAll("[data-read]").forEach(b=>b.onclick=async()=>{await api("mark_notification_read",{id:b.dataset.read});notificationsView()});document.querySelectorAll("[data-notification-appointment]").forEach(b=>b.onclick=()=>detail(b.dataset.notificationAppointment))}
@@ -919,3 +936,1641 @@ async function enablePushNotifications() {
         );
     }
 }
+
+/* =========================================================
+   ADMIN SUPPORT CENTER
+   PHASE 6B
+   ========================================================= */
+
+const ADMIN_SUPPORT_STATUSES = [
+    "OPEN",
+    "ACKNOWLEDGED",
+    "IN_PROGRESS",
+    "RESOLVED",
+    "CLOSED",
+    "CANCELLED"
+];
+
+const ADMIN_SUPPORT_TYPES = [
+    "TECHNICAL_PROBLEM",
+    "APPOINTMENT_JOB",
+    "CCTV_PROBLEM",
+    "COMPUTER_LAPTOP",
+    "JOB_ID_BILLING",
+    "TECHNICIAN_SUPPORT",
+    "OTHER"
+];
+
+let adminSupportState = {
+    status: "",
+    supportType: "",
+    search: "",
+    requestId: "",
+    loading: false
+};
+
+function adminSupportTypeLabel(value) {
+
+    const labels = {
+        TECHNICAL_PROBLEM: "Technical Problem",
+        APPOINTMENT_JOB: "Appointment / Job",
+        CCTV_PROBLEM: "CCTV Problem",
+        COMPUTER_LAPTOP: "Computer / Laptop",
+        JOB_ID_BILLING: "Job ID / Billing",
+        TECHNICIAN_SUPPORT: "Technician Support",
+        OTHER: "Other"
+    };
+
+    return (
+        labels[value] ||
+        String(value || "")
+            .replaceAll("_", " ")
+            .replace(/\b\w/g, char => char.toUpperCase())
+    );
+}
+
+function adminSupportStatusLabel(value) {
+
+    return String(value || "")
+        .replaceAll("_", " ")
+        .replace(/\b\w/g, char => char.toUpperCase());
+}
+
+function adminSupportStatusClass(status) {
+
+    return String(status || "")
+        .toLowerCase()
+        .replaceAll("_", "-");
+}
+
+function adminSupportFormatDate(value) {
+
+    if (!value) {
+        return "—";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return String(value);
+    }
+
+    return date.toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+    });
+}
+
+function adminSupportFormatAppointmentDate(date, time) {
+
+    if (!date) {
+        return "—";
+    }
+
+    const cleanTime = String(time || "").slice(0, 8);
+
+    const value = new Date(
+        `${date}T${cleanTime}`
+    );
+
+    if (Number.isNaN(value.getTime())) {
+        return `${date} ${time || ""}`.trim();
+    }
+
+    return value.toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+    });
+}
+
+
+/* =========================================================
+   SUPPORT CENTER
+   ========================================================= */
+
+async function supportCenterView() {
+
+    pageTitle.textContent = "Support Center";
+
+    q.innerHTML = `
+        <div class="admin-support-loading">
+            <div class="spinner-border spinner-border-sm"
+                 role="status"></div>
+            <span>Loading support requests…</span>
+        </div>
+    `;
+
+    try {
+
+        await loadAdminSupportRequests();
+
+    } catch (error) {
+
+        console.error(
+            "Admin support center failed:",
+            error
+        );
+
+        q.innerHTML = `
+            <div class="admin-card admin-support-error">
+                <h2 class="h6 mb-2">
+                    Unable to load Support Center
+                </h2>
+
+                <p class="text-muted mb-3">
+                    ${e(
+                        error?.message ||
+                        "Support requests could not be loaded."
+                    )}
+                </p>
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="adminSupportRetry"
+                >
+                    Retry
+                </button>
+            </div>
+        `;
+
+        document
+            .getElementById("adminSupportRetry")
+            ?.addEventListener(
+                "click",
+                () => supportCenterView()
+            );
+    }
+}
+
+
+/* =========================================================
+   LOAD SUPPORT REQUESTS
+   ========================================================= */
+
+async function loadAdminSupportRequests() {
+
+    adminSupportState.loading = true;
+
+    const response = await api(
+        "support_requests",
+        {
+            status:
+                adminSupportState.status || undefined,
+
+            support_type:
+                adminSupportState.supportType || undefined,
+
+            search:
+                adminSupportState.search || undefined,
+
+            offset: 0,
+            limit: 50
+        }
+    );
+
+    const requests =
+        Array.isArray(response?.requests)
+            ? response.requests
+            : [];
+
+    adminSupportState.loading = false;
+
+    renderAdminSupportCenter(
+        requests,
+        response?.count || requests.length
+    );
+}
+
+
+/* =========================================================
+   SUPPORT CENTER UI
+   ========================================================= */
+
+function renderAdminSupportCenter(
+    requests,
+    totalCount
+) {
+
+    pageTitle.textContent = "Support Center";
+
+    q.innerHTML = `
+        <div class="admin-support-header">
+
+            <div>
+                <h2 class="admin-support-title">
+                    Technician Support
+                </h2>
+
+                <p class="admin-support-subtitle">
+                    Manage technician support requests,
+                    conversations and status.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                id="adminSupportRefresh"
+            >
+                ↻ Refresh
+            </button>
+
+        </div>
+
+
+        <div class="admin-support-stats">
+
+            <div class="admin-support-stat">
+                <small>Total Requests</small>
+                <strong>${Number(totalCount) || 0}</strong>
+            </div>
+
+            <div class="admin-support-stat">
+                <small>Open</small>
+                <strong>
+                    ${requests.filter(
+                        x => x.status === "OPEN"
+                    ).length}
+                </strong>
+            </div>
+
+            <div class="admin-support-stat">
+                <small>In Progress</small>
+                <strong>
+                    ${requests.filter(
+                        x => x.status === "IN_PROGRESS"
+                    ).length}
+                </strong>
+            </div>
+
+            <div class="admin-support-stat">
+                <small>Resolved</small>
+                <strong>
+                    ${requests.filter(
+                        x => x.status === "RESOLVED"
+                    ).length}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="admin-card admin-support-filter-card">
+
+            <div class="row g-2">
+
+                <div class="col-lg-5 col-md-6">
+
+                    <label
+                        class="form-label small fw-semibold"
+                        for="adminSupportSearch"
+                    >
+                        Search
+                    </label>
+
+                    <input
+                        id="adminSupportSearch"
+                        type="search"
+                        class="form-control"
+                        placeholder="Token, appointment, technician..."
+                        value="${e(
+                            adminSupportState.search
+                        )}"
+                    >
+
+                </div>
+
+
+                <div class="col-lg-3 col-md-3">
+
+                    <label
+                        class="form-label small fw-semibold"
+                        for="adminSupportStatus"
+                    >
+                        Status
+                    </label>
+
+                    <select
+                        id="adminSupportStatus"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            All statuses
+                        </option>
+
+                        ${ADMIN_SUPPORT_STATUSES
+                            .map(status => `
+                                <option
+                                    value="${status}"
+                                    ${
+                                        adminSupportState.status === status
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    ${adminSupportStatusLabel(status)}
+                                </option>
+                            `)
+                            .join("")}
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-lg-3 col-md-3">
+
+                    <label
+                        class="form-label small fw-semibold"
+                        for="adminSupportType"
+                    >
+                        Support Type
+                    </label>
+
+                    <select
+                        id="adminSupportType"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            All types
+                        </option>
+
+                        ${ADMIN_SUPPORT_TYPES
+                            .map(type => `
+                                <option
+                                    value="${type}"
+                                    ${
+                                        adminSupportState.supportType === type
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    ${adminSupportTypeLabel(type)}
+                                </option>
+                            `)
+                            .join("")}
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-lg-1 col-md-12 d-flex align-items-end">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary w-100"
+                        id="adminSupportClear"
+                        title="Clear filters"
+                    >
+                        Clear
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="admin-card mt-3">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <div>
+                    <h2 class="h6 mb-1">
+                        Support Requests
+                    </h2>
+
+                    <small class="text-muted">
+                        ${requests.length} request${
+                            requests.length === 1 ? "" : "s"
+                        } shown
+                    </small>
+                </div>
+
+            </div>
+
+            ${renderAdminSupportRequestTable(requests)}
+
+        </div>
+    `;
+
+    bindAdminSupportCenter();
+}
+
+
+/* =========================================================
+   SUPPORT REQUEST TABLE
+   ========================================================= */
+
+function renderAdminSupportRequestTable(
+    requests
+) {
+
+    if (!requests.length) {
+
+        return `
+            <div class="admin-support-empty">
+
+                <div class="admin-support-empty-icon">
+                    ?
+                </div>
+
+                <h3>
+                    No support requests found
+                </h3>
+
+                <p>
+                    There are no support requests matching
+                    the selected filters.
+                </p>
+
+            </div>
+        `;
+    }
+
+    return `
+        <div class="table-responsive">
+
+            <table class="table align-middle admin-support-table">
+
+                <thead>
+                    <tr>
+                        <th>Support</th>
+                        <th>Technician</th>
+                        <th>Appointment</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    ${requests.map(request => {
+
+                        const technician =
+                            request.technicians;
+
+                        const appointment =
+                            request.appointments;
+
+                        return `
+                            <tr>
+
+                                <td>
+
+                                    <div class="support-token">
+                                        ${e(
+                                            request.support_token
+                                        )}
+                                    </div>
+
+                                    <small class="text-muted">
+                                        ${e(
+                                            String(
+                                                request.id || ""
+                                            ).slice(0, 8)
+                                        )}
+                                    </small>
+
+                                </td>
+
+
+                                <td>
+
+                                    <strong>
+                                        ${e(
+                                            technician?.full_name ||
+                                            "Unknown"
+                                        )}
+                                    </strong>
+
+                                    <small class="d-block text-muted">
+                                        ${e(
+                                            technician?.technician_code ||
+                                            "—"
+                                        )}
+                                    </small>
+
+                                </td>
+
+
+                                <td>
+
+                                    <strong>
+                                        ${e(
+                                            appointment?.appointment_id ||
+                                            "—"
+                                        )}
+                                    </strong>
+
+                                    <small class="d-block text-muted">
+                                        ${e(
+                                            appointment?.customer_name ||
+                                            "—"
+                                        )}
+                                    </small>
+
+                                </td>
+
+
+                                <td>
+                                    ${e(
+                                        adminSupportTypeLabel(
+                                            request.support_type
+                                        )
+                                    )}
+                                </td>
+
+
+                                <td>
+
+                                    <span
+                                        class="
+                                            support-status-badge
+                                            ${adminSupportStatusClass(
+                                                request.status
+                                            )}
+                                        "
+                                    >
+                                        ${e(
+                                            adminSupportStatusLabel(
+                                                request.status
+                                            )
+                                        )}
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+                                    ${e(
+                                        adminSupportFormatDate(
+                                            request.created_at
+                                        )
+                                    )}
+                                </td>
+
+
+                                <td>
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-primary"
+                                        data-admin-support-view="${e(
+                                            request.id
+                                        )}"
+                                    >
+                                        View
+                                    </button>
+
+                                </td>
+
+                            </tr>
+                        `;
+
+                    }).join("")}
+
+                </tbody>
+
+            </table>
+
+        </div>
+    `;
+}
+
+
+/* =========================================================
+   SUPPORT CENTER EVENTS
+   ========================================================= */
+
+function bindAdminSupportCenter() {
+
+    document
+        .getElementById(
+            "adminSupportRefresh"
+        )
+        ?.addEventListener(
+            "click",
+            () => loadAdminSupportRequests()
+        );
+
+
+    document
+        .getElementById(
+            "adminSupportStatus"
+        )
+        ?.addEventListener(
+            "change",
+            event => {
+
+                adminSupportState.status =
+                    event.target.value;
+
+                loadAdminSupportRequests();
+            }
+        );
+
+
+    document
+        .getElementById(
+            "adminSupportType"
+        )
+        ?.addEventListener(
+            "change",
+            event => {
+
+                adminSupportState.supportType =
+                    event.target.value;
+
+                loadAdminSupportRequests();
+            }
+        );
+
+
+    document
+        .getElementById(
+            "adminSupportSearch"
+        )
+        ?.addEventListener(
+            "change",
+            event => {
+
+                adminSupportState.search =
+                    String(
+                        event.target.value || ""
+                    ).trim();
+
+                loadAdminSupportRequests();
+            }
+        );
+
+
+    document
+        .getElementById(
+            "adminSupportClear"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                adminSupportState.status = "";
+                adminSupportState.supportType = "";
+                adminSupportState.search = "";
+
+                loadAdminSupportRequests();
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            "[data-admin-support-view]"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    openAdminSupportRequest(
+                        button.dataset.adminSupportView
+                    );
+                }
+            );
+
+        });
+}
+
+
+/* =========================================================
+   SUPPORT REQUEST DETAILS
+   ========================================================= */
+
+async function openAdminSupportRequest(
+    requestId
+) {
+
+    const id =
+        String(requestId || "").trim();
+
+    if (!id) {
+        flash(
+            "Invalid support request.",
+            false
+        );
+        return;
+    }
+
+    adminSupportState.requestId = id;
+
+    q.innerHTML = `
+        <div class="admin-support-loading">
+            <div
+                class="spinner-border spinner-border-sm"
+                role="status"
+            ></div>
+
+            <span>
+                Loading support request…
+            </span>
+        </div>
+    `;
+
+    try {
+
+        const [
+            requestResponse,
+            messageResponse
+        ] = await Promise.all([
+            api(
+                "support_get_request",
+                {
+                    id
+                }
+            ),
+
+            api(
+                "support_messages",
+                {
+                    support_request_id: id
+                }
+            )
+        ]);
+
+        const request =
+            requestResponse?.request;
+
+        const messages =
+            Array.isArray(
+                messageResponse?.messages
+            )
+                ? messageResponse.messages
+                : [];
+
+        if (!request?.id) {
+            throw new Error(
+                "Support request could not be loaded."
+            );
+        }
+
+        renderAdminSupportDetails(
+            request,
+            messages
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Admin support request load failed:",
+            error
+        );
+
+        q.innerHTML = `
+            <div class="admin-card">
+
+                <button
+                    type="button"
+                    class="btn btn-link p-0 mb-3"
+                    id="adminSupportBack"
+                >
+                    ← Back to Support Requests
+                </button>
+
+                <div class="alert alert-danger mb-0">
+                    ${e(
+                        error?.message ||
+                        "Unable to load support request."
+                    )}
+                </div>
+
+            </div>
+        `;
+
+        document
+            .getElementById(
+                "adminSupportBack"
+            )
+            ?.addEventListener(
+                "click",
+                () => supportCenterView()
+            );
+    }
+}
+
+
+/* =========================================================
+   SUPPORT DETAILS UI
+   ========================================================= */
+
+function renderAdminSupportDetails(
+    request,
+    messages
+) {
+
+    const technician =
+        request.technicians || {};
+
+    const appointment =
+        request.appointments || {};
+
+    pageTitle.textContent =
+        request.support_token ||
+        "Support Request";
+
+
+    q.innerHTML = `
+
+        <div class="admin-support-detail-header">
+
+            <div>
+
+                <button
+                    type="button"
+                    class="btn btn-link p-0 mb-2"
+                    id="adminSupportBack"
+                >
+                    ← Back to Support Requests
+                </button>
+
+                <h2 class="admin-support-title">
+                    ${e(
+                        request.support_token
+                    )}
+                </h2>
+
+                <p class="admin-support-subtitle mb-0">
+                    Support request created
+                    ${e(
+                        adminSupportFormatDate(
+                            request.created_at
+                        )
+                    )}
+                </p>
+
+            </div>
+
+
+            <span
+                class="
+                    support-status-badge
+                    large
+                    ${adminSupportStatusClass(
+                        request.status
+                    )}
+                "
+            >
+                ${e(
+                    adminSupportStatusLabel(
+                        request.status
+                    )
+                )}
+            </span>
+
+        </div>
+
+
+        <div class="detail-grid admin-support-detail-grid">
+
+            <section>
+
+                <h2 class="h6">
+                    Technician
+                </h2>
+
+                <div class="admin-support-info">
+
+                    <strong>
+                        ${e(
+                            technician.full_name ||
+                            "—"
+                        )}
+                    </strong>
+
+                    <span>
+                        Code:
+                        ${e(
+                            technician.technician_code ||
+                            "—"
+                        )}
+                    </span>
+
+                    <span>
+                        Mobile:
+                        ${e(
+                            technician.mobile ||
+                            "—"
+                        )}
+                    </span>
+
+                    <span>
+                        Username:
+                        ${e(
+                            technician.username ||
+                            "—"
+                        )}
+                    </span>
+
+                </div>
+
+            </section>
+
+
+            <section>
+
+                <h2 class="h6">
+                    Appointment
+                </h2>
+
+                <div class="admin-support-info">
+
+                    <strong>
+                        ${e(
+                            appointment.appointment_id ||
+                            "—"
+                        )}
+                    </strong>
+
+                    <span>
+                        Customer:
+                        ${e(
+                            appointment.customer_name ||
+                            "—"
+                        )}
+                    </span>
+
+                    <span>
+                        Mobile:
+                        ${e(
+                            appointment.mobile ||
+                            "—"
+                        )}
+                    </span>
+
+                    <span>
+                        Service:
+                        ${e(
+                            serviceCategoryLabel(
+                                appointment.service_category
+                            )
+                        )}
+                    </span>
+
+                    <span>
+                        ${e(
+                            serviceTypeLabel(
+                                appointment.service_type
+                            )
+                        )}
+                    </span>
+
+                    <span>
+                        Appointment:
+                        ${e(
+                            adminSupportFormatAppointmentDate(
+                                appointment.appointment_date,
+                                appointment.appointment_time
+                            )
+                        )}
+                    </span>
+
+                </div>
+
+            </section>
+
+
+            <section>
+
+                <h2 class="h6">
+                    Support Information
+                </h2>
+
+                <div class="admin-support-info">
+
+                    <span>
+                        Type:
+                        <strong>
+                            ${e(
+                                adminSupportTypeLabel(
+                                    request.support_type
+                                )
+                            )}
+                        </strong>
+                    </span>
+
+                    <span>
+                        Status:
+                        ${e(
+                            adminSupportStatusLabel(
+                                request.status
+                            )
+                        )}
+                    </span>
+
+                    <span>
+                        Created:
+                        ${e(
+                            adminSupportFormatDate(
+                                request.created_at
+                            )
+                        )}
+                    </span>
+
+                    ${
+                        request.location_url
+                            ? `
+                                <a
+                                    href="${e(
+                                        request.location_url
+                                    )}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="btn btn-sm btn-outline-primary mt-2"
+                                >
+                                    Open Technician Location
+                                </a>
+                            `
+                            : ""
+                    }
+
+                </div>
+
+            </section>
+
+
+            <section>
+
+                <h2 class="h6">
+                    Problem Details
+                </h2>
+
+                <div class="admin-support-problem">
+
+                    ${e(
+                        request.problem_details ||
+                        "No problem details provided."
+                    )}
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <div class="admin-card mt-3">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <div>
+
+                    <h2 class="h6 mb-1">
+                        Support Status
+                    </h2>
+
+                    <small class="text-muted">
+                        Update the request status from the
+                        available workflow.
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            ${renderAdminSupportStatusControls(
+                request
+            )}
+
+        </div>
+
+
+        <div class="admin-card mt-3">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <div>
+
+                    <h2 class="h6 mb-1">
+                        Support Conversation
+                    </h2>
+
+                    <small class="text-muted">
+                        Technician and admin messages
+                    </small>
+
+                </div>
+
+                <span class="badge text-bg-light">
+                    ${messages.length}
+                    message${messages.length === 1 ? "" : "s"}
+                </span>
+
+            </div>
+
+
+            <div
+                id="adminSupportMessages"
+                class="admin-support-messages"
+            >
+                ${renderAdminSupportMessages(
+                    messages
+                )}
+            </div>
+
+
+            ${
+                !["CLOSED", "CANCELLED"].includes(
+                    request.status
+                )
+                    ? `
+                        <form
+                            id="adminSupportMessageForm"
+                            class="admin-support-composer"
+                        >
+
+                            <textarea
+                                id="adminSupportMessageInput"
+                                class="form-control"
+                                rows="3"
+                                maxlength="4000"
+                                placeholder="Write a reply to the technician..."
+                                required
+                            ></textarea>
+
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+
+                                <small class="text-muted">
+                                    Admin message
+                                </small>
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary"
+                                    id="adminSupportSendButton"
+                                >
+                                    Send Message
+                                </button>
+
+                            </div>
+
+                        </form>
+                    `
+                    : `
+                        <div class="alert alert-light border mb-0">
+                            This support request is
+                            ${e(
+                                adminSupportStatusLabel(
+                                    request.status
+                                )
+                            ).toLowerCase()}
+                            and can no longer receive messages.
+                        </div>
+                    `
+            }
+
+        </div>
+
+    `;
+
+
+    document
+        .getElementById(
+            "adminSupportBack"
+        )
+        ?.addEventListener(
+            "click",
+            () => supportCenterView()
+        );
+
+
+    bindAdminSupportStatusControls(
+        request
+    );
+
+
+    bindAdminSupportMessageComposer(
+        request.id
+    );
+}
+
+
+/* =========================================================
+   STATUS CONTROLS
+   ========================================================= */
+
+function renderAdminSupportStatusControls(
+    request
+) {
+
+    const status =
+        String(request.status || "");
+
+    if (
+        status === "CLOSED" ||
+        status === "CANCELLED"
+    ) {
+
+        return `
+            <div class="admin-support-terminal">
+                <strong>
+                    ${e(
+                        adminSupportStatusLabel(
+                            status
+                        )
+                    )}
+                </strong>
+
+                <span>
+                    This request is in a terminal state.
+                </span>
+            </div>
+        `;
+    }
+
+
+    const transitions = {
+
+        OPEN: [
+            "ACKNOWLEDGED",
+            "CANCELLED"
+        ],
+
+        ACKNOWLEDGED: [
+            "IN_PROGRESS",
+            "CANCELLED"
+        ],
+
+        IN_PROGRESS: [
+            "RESOLVED",
+            "CANCELLED"
+        ],
+
+        RESOLVED: [
+            "CLOSED"
+        ]
+
+    };
+
+
+    const available =
+        transitions[status] || [];
+
+
+    return `
+
+        <div class="admin-support-status-actions">
+
+            ${available.map(
+                nextStatus => `
+                    <button
+                        type="button"
+                        class="
+                            btn
+                            ${
+                                nextStatus === "CANCELLED"
+                                    ? "btn-outline-danger"
+                                    : "btn-primary"
+                            }
+                        "
+                        data-admin-support-status="${nextStatus}"
+                    >
+                        ${e(
+                            adminSupportStatusLabel(
+                                nextStatus
+                            )
+                        )}
+                    </button>
+                `
+            ).join("")}
+
+        </div>
+
+
+        <div class="mt-3">
+
+            <label
+                class="form-label small fw-semibold"
+                for="adminSupportStatusNote"
+            >
+                Optional note
+            </label>
+
+            <textarea
+                id="adminSupportStatusNote"
+                class="form-control"
+                rows="2"
+                maxlength="2000"
+                placeholder="Optional note for the technician..."
+            ></textarea>
+
+        </div>
+    `;
+}
+
+
+function bindAdminSupportStatusControls(
+    request
+) {
+
+    document
+        .querySelectorAll(
+            "[data-admin-support-status]"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                async () => {
+
+                    const nextStatus =
+                        button.dataset
+                            .adminSupportStatus;
+
+                    const note =
+                        String(
+                            document
+                                .getElementById(
+                                    "adminSupportStatusNote"
+                                )
+                                ?.value ||
+                            ""
+                        ).trim();
+
+                    if (!nextStatus) {
+                        return;
+                    }
+
+
+                    const confirmed =
+                        window.confirm(
+                            `Change support status to "${adminSupportStatusLabel(nextStatus)}"?`
+                        );
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+
+                    try {
+
+                        button.disabled = true;
+
+                        button.textContent =
+                            "Updating…";
+
+
+                        await api(
+                            "support_status_update",
+                            {
+                                support_request_id:
+                                    request.id,
+
+                                status:
+                                    nextStatus,
+
+                                note
+                            }
+                        );
+
+
+                        flash(
+                            `Support status updated to ${adminSupportStatusLabel(nextStatus)}.`
+                        );
+
+
+                        await openAdminSupportRequest(
+                            request.id
+                        );
+
+
+                    } catch (error) {
+
+                        button.disabled = false;
+
+                        button.textContent =
+                            adminSupportStatusLabel(
+                                nextStatus
+                            );
+
+                        flash(
+                            error?.message ||
+                            "Support status could not be updated.",
+                            false
+                        );
+                    }
+
+                }
+            );
+
+        });
+}
+
+
+/* =========================================================
+   SUPPORT MESSAGES
+   ========================================================= */
+
+function renderAdminSupportMessages(
+    messages
+) {
+
+    if (!messages.length) {
+
+        return `
+            <div class="admin-support-message-empty">
+                No messages yet.
+            </div>
+        `;
+    }
+
+
+    return messages.map(
+        message => {
+
+            const sender =
+                String(
+                    message.sender_type || ""
+                ).toUpperCase();
+
+            const isAdmin =
+                sender === "ADMIN";
+
+            const isBot =
+                sender === "BOT";
+
+
+            return `
+                <div
+                    class="
+                        admin-support-message
+                        ${isAdmin ? "admin" : ""}
+                        ${isBot ? "bot" : "technician"}
+                    "
+                    data-message-id="${e(
+                        message.id
+                    )}"
+                >
+
+                    <div class="admin-support-message-head">
+
+                        <strong>
+                            ${
+                                isAdmin
+                                    ? "Admin"
+                                    : isBot
+                                        ? "Support Bot"
+                                        : "Technician"
+                            }
+                        </strong>
+
+                        <small>
+                            ${e(
+                                adminSupportFormatDate(
+                                    message.created_at
+                                )
+                            )}
+                        </small>
+
+                    </div>
+
+
+                    <div class="admin-support-message-body">
+                        ${e(
+                            message.message ||
+                            ""
+                        ).replaceAll(
+                            "\n",
+                            "<br>"
+                        )}
+                    </div>
+
+                </div>
+            `;
+
+        }
+    ).join("");
+}
+
+
+/* =========================================================
+   SEND ADMIN MESSAGE
+   ========================================================= */
+
+function bindAdminSupportMessageComposer(
+    requestId
+) {
+
+    const form =
+        document.getElementById(
+            "adminSupportMessageForm"
+        );
+
+    const input =
+        document.getElementById(
+            "adminSupportMessageInput"
+        );
+
+    const button =
+        document.getElementById(
+            "adminSupportSendButton"
+        );
+
+
+    if (!form || !input || !button) {
+        return;
+    }
+
+
+    form.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            const message =
+                String(
+                    input.value || ""
+                ).trim();
+
+
+            if (!message) {
+
+                input.focus();
+
+                return;
+            }
+
+
+            try {
+
+                button.disabled = true;
+
+                button.textContent =
+                    "Sending…";
+
+
+                await api(
+                    "support_message_send",
+                    {
+                        support_request_id:
+                            requestId,
+
+                        message
+                    }
+                );
+
+
+                input.value = "";
+
+
+                flash(
+                    "Message sent successfully."
+                );
+
+
+                await openAdminSupportRequest(
+                    requestId
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Admin support message send failed:",
+                    error
+                );
+
+                flash(
+                    error?.message ||
+                    "Message could not be sent.",
+                    false
+                );
+
+            } finally {
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Send Message";
+            }
+
+        }
+    );
+}
+

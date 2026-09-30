@@ -23,3 +23,382 @@
 .admin-main .table td.actions .btn:last-child {
     margin-right: 0;
 }
+
+/* =========================================================
+   ADMIN SUPPORT CENTER
+   PHASE 6B
+   ========================================================= */
+
+.admin-support-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.admin-support-title {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #13233b;
+}
+
+.admin-support-subtitle {
+    margin: .35rem 0 0;
+    color: #64748b;
+    font-size: .9rem;
+}
+
+
+.admin-support-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(130px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.admin-support-stat {
+    background: #fff;
+    border: 1px solid #e3e8f0;
+    border-radius: .75rem;
+    padding: 1rem;
+}
+
+.admin-support-stat small {
+    display: block;
+    color: #64748b;
+    font-size: .78rem;
+    margin-bottom: .3rem;
+}
+
+.admin-support-stat strong {
+    display: block;
+    color: #13233b;
+    font-size: 1.55rem;
+    line-height: 1.2;
+}
+
+
+.admin-support-filter-card {
+    padding: 1rem;
+}
+
+
+.admin-support-loading {
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .65rem;
+    color: #64748b;
+}
+
+
+.admin-support-error {
+    max-width: 700px;
+}
+
+
+.admin-support-empty {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: #64748b;
+}
+
+.admin-support-empty-icon {
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    background: #eef4fb;
+    color: #27486f;
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.admin-support-empty h3 {
+    color: #13233b;
+    font-size: 1rem;
+    margin-bottom: .35rem;
+}
+
+.admin-support-empty p {
+    margin: 0;
+    font-size: .88rem;
+}
+
+
+.admin-support-table th {
+    white-space: nowrap;
+    color: #475569;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+}
+
+.admin-support-table td {
+    font-size: .88rem;
+}
+
+.support-token {
+    font-weight: 700;
+    color: #13233b;
+    white-space: nowrap;
+}
+
+
+.support-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+    padding: .32rem .6rem;
+    border-radius: 999px;
+    border: 1px solid #d8e0eb;
+    background: #f8fafc;
+    color: #475569;
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    white-space: nowrap;
+}
+
+.support-status-badge.large {
+    min-width: 125px;
+    padding: .45rem .75rem;
+}
+
+
+/* Status-specific UI */
+
+.support-status-badge.open {
+    background: #fff7ed;
+    border-color: #fed7aa;
+    color: #9a3412;
+}
+
+.support-status-badge.acknowledged {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+}
+
+.support-status-badge.in-progress {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #4338ca;
+}
+
+.support-status-badge.resolved {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #047857;
+}
+
+.support-status-badge.closed {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+.support-status-badge.cancelled {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+
+/* =========================================================
+   SUPPORT DETAILS
+   ========================================================= */
+
+.admin-support-detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.admin-support-detail-grid {
+    margin-top: 0;
+}
+
+.admin-support-info {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    color: #475569;
+    font-size: .9rem;
+}
+
+.admin-support-info strong {
+    color: #13233b;
+}
+
+.admin-support-info span {
+    line-height: 1.45;
+}
+
+
+.admin-support-problem {
+    min-height: 80px;
+    padding: .85rem;
+    border-radius: .6rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.55;
+}
+
+
+/* =========================================================
+   SUPPORT STATUS
+   ========================================================= */
+
+.admin-support-status-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.admin-support-terminal {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    padding: .9rem 1rem;
+    border-radius: .65rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.admin-support-terminal strong {
+    color: #13233b;
+}
+
+.admin-support-terminal span {
+    color: #64748b;
+    font-size: .85rem;
+}
+
+
+/* =========================================================
+   SUPPORT CHAT
+   ========================================================= */
+
+.admin-support-messages {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    max-height: 520px;
+    overflow-y: auto;
+    padding: .25rem;
+    margin-bottom: 1rem;
+}
+
+.admin-support-message {
+    width: min(82%, 720px);
+    align-self: flex-start;
+    padding: .75rem .85rem;
+    border-radius: .75rem;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.admin-support-message.admin {
+    align-self: flex-end;
+    background: #eef5ff;
+    border-color: #cfe0f5;
+}
+
+.admin-support-message.bot {
+    background: #f5f3ff;
+    border-color: #ddd6fe;
+}
+
+.admin-support-message-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .35rem;
+}
+
+.admin-support-message-head strong {
+    color: #13233b;
+    font-size: .82rem;
+}
+
+.admin-support-message-head small {
+    color: #64748b;
+    font-size: .7rem;
+    white-space: nowrap;
+}
+
+.admin-support-message-body {
+    color: #334155;
+    font-size: .88rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.admin-support-message-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #94a3b8;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: .7rem;
+}
+
+
+.admin-support-composer {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1rem;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 767px) {
+
+    .admin-support-header {
+        flex-direction: column;
+    }
+
+    .admin-support-header .btn {
+        width: 100%;
+    }
+
+    .admin-support-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .admin-support-detail-header {
+        flex-direction: column;
+    }
+
+    .admin-support-detail-header .support-status-badge {
+        align-self: flex-start;
+    }
+
+    .admin-support-message {
+        width: 94%;
+    }
+
+    .admin-support-message-head {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: .15rem;
+    }
+
+}
+

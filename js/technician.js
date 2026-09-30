@@ -8274,35 +8274,6 @@ function escapeHtml(
 
 }
 
-
-function formatSupportType(
-    type
-) {
-
-    const value =
-        String(
-            type || ""
-        ).trim();
-
-    if (!value) {
-        return "Support Request";
-    }
-
-    return value
-        .toLowerCase()
-        .replace(
-            /_/g,
-            " "
-        )
-        .replace(
-            /\b\w/g,
-            char =>
-                char.toUpperCase()
-        );
-
-}
-
-
 function getSupportStatusClass(
     status
 ) {

@@ -1400,7 +1400,37 @@ async function loadProfile() {
                 </div>
 
 
-                                <!-- =================================================
+                <!-- =================================================
+                     ACCOUNT INFORMATION
+                     ================================================= -->
+
+                <div class="tech-detail-section">
+
+                    <h3>
+                        Account Information
+                    </h3>
+
+                    <div class="tech-detail-info-grid">
+
+                        <div>
+                            <span>Account Status</span>
+                            <strong>
+                                ${p.is_active ? "Active" : "Inactive"}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Account Created</span>
+                            <strong>
+                                ${formatDateTime(p.created_at)}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+<!-- =================================================
                      CHANGE PASSWORD
                      ================================================= -->
 
@@ -1515,35 +1545,6 @@ async function loadProfile() {
 
                 </div>
 
-                <!-- =================================================
-                     ACCOUNT INFORMATION
-                     ================================================= -->
-
-                <div class="tech-detail-section">
-
-                    <h3>
-                        Account Information
-                    </h3>
-
-                    <div class="tech-detail-info-grid">
-
-                        <div>
-                            <span>Account Status</span>
-                            <strong>
-                                ${p.is_active ? "Active" : "Inactive"}
-                            </strong>
-                        </div>
-
-                        <div>
-                            <span>Account Created</span>
-                            <strong>
-                                ${formatDateTime(p.created_at)}
-                            </strong>
-                        </div>
-
-                    </div>
-
-                </div>
 
             </div>
 

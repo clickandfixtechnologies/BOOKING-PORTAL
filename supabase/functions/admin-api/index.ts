@@ -1599,14 +1599,5 @@ function isUuid(
 
 }
 
-function clean(
-  value:any,
-  max:number
-){
 
-  return typeof value==="string"
-    ? value.trim().slice(0,max)
-    : null;
-
-}
 function clean(value:any,max:number){return typeof value==="string"?value.trim().slice(0,max):null;}

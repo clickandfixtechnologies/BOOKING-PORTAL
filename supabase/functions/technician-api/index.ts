@@ -154,11 +154,11 @@ async function route(
       );
 
 
-    /* =====================================================
+        /* =====================================================
        CREATE SUPPORT REQUEST
        ===================================================== */
 
-        case "support_create":
+    case "support_create":
       return createSupportRequest(
         db,
         technician.id,
@@ -177,6 +177,9 @@ async function route(
       throw new Error(
         "Unknown technician action."
       );
+  }
+}
+
 
 /* =========================================================
    DASHBOARD

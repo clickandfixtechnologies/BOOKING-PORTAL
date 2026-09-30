@@ -6295,12 +6295,10 @@ async function loadMySupportRequests() {
                     );
 
 
-                const appointmentId =
-                    request?.appointment_id
-                        ? String(
-                            request.appointment_id
-                        )
-                        : "Not linked";
+                const appointmentReference =
+                request?.appointment_reference ||
+                request?.appointment_code ||
+                "Not linked";
 
 
                 const supportToken =
@@ -6366,7 +6364,7 @@ async function loadMySupportRequests() {
 
                             <span>
                                 Appointment:
-                                ${esc(appointmentId)}
+                                ${esc(appointmentReference)}
                             </span>
 
                         </div>
@@ -6597,12 +6595,10 @@ function showMySupportRequestDetails(
         );
 
 
-    const appointmentId =
-        request.appointment_id
-            ? String(
-                request.appointment_id
-            )
-            : "Not linked";
+    const appointmentReference =
+    request?.appointment_reference ||
+    request?.appointment_code ||
+    "Not linked";
 
 
     const problemDetails =
@@ -6709,7 +6705,7 @@ function showMySupportRequestDetails(
                     </span>
 
                     <strong>
-                        ${esc(appointmentId)}
+                        ${esc(appointmentReference)}
                     </strong>
 
                 </div>

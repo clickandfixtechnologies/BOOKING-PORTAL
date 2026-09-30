@@ -1183,8 +1183,9 @@ async function createSupportRequest(
 
 /* =========================================================
    MY SUPPORT REQUESTS
-   PHASE 4A
+   PHASE 4A / 4B
    RETURN ONLY THIS TECHNICIAN'S SUPPORT REQUESTS
+   WITH APPOINTMENT REFERENCE
    ========================================================= */
 
 async function supportMyRequests(
@@ -1195,9 +1196,11 @@ async function supportMyRequests(
   if (
     !isUuid(technicianId)
   ) {
+
     throw new Error(
       "Invalid technician."
     );
+
   }
 
 
@@ -1222,7 +1225,16 @@ async function supportMyRequests(
       updated_at,
       acknowledged_at,
       resolved_at,
-      closed_at
+      closed_at,
+
+      appointments (
+        appointment_id,
+        appointment_code,
+        appointment_date,
+        appointment_time,
+        customer_name,
+        service_category
+      )
     `)
     .eq(
       "technician_id",
@@ -1255,9 +1267,11 @@ async function supportMyRequests(
       }
     );
 
+
     throw new Error(
       "SUPPORT_REQUESTS_QUERY_FAILED"
     );
+
   }
 
 
@@ -1269,60 +1283,101 @@ async function supportMyRequests(
 
     requests:
       requests.map(
-        (request: any) => ({
+        (request: any) => {
 
-          id:
-            request.id,
+          const appointment =
+            Array.isArray(
+              request.appointments
+            )
+              ? (
+                  request.appointments[0] ||
+                  null
+                )
+              : request.appointments;
 
-          support_token:
-            request.support_token,
 
-          appointment_id:
-            request.appointment_id,
+          return {
 
-          technician_id:
-            request.technician_id,
+            id:
+              request.id,
 
-          support_type:
-            request.support_type,
+            support_token:
+              request.support_token,
 
-          problem_details:
-            request.problem_details,
+            appointment_id:
+              request.appointment_id,
 
-          latitude:
-            request.latitude,
+            appointment_reference:
+              appointment?.appointment_id ||
+              appointment?.appointment_code ||
+              null,
 
-          longitude:
-            request.longitude,
+            appointment_code:
+              appointment?.appointment_code ||
+              null,
 
-          location_url:
-            request.location_url,
+            appointment_date:
+              appointment?.appointment_date ||
+              null,
 
-          location_captured_at:
-            request.location_captured_at,
+            appointment_time:
+              appointment?.appointment_time ||
+              null,
 
-          status:
-            request.status,
+            customer_name:
+              appointment?.customer_name ||
+              null,
 
-          created_at:
-            request.created_at,
+            service_category:
+              appointment?.service_category ||
+              null,
 
-          updated_at:
-            request.updated_at,
+            technician_id:
+              request.technician_id,
 
-          acknowledged_at:
-            request.acknowledged_at,
+            support_type:
+              request.support_type,
 
-          resolved_at:
-            request.resolved_at,
+            problem_details:
+              request.problem_details,
 
-          closed_at:
-            request.closed_at
+            latitude:
+              request.latitude,
 
-        })
+            longitude:
+              request.longitude,
+
+            location_url:
+              request.location_url,
+
+            location_captured_at:
+              request.location_captured_at,
+
+            status:
+              request.status,
+
+            created_at:
+              request.created_at,
+
+            updated_at:
+              request.updated_at,
+
+            acknowledged_at:
+              request.acknowledged_at,
+
+            resolved_at:
+              request.resolved_at,
+
+            closed_at:
+              request.closed_at
+
+          };
+
+        }
       )
 
   };
+
 }
 
 /* =========================================================

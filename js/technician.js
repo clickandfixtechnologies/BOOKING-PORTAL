@@ -6424,15 +6424,15 @@ async function loadMySupportRequests() {
 
 
                 viewButton?.addEventListener(
-                    "click",
-                    () => {
+    "click",
+    async () => {
 
-                        viewSupportRequest(
-                         request.id
-                         );
+        await viewSupportRequest(
+            request.id
+        );
 
-                    }
-                );
+    }
+);
 
             }
         );
@@ -6499,6 +6499,389 @@ async function loadMySupportRequests() {
             );
 
     }
+
+}
+
+/* =========================================================
+   VIEW SUPPORT REQUEST
+   PHASE 4C
+   LOAD FRESH DATA FROM SECURE BACKEND
+   ========================================================= */
+
+async function viewSupportRequest(
+    requestId
+) {
+
+    const id =
+        String(
+            requestId || ""
+        ).trim();
+
+    if (!id) {
+
+        console.error(
+            "View Support Request: Missing request ID."
+        );
+
+        return;
+
+    }
+
+    /*
+     * Show loading state first.
+     */
+    showMySupportRequestDetailsLoading();
+
+
+    try {
+
+        const response =
+            await api(
+                "support_get_request",
+                {
+                    request_id: id
+                }
+            );
+
+
+        const request =
+            response?.request;
+
+
+        if (
+            !request ||
+            !request.id
+        ) {
+
+            throw new Error(
+                "Support request details could not be loaded."
+            );
+
+        }
+
+
+        /*
+         * Render fresh backend data.
+         */
+        showMySupportRequestDetails(
+            request
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Support request detail load failed:",
+            error
+        );
+
+
+        showMySupportRequestDetailsError(
+            error?.message ||
+            "Unable to load support request details."
+        );
+
+    }
+
+}
+
+/* =========================================================
+   SUPPORT REQUEST DETAIL
+   LOADING STATE
+   ========================================================= */
+
+function showMySupportRequestDetailsLoading() {
+
+    const existing =
+        document.getElementById(
+            "techSupportRequestModal"
+        );
+
+    if (existing) {
+
+        existing.remove();
+
+    }
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+    modal.id =
+        "techSupportRequestModal";
+
+    modal.className =
+        "tech-support-request-modal";
+
+
+    modal.innerHTML = `
+
+        <div
+            class="tech-support-request-modal-backdrop"
+        ></div>
+
+
+        <div
+            class="tech-support-request-modal-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Support request details"
+        >
+
+            <div
+                class="tech-support-request-modal-header"
+            >
+
+                <div>
+
+                    <span
+                        class="tech-support-request-modal-eyebrow"
+                    >
+                        SUPPORT REQUEST
+                    </span>
+
+                    <h2>
+                        Loading Details
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="tech-support-request-modal-close"
+                    id="closeTechSupportRequestModal"
+                    aria-label="Close"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+
+            <div
+                class="tech-support-request-modal-body"
+            >
+
+                <div
+                    class="tech-support-request-loading"
+                >
+
+                    <div
+                        class="tech-support-request-spinner"
+                    ></div>
+
+                    <p>
+                        Loading support request details...
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    modal
+        .querySelector(
+            ".tech-support-request-modal-backdrop"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+                modal.remove();
+            }
+        );
+
+
+    modal
+        .querySelector(
+            "#closeTechSupportRequestModal"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+                modal.remove();
+            }
+        );
+
+}
+
+/* =========================================================
+   SUPPORT REQUEST DETAIL
+   ERROR STATE
+   ========================================================= */
+
+function showMySupportRequestDetailsError(
+    message
+) {
+
+    const existing =
+        document.getElementById(
+            "techSupportRequestModal"
+        );
+
+    if (existing) {
+
+        existing.remove();
+
+    }
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+    modal.id =
+        "techSupportRequestModal";
+
+    modal.className =
+        "tech-support-request-modal";
+
+
+    modal.innerHTML = `
+
+        <div
+            class="tech-support-request-modal-backdrop"
+        ></div>
+
+
+        <div
+            class="tech-support-request-modal-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Support request details"
+        >
+
+            <div
+                class="tech-support-request-modal-header"
+            >
+
+                <div>
+
+                    <span
+                        class="tech-support-request-modal-eyebrow"
+                    >
+                        SUPPORT REQUEST
+                    </span>
+
+                    <h2>
+                        Unable to Load
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="tech-support-request-modal-close"
+                    id="closeTechSupportRequestModal"
+                    aria-label="Close"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+
+            <div
+                class="tech-support-request-modal-body"
+            >
+
+                <div
+                    class="tech-support-request-error"
+                >
+
+                    <div
+                        class="tech-support-request-error-icon"
+                    >
+                        <i
+                            class="fa-solid fa-circle-exclamation"
+                        ></i>
+                    </div>
+
+
+                    <h3>
+                        Unable to load details
+                    </h3>
+
+
+                    <p>
+                        ${esc(
+                            message ||
+                            "Something went wrong while loading this support request."
+                        )}
+                    </p>
+
+
+                    <button
+                        type="button"
+                        class="tech-support-request-modal-action"
+                        id="closeSupportRequestError"
+                    >
+                        Close
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    const closeModal =
+        () => {
+
+            modal.remove();
+
+        };
+
+
+    modal
+        .querySelector(
+            ".tech-support-request-modal-backdrop"
+        )
+        ?.addEventListener(
+            "click",
+            closeModal
+        );
+
+
+    modal
+        .querySelector(
+            "#closeTechSupportRequestModal"
+        )
+        ?.addEventListener(
+            "click",
+            closeModal
+        );
+
+
+    modal
+        .querySelector(
+            "#closeSupportRequestError"
+        )
+        ?.addEventListener(
+            "click",
+            closeModal
+        );
 
 }
 

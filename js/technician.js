@@ -6934,7 +6934,8 @@ function formatSupportDate(
 
 /* =========================================================
    SUPPORT REQUEST DETAILS
-   PHASE 4B
+   PHASE 4C
+   FRESH BACKEND DATA
    ========================================================= */
 
 function showMySupportRequestDetails(
@@ -6943,6 +6944,25 @@ function showMySupportRequestDetails(
 
     if (!request) {
         return;
+    }
+
+
+    /*
+     * IMPORTANT:
+     * Remove any existing loading/detail modal first.
+     * This prevents the old "Loading Details" modal
+     * from remaining underneath the fresh details modal.
+     */
+    const existingModal =
+        document.getElementById(
+            "techSupportRequestModal"
+        );
+
+
+    if (existingModal) {
+
+        existingModal.remove();
+
     }
 
 
@@ -6979,9 +6999,9 @@ function showMySupportRequestDetails(
 
 
     const appointmentReference =
-    request?.appointment_reference ||
-    request?.appointment_code ||
-    "Not linked";
+        request?.appointment_reference ||
+        request?.appointment_code ||
+        "Not linked";
 
 
     const problemDetails =
@@ -7005,6 +7025,16 @@ function showMySupportRequestDetails(
         );
 
 
+    /*
+     * SAME ID AS LOADING MODAL
+     *
+     * This makes sure there can only be
+     * one support request modal at a time.
+     */
+    modal.id =
+        "techSupportRequestModal";
+
+
     modal.className =
         "tech-support-request-modal";
 
@@ -7024,13 +7054,18 @@ function showMySupportRequestDetails(
             aria-label="Support request details"
         >
 
-            <div class="tech-support-request-modal-header">
+            <div
+                class="tech-support-request-modal-header"
+            >
 
                 <div>
 
-                    <p class="tech-support-eyebrow">
+                    <p
+                        class="tech-support-eyebrow"
+                    >
                         SUPPORT REQUEST
                     </p>
+
 
                     <h3>
                         ${esc(supportToken)}
@@ -7046,14 +7081,18 @@ function showMySupportRequestDetails(
                     data-close-support-modal="true"
                 >
 
-                    <i class="fa-solid fa-xmark"></i>
+                    <i
+                        class="fa-solid fa-xmark"
+                    ></i>
 
                 </button>
 
             </div>
 
 
-            <div class="tech-support-request-modal-status">
+            <div
+                class="tech-support-request-modal-status"
+            >
 
                 <span
                     class="tech-support-request-status status-${esc(
@@ -7066,7 +7105,9 @@ function showMySupportRequestDetails(
             </div>
 
 
-            <div class="tech-support-request-detail-grid">
+            <div
+                class="tech-support-request-detail-grid"
+            >
 
                 <div>
 
@@ -7088,7 +7129,9 @@ function showMySupportRequestDetails(
                     </span>
 
                     <strong>
-                        ${esc(appointmentReference)}
+                        ${esc(
+                            appointmentReference
+                        )}
                     </strong>
 
                 </div>
@@ -7122,11 +7165,14 @@ function showMySupportRequestDetails(
             </div>
 
 
-            <div class="tech-support-request-detail-description">
+            <div
+                class="tech-support-request-detail-description"
+            >
 
                 <span>
                     Problem Details
                 </span>
+
 
                 <p>
                     ${esc(problemDetails)}
@@ -7135,7 +7181,9 @@ function showMySupportRequestDetails(
             </div>
 
 
-            <div class="tech-support-request-modal-actions">
+            <div
+                class="tech-support-request-modal-actions"
+            >
 
                 ${
                     locationUrl
@@ -7146,7 +7194,10 @@ function showMySupportRequestDetails(
                                 rel="noopener noreferrer"
                                 class="tech-support-request-action"
                             >
-                                <i class="fa-solid fa-location-dot"></i>
+                                <i
+                                    class="fa-solid fa-location-dot"
+                                ></i>
+
                                 Open Location
                             </a>
                         `
@@ -7160,7 +7211,9 @@ function showMySupportRequestDetails(
                     data-close-support-modal="true"
                 >
 
-                    <i class="fa-solid fa-xmark"></i>
+                    <i
+                        class="fa-solid fa-xmark"
+                    ></i>
 
                     Close
 
@@ -7178,14 +7231,36 @@ function showMySupportRequestDetails(
     );
 
 
+    /*
+     * CLOSE MODAL
+     */
     const closeModal =
         () => {
 
-            modal.remove();
+            if (
+                modal &&
+                modal.isConnected
+            ) {
+
+                modal.remove();
+
+            }
+
+
+            /*
+             * Remove Escape listener as well.
+             */
+            document.removeEventListener(
+                "keydown",
+                escapeHandler
+            );
 
         };
 
 
+    /*
+     * Backdrop + X + Close button
+     */
     modal
         .querySelectorAll(
             "[data-close-support-modal]"
@@ -7202,6 +7277,9 @@ function showMySupportRequestDetails(
         );
 
 
+    /*
+     * ESC key support
+     */
     const escapeHandler =
         (event) => {
 
@@ -7210,11 +7288,6 @@ function showMySupportRequestDetails(
             ) {
 
                 closeModal();
-
-                document.removeEventListener(
-                    "keydown",
-                    escapeHandler
-                );
 
             }
 

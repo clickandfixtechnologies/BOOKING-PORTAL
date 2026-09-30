@@ -4498,10 +4498,314 @@ function openRaiseSupportRequestModal() {
             "supportProblemCount"
         );
 
-    const submitButton =
-        document.getElementById(
-            "submitSupportRequest"
-        );
+    /* =========================================================
+   SUBMIT SUPPORT REQUEST
+   PHASE 3D
+   ========================================================= */
+
+const submitSupportRequest =
+    document.getElementById(
+        "submitSupportRequest"
+    );
+
+
+if (submitSupportRequest) {
+
+    submitSupportRequest.addEventListener(
+        "click",
+        async () => {
+
+            const select =
+                document.getElementById(
+                    "supportJobSelect"
+                );
+
+            const supportType =
+                document.getElementById(
+                    "supportTypeSelect"
+                );
+
+            const problemDetails =
+                document.getElementById(
+                    "supportProblemDetails"
+                );
+
+            const errorBox =
+                document.getElementById(
+                    "supportRequestFormError"
+                );
+
+            const modal =
+                document.getElementById(
+                    "raiseSupportRequestModal"
+                );
+
+
+            /* =================================================
+               RESET ERROR
+               ================================================= */
+
+            if (errorBox) {
+
+                errorBox.hidden = true;
+
+                errorBox.textContent = "";
+
+            }
+
+
+            /* =================================================
+               READ VALUES
+               ================================================= */
+
+            const appointmentId =
+                select?.value?.trim() ||
+                "";
+
+
+            const selectedSupportType =
+                supportType?.value?.trim() ||
+                "";
+
+
+            const details =
+                problemDetails?.value?.trim() ||
+                "";
+
+
+            const latitude =
+                Number(
+                    modal?.dataset?.latitude
+                );
+
+
+            const longitude =
+                Number(
+                    modal?.dataset?.longitude
+                );
+
+
+            /* =================================================
+               VALIDATION
+               ================================================= */
+
+            if (!appointmentId) {
+
+                showSupportRequestError(
+                    errorBox,
+                    "Please select an assigned service."
+                );
+
+                select?.focus();
+
+                return;
+            }
+
+
+            if (!selectedSupportType) {
+
+                showSupportRequestError(
+                    errorBox,
+                    "Please select a support type."
+                );
+
+                supportType?.focus();
+
+                return;
+            }
+
+
+            if (
+                !details ||
+                details.length < 10
+            ) {
+
+                showSupportRequestError(
+                    errorBox,
+                    "Please provide at least 10 characters describing the problem."
+                );
+
+                problemDetails?.focus();
+
+                return;
+            }
+
+
+            if (
+                !Number.isFinite(latitude) ||
+                !Number.isFinite(longitude)
+            ) {
+
+                showSupportRequestError(
+                    errorBox,
+                    "Current location is required. Please capture your location before submitting."
+                );
+
+                captureSupportLocation();
+
+                return;
+            }
+
+
+            if (
+                latitude < -90 ||
+                latitude > 90 ||
+                longitude < -180 ||
+                longitude > 180
+            ) {
+
+                showSupportRequestError(
+                    errorBox,
+                    "Invalid location detected. Please capture your location again."
+                );
+
+                captureSupportLocation();
+
+                return;
+            }
+
+
+            /* =================================================
+               LOADING STATE
+               ================================================= */
+
+            const originalButtonHTML =
+                submitSupportRequest.innerHTML;
+
+
+            submitSupportRequest.disabled =
+                true;
+
+
+            submitSupportRequest.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Creating Support Request...
+            `;
+
+
+            if (select) {
+                select.disabled = true;
+            }
+
+            if (supportType) {
+                supportType.disabled = true;
+            }
+
+            if (problemDetails) {
+                problemDetails.disabled = true;
+            }
+
+
+            try {
+
+                /* =============================================
+                   REAL BACKEND REQUEST
+                   ============================================= */
+
+                const result =
+                    await api(
+                        "support_create",
+                        {
+                            appointment_id:
+                                appointmentId,
+
+                            support_type:
+                                selectedSupportType,
+
+                            problem_details:
+                                details,
+
+                            latitude:
+                                latitude,
+
+                            longitude:
+                                longitude
+                        }
+                    );
+
+
+                console.log(
+                    "Support request created:",
+                    result
+                );
+
+
+                /* =============================================
+                   VERIFY RESPONSE
+                   ============================================= */
+
+                const support =
+                    result?.support;
+
+
+                if (
+                    !support ||
+                    !support.id ||
+                    !support.support_token
+                ) {
+
+                    throw new Error(
+                        "Support request was created but the server returned an invalid response."
+                    );
+
+                }
+
+
+                /* =============================================
+                   SUCCESS SCREEN
+                   ============================================= */
+
+                showSupportRequestSuccessPreview(
+                    support,
+                    result?.appointment
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Support request creation failed:",
+                    error
+                );
+
+
+                showSupportRequestError(
+                    errorBox,
+                    error?.message ||
+                    "Unable to create the support request."
+                );
+
+
+                /* =============================================
+                   RESTORE FORM
+                   ============================================= */
+
+                submitSupportRequest.disabled =
+                    false;
+
+
+                submitSupportRequest.innerHTML =
+                    originalButtonHTML;
+
+
+                if (select) {
+                    select.disabled = false;
+                }
+
+                if (supportType) {
+                    supportType.disabled = false;
+                }
+
+                if (problemDetails) {
+                    problemDetails.disabled = false;
+                }
+
+            }
+
+        }
+    );
+
+}
 
 
     /* =====================================================
@@ -4731,12 +5035,13 @@ function showSupportRequestError(
 
 
 /* =========================================================
-   PHASE 2B
-   TEMPORARY SUCCESS PREVIEW
+   SUPPORT REQUEST SUCCESS
+   PHASE 3D
    ========================================================= */
 
 function showSupportRequestSuccessPreview(
-    closeModal
+    support,
+    appointment
 ) {
 
     const modal =
@@ -4744,66 +5049,158 @@ function showSupportRequestSuccessPreview(
             "raiseSupportRequestModal"
         );
 
+
     if (!modal) {
         return;
     }
 
 
-    const box =
+    const modalBox =
         modal.querySelector(
             ".tech-support-modal-box"
         );
 
-    if (!box) {
+
+    if (!modalBox) {
         return;
     }
 
 
-    box.innerHTML = `
+    const token =
+        support?.support_token ||
+        "—";
+
+
+    const status =
+        support?.status ||
+        "OPEN";
+
+
+    const customerName =
+        appointment?.customer_name ||
+        "—";
+
+
+    const appointmentCode =
+        appointment?.appointment_code ||
+        "—";
+
+
+    const supportType =
+        support?.support_type ||
+        "—";
+
+
+    modalBox.innerHTML = `
 
         <div class="tech-support-request-success">
 
-            <div class="tech-support-request-success-icon">
+            <div class="tech-support-success-icon">
 
-                <i class="fa-solid fa-check"></i>
+                <i class="fa-solid fa-circle-check"></i>
 
             </div>
 
 
             <p class="tech-support-modal-eyebrow">
-                SUPPORT REQUEST
+                SUPPORT REQUEST CREATED
             </p>
 
 
             <h2>
-                Request Form Ready
+                Your support request has been submitted
             </h2>
 
 
-            <p>
-                Your support request has passed the
-                frontend validation successfully.
+            <p class="tech-support-success-description">
+                Our support team can now review your request
+                through the technician support system.
             </p>
 
 
-            <div class="tech-support-phase-note">
+            <div class="tech-support-token-card">
 
-                <i class="fa-solid fa-code-branch"></i>
+                <span>
+                    SUPPORT TOKEN
+                </span>
+
+                <strong>
+                    ${esc(token)}
+                </strong>
+
+            </div>
+
+
+            <div class="tech-support-success-details">
 
                 <div>
 
-                    <strong>
-                        Phase 2B UI Preview
-                    </strong>
-
                     <span>
-                        The request has NOT been submitted
-                        to the server yet.
-                        Supabase, GPS and support token
-                        creation will be connected in Phase 3.
+                        Customer
                     </span>
 
+                    <strong>
+                        ${esc(customerName)}
+                    </strong>
+
                 </div>
+
+
+                <div>
+
+                    <span>
+                        Appointment
+                    </span>
+
+                    <strong>
+                        ${esc(appointmentCode)}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Support Type
+                    </span>
+
+                    <strong>
+                        ${esc(
+                            formatSupportType(
+                                supportType
+                            )
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Status
+                    </span>
+
+                    <strong>
+                        ${esc(
+                            status
+                        )}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="tech-support-success-note">
+
+                <i class="fa-solid fa-location-dot"></i>
+
+                <span>
+                    Your current location was attached
+                    to this support request.
+                </span>
 
             </div>
 
@@ -4811,10 +5208,12 @@ function showSupportRequestSuccessPreview(
             <button
                 type="button"
                 class="tech-support-modal-primary"
-                id="closeSupportPreview"
+                id="closeSupportSuccess"
             >
 
-                Continue
+                <i class="fa-solid fa-check"></i>
+
+                Done
 
             </button>
 
@@ -4823,22 +5222,75 @@ function showSupportRequestSuccessPreview(
     `;
 
 
-    document
-        .getElementById(
-            "closeSupportPreview"
-        )
-        ?.addEventListener(
+    const closeButton =
+        document.getElementById(
+            "closeSupportSuccess"
+        );
+
+
+    if (closeButton) {
+
+        closeButton.addEventListener(
             "click",
             () => {
 
-                if (typeof closeModal === "function") {
-                    closeModal();
-                } else {
-                    modal.remove();
-                }
+                modal.remove();
 
             }
         );
+
+    }
+
+}
+
+
+/* =========================================================
+   SUPPORT TYPE LABEL
+   ========================================================= */
+
+function formatSupportType(
+    type
+) {
+
+    const labels = {
+
+        TECHNICAL_PROBLEM:
+            "Technical Problem",
+
+        APPOINTMENT_JOB:
+            "Appointment / Job",
+
+        CCTV_PROBLEM:
+            "CCTV Problem",
+
+        COMPUTER_LAPTOP:
+            "Computer / Laptop",
+
+        JOB_ID_BILLING:
+            "Job ID / Billing",
+
+        TECHNICIAN_SUPPORT:
+            "Technician Support",
+
+        OTHER:
+            "Other"
+
+    };
+
+
+    return (
+        labels[type] ||
+        String(type || "")
+            .replaceAll(
+                "_",
+                " "
+            )
+            .replace(
+                /\b\w/g,
+                char =>
+                    char.toUpperCase()
+            )
+    );
 
 }
 

@@ -5791,3 +5791,119 @@ i[class*="fa-"]{
     background: rgba(255, 255, 255, 0.10);
 }
 
+/* =========================================================
+   SUPPORT REQUEST SUCCESS
+   PHASE 3D
+   ========================================================= */
+
+.tech-support-success-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(74, 222, 128, 0.12);
+    color: #4ade80;
+    font-size: 30px;
+}
+
+.tech-support-request-success {
+    text-align: center;
+    padding: 12px 4px 4px;
+}
+
+.tech-support-request-success h2 {
+    margin: 0;
+}
+
+.tech-support-success-description {
+    max-width: 520px;
+    margin: 10px auto 22px;
+    color: rgba(255, 255, 255, 0.62);
+    line-height: 1.6;
+    font-size: 13px;
+}
+
+.tech-support-token-card {
+    margin: 0 auto 20px;
+    padding: 16px 20px;
+    max-width: 360px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tech-support-token-card span {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    opacity: 0.55;
+}
+
+.tech-support-token-card strong {
+    display: block;
+    font-size: 21px;
+    letter-spacing: 0.08em;
+}
+
+.tech-support-success-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+    text-align: left;
+}
+
+.tech-support-success-details > div {
+    padding: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.tech-support-success-details span {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.5;
+}
+
+.tech-support-success-details strong {
+    display: block;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.tech-support-success-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.58);
+}
+
+.tech-support-success-note i {
+    color: #4ade80;
+}
+
+@media (max-width: 600px) {
+
+    .tech-support-success-details {
+        grid-template-columns: 1fr;
+    }
+
+    .tech-support-token-card strong {
+        font-size: 18px;
+    }
+
+}
+
+

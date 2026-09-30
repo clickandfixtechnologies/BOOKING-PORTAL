@@ -6933,9 +6933,9 @@ async function stopSupportChatRealtime() {
 
         try {
 
-            await supabase.removeChannel(
-                supportChatRealtimeChannel
-            );
+            await sb.removeChannel(
+    supportChatRealtimeChannel
+);
 
         } catch (error) {
 
@@ -6996,8 +6996,8 @@ async function startSupportChatRealtime(
         `support-chat-${id}`;
 
     supportChatRealtimeChannel =
-        supabase
-            .channel(channelName)
+    sb
+        .channel(channelName)
             .on(
                 "postgres_changes",
                 {

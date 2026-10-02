@@ -2588,6 +2588,7 @@ const adminFloatingSupportState = {
     currentMessages: [],
     requests: [],
     unread: new Map(),
+    seenMessageIds: new Set(),
     open: false,
     loading: false
 };
@@ -2759,8 +2760,11 @@ async function openAdminFloatingSupport() {
 
 function closeAdminFloatingSupport() {
 
-    adminFloatingSupportState.open =
-        false;
+    adminFloatingSupportState.open = false;
+
+    adminFloatingSupportState.currentRequestId = "";
+    adminFloatingSupportState.currentRequest = null;
+    adminFloatingSupportState.currentMessages = [];
 
     const panel =
         document.getElementById(
@@ -2771,7 +2775,6 @@ function closeAdminFloatingSupport() {
         panel.hidden = true;
     }
 }
-
 
 /* =========================================================
    LOAD REQUESTS
@@ -3241,10 +3244,17 @@ async function openAdminFloatingSupportChat(
 
 
         adminFloatingSupportState.currentMessages =
-            messages;
+    messages;
 
+messages.forEach(message => {
+    if (message?.id) {
+        adminFloatingSupportState.seenMessageIds.add(
+            String(message.id)
+        );
+    }
+});
 
-        renderAdminFloatingSupportChat();
+renderAdminFloatingSupportChat();
 
     } catch (error) {
 
@@ -3582,67 +3592,98 @@ function renderAdminFloatingSupportMessages(
    ADD REALTIME MESSAGE WITHOUT DUPLICATE
    ========================================================= */
 
-function addAdminFloatingRealtimeMessage(
-    message
-) {
+function addAdminFloatingRealtimeMessage(message) {
 
     if (!message?.id) {
         return;
     }
 
+    const messageId = String(message.id);
+    const requestId = String(
+        message.support_request_id || ""
+    ).trim();
 
-    const exists =
-        adminFloatingSupportState.currentMessages
-            .some(
-                item =>
-                    item.id === message.id
-            );
-
-
-    if (exists) {
+    if (!requestId) {
         return;
     }
 
+    const sender = String(
+        message.sender_type || ""
+    ).toUpperCase();
 
-    adminFloatingSupportState.currentMessages
-        .push(message);
-
+    /*
+     * Prevent duplicate realtime/API delivery.
+     *
+     * currentMessages only contains the currently
+     * opened conversation, so duplicate protection
+     * must also work when another conversation is closed.
+     */
+    if (!adminFloatingSupportState.seenMessageIds) {
+        adminFloatingSupportState.seenMessageIds =
+            new Set();
+    }
 
     if (
-        adminFloatingSupportState.currentRequestId ===
-        message.support_request_id
+        adminFloatingSupportState.seenMessageIds.has(
+            messageId
+        )
     ) {
+        return;
+    }
+
+    adminFloatingSupportState.seenMessageIds.add(
+        messageId
+    );
+
+
+    /*
+     * ADMIN's own message never creates unread count.
+     */
+    const isAdmin =
+        sender === "ADMIN";
+
+
+    /*
+     * Check whether this exact conversation is
+     * currently visible to the admin.
+     */
+    const isCurrentChatVisible =
+        adminFloatingSupportState.open === true &&
+        adminFloatingSupportState.currentRequestId ===
+            requestId &&
+        document.getElementById(
+            "adminFloatingSupportMessages"
+        );
+
+
+    /*
+     * -----------------------------------------------------
+     * CURRENTLY OPEN CONVERSATION
+     * -----------------------------------------------------
+     */
+    if (isCurrentChatVisible) {
+
+        adminFloatingSupportState.currentMessages.push(
+            message
+        );
 
         const container =
             document.getElementById(
                 "adminFloatingSupportMessages"
             );
 
-
         if (!container) {
             return;
         }
-
 
         const empty =
             container.querySelector(
                 ".admin-floating-support-no-messages"
             );
 
-
         if (empty) {
             empty.remove();
         }
-
-
-        const sender =
-            String(
-                message.sender_type || ""
-            ).toUpperCase();
-
-
-        const isAdmin =
-            sender === "ADMIN";
 
 
         const isBot =
@@ -3652,7 +3693,6 @@ function addAdminFloatingRealtimeMessage(
         const wrapper =
             document.createElement("div");
 
-
         wrapper.className =
             `
                 admin-floating-support-message
@@ -3660,9 +3700,8 @@ function addAdminFloatingRealtimeMessage(
                 ${isBot ? "bot" : "technician"}
             `;
 
-
         wrapper.dataset.floatingMessageId =
-            message.id;
+            messageId;
 
 
         wrapper.innerHTML = `
@@ -3710,41 +3749,54 @@ function addAdminFloatingRealtimeMessage(
             wrapper
         );
 
-
         scrollAdminFloatingSupportMessages();
 
+        return;
+    }
 
-    } else {
+
+    /*
+     * -----------------------------------------------------
+     * CONVERSATION IS NOT CURRENTLY OPEN
+     * -----------------------------------------------------
+     *
+     * Only technician messages create unread count.
+     * Admin messages must never create unread count.
+     */
+    if (sender === "TECHNICIAN") {
 
         const currentUnread =
             Number(
                 adminFloatingSupportState.unread.get(
-                    message.support_request_id
+                    requestId
                 ) || 0
             );
 
-
         adminFloatingSupportState.unread.set(
-            message.support_request_id,
+            requestId,
             currentUnread + 1
         );
-
 
         updateAdminFloatingSupportBadge();
 
 
+        /*
+         * If the popup is showing the request LIST,
+         * refresh the list so the per-request unread
+         * count appears immediately.
+         *
+         * If a chat is currently open, do NOT replace
+         * that chat with the request list.
+         */
         if (
-            adminFloatingSupportState.open
+            adminFloatingSupportState.open &&
+            !adminFloatingSupportState.currentRequestId
         ) {
-
             renderAdminFloatingSupportRequestList(
                 adminFloatingSupportState.requests
             );
-
         }
-
     }
-
 }
 
 

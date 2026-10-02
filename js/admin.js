@@ -3752,59 +3752,67 @@ function addAdminFloatingRealtimeMessage(
    REALTIME
    ========================================================= */
 
-async function initAdminFloatingSupportRealtime() {
+function initAdminFloatingSupportRealtime() {
 
     if (!s) {
+        console.error("Admin realtime: Supabase client missing.");
         return;
     }
 
+    console.log("Admin realtime: initializing...");
 
-    if (
-        adminFloatingSupportState.realtimeChannel
-    ) {
-
-        return;
-
+    if (window.__adminSupportRealtimeChannel) {
+        try {
+            s.removeChannel(window.__adminSupportRealtimeChannel);
+        } catch (error) {
+            console.warn(
+                "Admin realtime: old channel cleanup failed:",
+                error
+            );
+        }
     }
 
+    const channel = s
+        .channel("admin-floating-support-live")
+        .on(
+            "postgres_changes",
+            {
+                event: "INSERT",
+                schema: "public",
+                table: "support_messages"
+            },
+            payload => {
 
-    adminFloatingSupportState.realtimeChannel =
-        s
-            .channel(
-                "admin-floating-support-live"
-            )
-            .on(
-                "postgres_changes",
-                {
-                    event: "INSERT",
-                    schema: "public",
-                    table: "support_messages"
-                },
-                payload => {
+                console.log(
+                    "🔥 ADMIN REALTIME MESSAGE RECEIVED:",
+                    payload
+                );
 
-                    console.log(
-                        "Admin support realtime message:",
-                        payload.new
-                    );
+                console.log(
+                    "🔥 NEW MESSAGE ROW:",
+                    payload?.new
+                );
 
-
+                if (
+                    typeof addAdminFloatingRealtimeMessage ===
+                    "function"
+                ) {
                     addAdminFloatingRealtimeMessage(
-                        payload.new
+                        payload?.new
                     );
-
                 }
-            )
-            .subscribe(
-                status => {
+            }
+        )
+        .subscribe(status => {
 
-                    console.log(
-                        "Admin support realtime status:",
-                        status
-                    );
-
-                }
+            console.log(
+                "Admin support realtime status:",
+                status
             );
 
+        });
+
+    window.__adminSupportRealtimeChannel = channel;
 }
 
 

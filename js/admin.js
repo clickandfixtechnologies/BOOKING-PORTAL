@@ -4124,6 +4124,35 @@ try {
     window.__adminSupportRealtimeChannel =
         channel;
 
+        window.__adminRealtimeDebugChannel = s
+    .channel(
+        "admin-support-debug-" +
+        Date.now()
+    )
+    .on(
+        "postgres_changes",
+        {
+            event: "*",
+            schema: "public",
+            table: "support_messages"
+        },
+        payload => {
+
+            console.log(
+                "🚨🚨🚨 ADMIN DEBUG ANY EVENT 🚨🚨🚨",
+                payload
+            );
+
+        }
+    )
+    .subscribe(status => {
+
+        console.log(
+            "🧪 ADMIN DEBUG REALTIME STATUS:",
+            status
+        );
+
+    });
 
     console.log(
         "✅ ADMIN REALTIME: initialization complete."

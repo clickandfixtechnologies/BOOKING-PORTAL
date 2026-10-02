@@ -3814,7 +3814,7 @@ async function initAdminFloatingSupportRealtime() {
     }
     
     /* -----------------------------------------------------
-   2B. REALTIME / DATABASE DIAGNOSTIC
+   2B. ADMIN AUTH READINESS TEST
    ----------------------------------------------------- */
 
 try {
@@ -3827,89 +3827,23 @@ try {
     } = await s.auth.getUser();
 
     console.log(
-        "👤 ADMIN AUTH USER:",
+        "👤 ADMIN AUTH USER READY:",
         user
     );
 
-    console.log(
-        "🌐 ADMIN SUPABASE URL:",
-        c.supabaseUrl
-    );
+    if (userError) {
 
-try {
-    const { data: adminRows, error: adminRowsError } = await s
-        .from("admin_users")
-        .select("user_id")
-        .eq("user_id", user?.id || "");
-
-    console.log("👑 ADMIN USERS DIRECT SELECT:", adminRows);
-    console.log("👑 ADMIN USERS DIRECT SELECT ERROR:", adminRowsError);
-} catch (error) {
-    console.error("❌ ADMIN USERS DIRECT SELECT FAILED:", error);
-}
-
-    console.log(
-        "🗄️ ADMIN DATABASE TEST: checking support_requests..."
-    );
-
-    const {
-        data: requests,
-        error: requestsError
-    } = await s
-        .from("support_requests")
-        .select(
-            "id, support_token, technician_id, status, created_at"
-        )
-        .order(
-            "created_at",
-            {
-                ascending: false
-            }
-        )
-        .limit(5);
-
-    console.log(
-        "📋 ADMIN SUPPORT REQUESTS:",
-        requests
-    );
-
-    console.log(
-        "📋 ADMIN SUPPORT REQUESTS ERROR:",
-        requestsError
-    );
-
-
-    console.log(
-        "💬 ADMIN SUPPORT MESSAGES COUNT TEST..."
-    );
-
-    const {
-        count: messageCount,
-        error: countError
-    } = await s
-        .from("support_messages")
-        .select(
-            "*",
-            {
-                count: "exact",
-                head: true
-            }
+        console.warn(
+            "⚠️ ADMIN AUTH USER CHECK ERROR:",
+            userError
         );
 
-    console.log(
-        "💬 SUPPORT MESSAGE COUNT:",
-        messageCount
-    );
-
-    console.log(
-        "💬 SUPPORT MESSAGE COUNT ERROR:",
-        countError
-    );
+    }
 
 } catch (error) {
 
-    console.error(
-        "❌ ADMIN DATABASE DIAGNOSTIC FAILED:",
+    console.warn(
+        "⚠️ ADMIN AUTH READINESS CHECK FAILED:",
         error
     );
 

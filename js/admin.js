@@ -3852,6 +3852,95 @@ async function initAdminFloatingSupportRealtime() {
 
     }
 
+    /* -----------------------------------------------------
+   2B. REALTIME / DATABASE DIAGNOSTIC
+   ----------------------------------------------------- */
+
+try {
+
+    const {
+        data: {
+            user
+        } = {},
+        error: userError
+    } = await s.auth.getUser();
+
+    console.log(
+        "👤 ADMIN AUTH USER:",
+        user
+    );
+
+    console.log(
+        "🌐 ADMIN SUPABASE URL:",
+        c.supabaseUrl
+    );
+
+    console.log(
+        "🗄️ ADMIN DATABASE TEST: checking support_requests..."
+    );
+
+    const {
+        data: requests,
+        error: requestsError
+    } = await s
+        .from("support_requests")
+        .select(
+            "id, support_token, technician_id, status, created_at"
+        )
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        )
+        .limit(5);
+
+    console.log(
+        "📋 ADMIN SUPPORT REQUESTS:",
+        requests
+    );
+
+    console.log(
+        "📋 ADMIN SUPPORT REQUESTS ERROR:",
+        requestsError
+    );
+
+
+    console.log(
+        "💬 ADMIN SUPPORT MESSAGES COUNT TEST..."
+    );
+
+    const {
+        count: messageCount,
+        error: countError
+    } = await s
+        .from("support_messages")
+        .select(
+            "*",
+            {
+                count: "exact",
+                head: true
+            }
+        );
+
+    console.log(
+        "💬 SUPPORT MESSAGE COUNT:",
+        messageCount
+    );
+
+    console.log(
+        "💬 SUPPORT MESSAGE COUNT ERROR:",
+        countError
+    );
+
+} catch (error) {
+
+    console.error(
+        "❌ ADMIN DATABASE DIAGNOSTIC FAILED:",
+        error
+    );
+
+}
 
     /* -----------------------------------------------------
        3. REMOVE OLD REALTIME CHANNEL

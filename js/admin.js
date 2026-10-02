@@ -3800,9 +3800,9 @@ function addAdminFloatingRealtimeMessage(message) {
     }
 }
 
-/*let adminSupportRealtimeRetryTimer = null;
+let adminSupportRealtimeRetryTimer = null;
 let adminSupportRealtimeRetryCount = 0;
-let adminSupportRealtimeStarting = false;*/
+let adminSupportRealtimeStarting = false;
 
 /* =========================================================
    REALTIME

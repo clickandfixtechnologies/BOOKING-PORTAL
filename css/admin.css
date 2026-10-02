@@ -402,3 +402,602 @@
 
 }
 
+/* =========================================================
+   ADMIN FLOATING SUPPORT CHAT
+   PHASE 7 - ADMIN SIDE
+   ========================================================= */
+
+#adminFloatingSupport{
+    position:fixed;
+    right:24px;
+    bottom:24px;
+    z-index:99990;
+    font-family:inherit;
+}
+
+
+/* =========================================================
+   FLOATING BUTTON
+   ========================================================= */
+
+.admin-floating-support-button{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:.55rem;
+    border:0;
+    border-radius:999px;
+    padding:.72rem 1rem;
+    background:#13233b;
+    color:#fff;
+    box-shadow:0 12px 32px rgba(19,35,59,.28);
+    cursor:pointer;
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease;
+}
+
+.admin-floating-support-button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 16px 38px rgba(19,35,59,.34);
+}
+
+.admin-floating-support-icon{
+    font-size:1.1rem;
+    line-height:1;
+}
+
+.admin-floating-support-label{
+    font-weight:700;
+    font-size:.9rem;
+}
+
+.admin-floating-support-badge{
+    min-width:21px;
+    height:21px;
+    padding:0 6px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:999px;
+    background:#dc3545;
+    color:#fff;
+    font-size:.7rem;
+    font-weight:800;
+}
+
+
+/* =========================================================
+   PANEL
+   ========================================================= */
+
+.admin-floating-support-panel{
+    position:absolute;
+    right:0;
+    bottom:58px;
+    width:390px;
+    height:560px;
+    max-height:calc(100vh - 110px);
+    background:#fff;
+    border:1px solid #e3e8f0;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(19,35,59,.24);
+    display:flex;
+    flex-direction:column;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.admin-floating-support-header{
+    min-height:68px;
+    padding:.85rem 1rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#13233b;
+    color:#fff;
+}
+
+.admin-floating-support-heading{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.admin-floating-support-heading strong{
+    font-size:.98rem;
+}
+
+.admin-floating-support-heading small{
+    color:#aebfd3;
+    font-size:.72rem;
+}
+
+.admin-floating-support-close{
+    width:34px;
+    height:34px;
+    border:0;
+    border-radius:50%;
+    background:rgba(255,255,255,.1);
+    color:#fff;
+    font-size:1.4rem;
+    line-height:1;
+    cursor:pointer;
+}
+
+.admin-floating-support-close:hover{
+    background:rgba(255,255,255,.18);
+}
+
+
+/* =========================================================
+   BODY
+   ========================================================= */
+
+.admin-floating-support-body{
+    min-height:0;
+    flex:1;
+    overflow:hidden;
+    background:#f7f9fc;
+}
+
+
+/* =========================================================
+   LIST HEADER
+   ========================================================= */
+
+.admin-floating-support-list-header{
+    padding:.85rem 1rem;
+    background:#fff;
+    border-bottom:1px solid #e7ebf2;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.admin-floating-support-list-header strong{
+    display:block;
+    font-size:.9rem;
+}
+
+.admin-floating-support-list-header small{
+    display:block;
+    margin-top:2px;
+    color:#7c8798;
+    font-size:.72rem;
+}
+
+.admin-floating-support-refresh{
+    width:32px;
+    height:32px;
+    border:1px solid #dce2eb;
+    border-radius:8px;
+    background:#fff;
+    color:#42526b;
+    cursor:pointer;
+    font-size:1.05rem;
+}
+
+.admin-floating-support-refresh:hover{
+    background:#f1f4f8;
+}
+
+
+/* =========================================================
+   REQUEST LIST
+   ========================================================= */
+
+.admin-floating-support-request-list{
+    height:100%;
+    overflow-y:auto;
+    padding:.55rem;
+}
+
+.admin-floating-support-request{
+    width:100%;
+    border:1px solid #e5eaf1;
+    background:#fff;
+    border-radius:12px;
+    padding:.75rem;
+    margin-bottom:.5rem;
+    display:flex;
+    align-items:center;
+    gap:.75rem;
+    text-align:left;
+    cursor:pointer;
+    transition:
+        border-color .15s ease,
+        background .15s ease,
+        transform .15s ease;
+}
+
+.admin-floating-support-request:hover{
+    border-color:#b9c9df;
+    background:#f9fbff;
+    transform:translateY(-1px);
+}
+
+.admin-floating-support-request-main{
+    min-width:0;
+    flex:1;
+}
+
+.admin-floating-support-request-top{
+    display:flex;
+    align-items:center;
+    gap:.45rem;
+}
+
+.admin-floating-support-request-top strong{
+    font-size:.84rem;
+    color:#17243a;
+}
+
+.admin-floating-support-request-main > span{
+    display:block;
+    margin-top:3px;
+    font-size:.8rem;
+    color:#42526b;
+}
+
+.admin-floating-support-request-main small{
+    display:block;
+    margin-top:4px;
+    color:#8490a2;
+    font-size:.7rem;
+}
+
+.admin-floating-support-unread{
+    min-width:19px;
+    height:19px;
+    padding:0 5px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:999px;
+    background:#dc3545;
+    color:#fff!important;
+    font-size:.65rem!important;
+    font-weight:800;
+}
+
+.admin-floating-support-status-dot{
+    width:9px;
+    height:9px;
+    flex:0 0 9px;
+    border-radius:50%;
+    background:#adb5bd;
+}
+
+.admin-floating-support-status-dot.open{
+    background:#ffc107;
+}
+
+.admin-floating-support-status-dot.acknowledged{
+    background:#0d6efd;
+}
+
+.admin-floating-support-status-dot.in-progress{
+    background:#fd7e14;
+}
+
+.admin-floating-support-status-dot.resolved{
+    background:#198754;
+}
+
+
+/* =========================================================
+   CHAT
+   ========================================================= */
+
+.admin-floating-support-chat{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+}
+
+.admin-floating-support-chat-header{
+    min-height:64px;
+    padding:.7rem .8rem;
+    background:#fff;
+    border-bottom:1px solid #e5eaf1;
+    display:flex;
+    align-items:center;
+    gap:.55rem;
+}
+
+.admin-floating-support-back{
+    width:32px;
+    height:32px;
+    border:1px solid #dce2eb;
+    border-radius:8px;
+    background:#fff;
+    color:#42526b;
+    cursor:pointer;
+    flex:0 0 32px;
+}
+
+.admin-floating-support-back:hover{
+    background:#f2f5f9;
+}
+
+.admin-floating-support-chat-title{
+    min-width:0;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+.admin-floating-support-chat-title strong{
+    font-size:.82rem;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.admin-floating-support-chat-title small{
+    color:#7c8798;
+    font-size:.7rem;
+    margin-top:2px;
+}
+
+.admin-floating-support-chat-header
+.support-status-badge{
+    white-space:nowrap;
+    font-size:.62rem;
+}
+
+
+/* =========================================================
+   MESSAGE AREA
+   ========================================================= */
+
+.admin-floating-support-messages{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    padding:1rem .8rem;
+    display:flex;
+    flex-direction:column;
+    gap:.65rem;
+    background:#f6f8fb;
+}
+
+.admin-floating-support-message{
+    max-width:84%;
+    align-self:flex-start;
+}
+
+.admin-floating-support-message.admin{
+    align-self:flex-end;
+}
+
+.admin-floating-support-message.bot{
+    align-self:center;
+    max-width:92%;
+}
+
+.admin-floating-support-message-meta{
+    display:flex;
+    align-items:center;
+    gap:.45rem;
+    margin-bottom:3px;
+    padding:0 3px;
+}
+
+.admin-floating-support-message-meta strong{
+    font-size:.66rem;
+    color:#526176;
+}
+
+.admin-floating-support-message-meta small{
+    font-size:.61rem;
+    color:#9aa4b2;
+}
+
+.admin-floating-support-message.admin
+.admin-floating-support-message-meta{
+    justify-content:flex-end;
+}
+
+.admin-floating-support-message-text{
+    padding:.62rem .72rem;
+    border-radius:13px 13px 13px 4px;
+    background:#fff;
+    border:1px solid #e3e8f0;
+    color:#26344a;
+    font-size:.78rem;
+    line-height:1.45;
+    word-break:break-word;
+    box-shadow:0 2px 6px rgba(19,35,59,.04);
+}
+
+.admin-floating-support-message.admin
+.admin-floating-support-message-text{
+    border-radius:13px 13px 4px 13px;
+    background:#13233b;
+    border-color:#13233b;
+    color:#fff;
+}
+
+.admin-floating-support-message.bot
+.admin-floating-support-message-text{
+    background:#eef3f8;
+    border-style:dashed;
+    text-align:center;
+}
+
+.admin-floating-support-no-messages{
+    margin:auto;
+    color:#8995a7;
+    font-size:.78rem;
+    text-align:center;
+}
+
+
+/* =========================================================
+   COMPOSER
+   ========================================================= */
+
+.admin-floating-support-composer{
+    padding:.7rem;
+    background:#fff;
+    border-top:1px solid #e5eaf1;
+    display:flex;
+    align-items:flex-end;
+    gap:.45rem;
+}
+
+.admin-floating-support-composer textarea{
+    min-height:42px;
+    max-height:100px;
+    resize:none;
+    flex:1;
+    border:1px solid #d9e0ea;
+    border-radius:10px;
+    padding:.62rem .7rem;
+    font-size:.78rem;
+    outline:none;
+}
+
+.admin-floating-support-composer textarea:focus{
+    border-color:#86aee2;
+    box-shadow:0 0 0 3px rgba(13,110,253,.08);
+}
+
+.admin-floating-support-composer button{
+    height:42px;
+    padding:0 .85rem;
+    border:0;
+    border-radius:10px;
+    background:#0d6efd;
+    color:#fff;
+    font-weight:700;
+    font-size:.75rem;
+    cursor:pointer;
+}
+
+.admin-floating-support-composer button:hover{
+    background:#0b5ed7;
+}
+
+.admin-floating-support-composer button:disabled{
+    opacity:.65;
+    cursor:not-allowed;
+}
+
+.admin-floating-support-closed{
+    padding:.8rem;
+    background:#fff;
+    border-top:1px solid #e5eaf1;
+    color:#7b8797;
+    font-size:.74rem;
+    text-align:center;
+}
+
+
+/* =========================================================
+   LOADING / EMPTY / ERROR
+   ========================================================= */
+
+.admin-floating-support-loading,
+.admin-floating-support-chat-loading{
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.55rem;
+    color:#7b8797;
+    font-size:.78rem;
+}
+
+.admin-floating-support-error{
+    height:100%;
+    padding:1.2rem;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:.5rem;
+    text-align:center;
+    color:#6f7b8c;
+    font-size:.75rem;
+}
+
+.admin-floating-support-error strong{
+    color:#26344a;
+    font-size:.86rem;
+}
+
+.admin-floating-support-empty{
+    height:100%;
+    padding:1.2rem;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:#7b8797;
+    font-size:.75rem;
+}
+
+.admin-floating-support-empty strong{
+    color:#26344a;
+    font-size:.86rem;
+}
+
+.admin-floating-support-empty-icon{
+    width:42px;
+    height:42px;
+    margin-bottom:.7rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:#e8f5ee;
+    color:#198754;
+    font-weight:800;
+    font-size:1.1rem;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media(max-width:575px){
+
+    #adminFloatingSupport{
+        right:14px;
+        bottom:14px;
+    }
+
+    .admin-floating-support-panel{
+        right:-4px;
+        bottom:58px;
+        width:calc(100vw - 28px);
+        height:min(600px,calc(100vh - 100px));
+        border-radius:16px;
+    }
+
+    .admin-floating-support-label{
+        display:none;
+    }
+
+    .admin-floating-support-button{
+        width:52px;
+        height:52px;
+        padding:0;
+        justify-content:center;
+    }
+
+    .admin-floating-support-icon{
+        font-size:1.2rem;
+    }
+
+}
+

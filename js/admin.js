@@ -3819,29 +3819,7 @@ async function initAdminFloatingSupportRealtime() {
 
 try {
 
-    console.log("🕐 ADMIN REALTIME: BEFORE AUTH CHECK");
-    const {
-        data: {
-            user
-        } = {},
-        error: userError
-    } = await s.auth.getUser();
-
-    console.log(
-        "👤 ADMIN AUTH USER READY:",
-        user
-    );
-
-    console.log("🕐 ADMIN REALTIME: AFTER AUTH CHECK");
-
-    if (userError) {
-
-        console.warn(
-            "⚠️ ADMIN AUTH USER CHECK ERROR:",
-            userError
-        );
-
-    }
+    await s.auth.getUser();
 
 } catch (error) {
 

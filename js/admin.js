@@ -3819,6 +3819,7 @@ async function initAdminFloatingSupportRealtime() {
 
 try {
 
+    console.log("🕐 ADMIN REALTIME: BEFORE AUTH CHECK");
     const {
         data: {
             user
@@ -3830,6 +3831,8 @@ try {
         "👤 ADMIN AUTH USER READY:",
         user
     );
+
+    console.log("🕐 ADMIN REALTIME: AFTER AUTH CHECK");
 
     if (userError) {
 

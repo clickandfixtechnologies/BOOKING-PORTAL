@@ -3752,28 +3752,155 @@ function addAdminFloatingRealtimeMessage(
    REALTIME
    ========================================================= */
 
-function initAdminFloatingSupportRealtime() {
+async function initAdminFloatingSupportRealtime() {
 
     if (!s) {
-        console.error("Admin realtime: Supabase client missing.");
+        console.error(
+            "❌ ADMIN REALTIME: Supabase client missing."
+        );
         return;
     }
 
-    console.log("Admin realtime: initializing...");
+    console.log(
+        "🔵 ADMIN REALTIME: initializing..."
+    );
 
-    if (window.__adminSupportRealtimeChannel) {
-        try {
-            s.removeChannel(window.__adminSupportRealtimeChannel);
-        } catch (error) {
-            console.warn(
-                "Admin realtime: old channel cleanup failed:",
-                error
+    /* -----------------------------------------------------
+       1. CHECK AUTH SESSION
+       ----------------------------------------------------- */
+
+    try {
+
+        const {
+            data: sessionData,
+            error: sessionError
+        } = await s.auth.getSession();
+
+        console.log(
+            "🔐 ADMIN REALTIME SESSION:",
+            sessionData?.session
+                ? {
+                    user_id:
+                        sessionData.session.user?.id || null,
+
+                    email:
+                        sessionData.session.user?.email || null,
+
+                    has_access_token:
+                        !!sessionData.session.access_token
+                }
+                : null
+        );
+
+        if (sessionError) {
+
+            console.error(
+                "❌ ADMIN REALTIME SESSION ERROR:",
+                sessionError
             );
+
         }
+
+    } catch (error) {
+
+        console.error(
+            "❌ ADMIN REALTIME SESSION CHECK FAILED:",
+            error
+        );
+
     }
 
+
+    /* -----------------------------------------------------
+       2. DIRECT SELECT TEST
+       ----------------------------------------------------- */
+
+    try {
+
+        const {
+            data,
+            error
+        } = await s
+            .from("support_messages")
+            .select(
+                "id, support_request_id, sender_type, message, created_at"
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            )
+            .limit(5);
+
+        console.log(
+            "📥 ADMIN DIRECT SELECT DATA:",
+            data
+        );
+
+        console.log(
+            "📥 ADMIN DIRECT SELECT ERROR:",
+            error
+        );
+
+    } catch (error) {
+
+        console.error(
+            "❌ ADMIN DIRECT SELECT FAILED:",
+            error
+        );
+
+    }
+
+
+    /* -----------------------------------------------------
+       3. REMOVE OLD REALTIME CHANNEL
+       ----------------------------------------------------- */
+
+    if (window.__adminSupportRealtimeChannel) {
+
+        console.log(
+            "🧹 ADMIN REALTIME: removing previous channel..."
+        );
+
+        try {
+
+            await s.removeChannel(
+                window.__adminSupportRealtimeChannel
+            );
+
+            console.log(
+                "✅ ADMIN REALTIME: previous channel removed."
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "⚠️ ADMIN REALTIME: old channel cleanup failed:",
+                error
+            );
+
+        }
+
+        window.__adminSupportRealtimeChannel = null;
+    }
+
+
+    /* -----------------------------------------------------
+       4. CREATE NEW REALTIME CHANNEL
+       ----------------------------------------------------- */
+
+    const channelName =
+        "admin-floating-support-live";
+
+    console.log(
+        "📡 ADMIN REALTIME: creating channel:",
+        channelName
+    );
+
     const channel = s
-        .channel("admin-floating-support-live")
+        .channel(channelName)
+
         .on(
             "postgres_changes",
             {
@@ -3783,38 +3910,136 @@ function initAdminFloatingSupportRealtime() {
             },
             payload => {
 
+                console.group(
+                    "🚨 ADMIN REALTIME INSERT EVENT"
+                );
+
                 console.log(
-                    "🔥 ADMIN REALTIME MESSAGE RECEIVED:",
+                    "📦 FULL PAYLOAD:",
                     payload
                 );
 
                 console.log(
-                    "🔥 NEW MESSAGE ROW:",
+                    "🆕 NEW ROW:",
                     payload?.new
                 );
+
+                console.log(
+                    "🆔 MESSAGE ID:",
+                    payload?.new?.id
+                );
+
+                console.log(
+                    "🆔 SUPPORT REQUEST ID:",
+                    payload?.new?.support_request_id
+                );
+
+                console.log(
+                    "👤 SENDER TYPE:",
+                    payload?.new?.sender_type
+                );
+
+                console.log(
+                    "💬 MESSAGE:",
+                    payload?.new?.message
+                );
+
+                console.log(
+                    "🕒 CREATED AT:",
+                    payload?.new?.created_at
+                );
+
+                console.groupEnd();
+
+
+                /* -----------------------------------------
+                   SEND EVENT TO FLOATING CHAT
+                   ----------------------------------------- */
 
                 if (
                     typeof addAdminFloatingRealtimeMessage ===
                     "function"
                 ) {
+
+                    console.log(
+                        "💬 ADMIN REALTIME: sending message to UI..."
+                    );
+
                     addAdminFloatingRealtimeMessage(
                         payload?.new
                     );
+
+                } else {
+
+                    console.warn(
+                        "⚠️ ADMIN REALTIME: addAdminFloatingRealtimeMessage() not found."
+                    );
+
                 }
+
             }
         )
-        .subscribe(status => {
 
-            console.log(
-                "Admin support realtime status:",
-                status
-            );
+        .subscribe(
+            status => {
 
-        });
+                console.log(
+                    "📡 ADMIN SUPPORT REALTIME STATUS:",
+                    status
+                );
 
-    window.__adminSupportRealtimeChannel = channel;
+                if (status === "SUBSCRIBED") {
+
+                    console.log(
+                        "✅ ADMIN REALTIME: channel SUBSCRIBED successfully."
+                    );
+
+                    console.log(
+                        "👂 ADMIN REALTIME: listening for INSERT on public.support_messages"
+                    );
+
+                }
+
+                if (status === "CHANNEL_ERROR") {
+
+                    console.error(
+                        "❌ ADMIN REALTIME: CHANNEL_ERROR"
+                    );
+
+                }
+
+                if (status === "TIMED_OUT") {
+
+                    console.error(
+                        "⏱️ ADMIN REALTIME: TIMED_OUT"
+                    );
+
+                }
+
+                if (status === "CLOSED") {
+
+                    console.warn(
+                        "🔴 ADMIN REALTIME: channel CLOSED"
+                    );
+
+                }
+
+            }
+        );
+
+
+    /* -----------------------------------------------------
+       5. STORE CHANNEL GLOBALLY FOR THIS PAGE
+       ----------------------------------------------------- */
+
+    window.__adminSupportRealtimeChannel =
+        channel;
+
+
+    console.log(
+        "✅ ADMIN REALTIME: initialization complete."
+    );
 }
-
 
 /* =========================================================
    REALTIME CLEANUP

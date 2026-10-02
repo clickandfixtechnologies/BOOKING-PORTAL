@@ -1186,6 +1186,17 @@ async function sendSupportMessage(
 
   }
 
+  console.log(
+  "🔥 ADMIN SUPPORT MESSAGE INSERTED:",
+  {
+    id: data?.id,
+    support_request_id: data?.support_request_id,
+    sender_type: data?.sender_type,
+    sender_user_id: data?.sender_user_id,
+    created_at: data?.created_at
+  }
+);
+
   return {
     message:data
   };

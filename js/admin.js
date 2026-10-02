@@ -3875,6 +3875,18 @@ try {
         c.supabaseUrl
     );
 
+try {
+    const { data: adminRows, error: adminRowsError } = await s
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", user?.id || "");
+
+    console.log("👑 ADMIN USERS DIRECT SELECT:", adminRows);
+    console.log("👑 ADMIN USERS DIRECT SELECT ERROR:", adminRowsError);
+} catch (error) {
+    console.error("❌ ADMIN USERS DIRECT SELECT FAILED:", error);
+}
+
     console.log(
         "🗄️ ADMIN DATABASE TEST: checking support_requests..."
     );

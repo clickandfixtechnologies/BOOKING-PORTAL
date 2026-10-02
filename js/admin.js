@@ -3887,48 +3887,6 @@ try {
             },
             payload => {
 
-                console.group(
-                    "🚨 ADMIN REALTIME INSERT EVENT"
-                );
-
-                console.log(
-                    "📦 FULL PAYLOAD:",
-                    payload
-                );
-
-                console.log(
-                    "🆕 NEW ROW:",
-                    payload?.new
-                );
-
-                console.log(
-                    "🆔 MESSAGE ID:",
-                    payload?.new?.id
-                );
-
-                console.log(
-                    "🆔 SUPPORT REQUEST ID:",
-                    payload?.new?.support_request_id
-                );
-
-                console.log(
-                    "👤 SENDER TYPE:",
-                    payload?.new?.sender_type
-                );
-
-                console.log(
-                    "💬 MESSAGE:",
-                    payload?.new?.message
-                );
-
-                console.log(
-                    "🕒 CREATED AT:",
-                    payload?.new?.created_at
-                );
-
-                console.groupEnd();
-
-
                 /* -----------------------------------------
                    SEND EVENT TO FLOATING CHAT
                    ----------------------------------------- */
@@ -3937,10 +3895,6 @@ try {
                     typeof addAdminFloatingRealtimeMessage ===
                     "function"
                 ) {
-
-                    console.log(
-                        "💬 ADMIN REALTIME: sending message to UI..."
-                    );
 
                     addAdminFloatingRealtimeMessage(
                         payload?.new

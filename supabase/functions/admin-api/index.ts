@@ -1,117 +1,361 @@
 import { corsHeaders, corsResponse } from "../_shared/cors.ts";
 import { requireAdmin } from "../_shared/auth.ts";
-const statuses=["pending","confirmed","technician_assigned","on_the_way","in_progress","job_id_created","completed","cancelled","rescheduled","no_show"];
 
-Deno.serve(async(request)=>{
-  if(request.method==="OPTIONS") return new Response("ok",{headers:corsHeaders});
-  try { const {supabase,user}=await requireAdmin(request); const body=await request.json(); const output=await route(supabase,user.id,body); return corsResponse(output); }
-  
-  catch(error) {
+const statuses = [
+  "pending",
+  "confirmed",
+  "technician_assigned",
+  "on_the_way",
+  "in_progress",
+  "job_id_created",
+  "completed",
+  "cancelled",
+  "rescheduled",
+  "no_show"
+];
 
-  const message =
-    error.message === "AUTH_REQUIRED"
-      ? "Sign in is required."
-      : error.message === "ADMIN_REQUIRED"
-      ? "Administrator access is required."
-      : error.message === "ADMIN_LOOKUP_FAILED"
-      ? "Administrator verification failed."
-      : error.message === "TECHNICIAN_LOOKUP_FAILED"
-      ? "Technician verification failed."
-      : error.message || "Request failed.";
+Deno.serve(async (request) => {
+  if (request.method === "OPTIONS") {
+    return new Response("ok", {
+      headers: corsHeaders
+    });
+  }
 
-  const status =
-    error.message === "AUTH_REQUIRED" ||
-    error.message === "ADMIN_REQUIRED"
-      ? 401
-      : 400;
+  try {
+    const { supabase, user } = await requireAdmin(request);
+    const body = await request.json();
+
+    const output = await route(
+      supabase,
+      user.id,
+      body
+    );
+
+    return corsResponse(output);
+
+  } catch (error) {
+
+    const message =
+      error.message === "AUTH_REQUIRED"
+        ? "Sign in is required."
+        : error.message === "ADMIN_REQUIRED"
+        ? "Administrator access is required."
+        : error.message === "ADMIN_LOOKUP_FAILED"
+        ? "Administrator verification failed."
+        : error.message === "TECHNICIAN_LOOKUP_FAILED"
+        ? "Technician verification failed."
+        : error.message || "Request failed.";
+
+    const status =
+      error.message === "AUTH_REQUIRED" ||
+      error.message === "ADMIN_REQUIRED"
+        ? 401
+        : 400;
 
     return corsResponse(
-    { error: message },
-    status
-  );
+      { error: message },
+      status
+    );
   }
 });
 
-async function route(db:any, userId:string, body:any) {
+async function route(
+  db: any,
+  userId: string,
+  body: any
+) {
 
-  switch(body.action) {
-    case "dashboard": return dashboard(db);
-    case "appointments": return appointments(db,body);
-    case "appointment": return detail(db,body.id);
-    case "update_appointment": return updateAppointment(db,userId,body);
-    case "reschedule_appointment": return rescheduleAppointment(db,userId,body);
-    case "availability": return availability(db);
-    case "save_availability": return saveAvailability(db,body.settings);
-    case "save_block": return saveBlock(db,body.block);
-    case "delete_block": return deleteBlock(db,body.id);
-    case "technicians": return technicians(db);
-    case "create_technician": return createTechnician(db,body.technician);
-    case "update_technician": return updateTechnician(db,body.technician);
-    case "toggle_technician_status": return toggleTechnicianStatus(db,body);
-    case "delete_technician": return deleteTechnician(db,body.id);
-    case "notifications": return notifications(db,userId);
-    case "notification_logs": return notificationLogs(db);
-    case "mark_notification_read": return markRead(db,userId,body.id);
+  switch (body.action) {
 
-    case "support_requests": return supportRequests(db,body);
+    case "dashboard":
+      return dashboard(db);
+
+    case "appointments":
+      return appointments(db, body);
+
+    case "appointment":
+      return detail(db, body.id);
+
+    case "update_appointment":
+      return updateAppointment(
+        db,
+        userId,
+        body
+      );
+
+    case "reschedule_appointment":
+      return rescheduleAppointment(
+        db,
+        userId,
+        body
+      );
+
+    case "availability":
+      return availability(db);
+
+    case "save_availability":
+      return saveAvailability(
+        db,
+        body.settings
+      );
+
+    case "save_block":
+      return saveBlock(
+        db,
+        body.block
+      );
+
+    case "delete_block":
+      return deleteBlock(
+        db,
+        body.id
+      );
+
+    case "technicians":
+      return technicians(db);
+
+    case "create_technician":
+      return createTechnician(
+        db,
+        body.technician
+      );
+
+    case "update_technician":
+      return updateTechnician(
+        db,
+        body.technician
+      );
+
+    case "toggle_technician_status":
+      return toggleTechnicianStatus(
+        db,
+        body
+      );
+
+    case "delete_technician":
+      return deleteTechnician(
+        db,
+        body.id
+      );
+
+    case "notifications":
+      return notifications(
+        db,
+        userId
+      );
+
+    case "notification_logs":
+      return notificationLogs(db);
+
+    case "mark_notification_read":
+      return markRead(
+        db,
+        userId,
+        body.id
+      );
+
+    case "support_requests":
+      return supportRequests(
+        db,
+        body
+      );
 
     case "support_get_request":
-    return supportGetRequest(db,body);
+      return supportGetRequest(
+        db,
+        body
+      );
 
     case "support_messages":
-    return supportMessages(db,body);
+      return supportMessages(
+        db,
+        body
+      );
 
     case "support_message_send":
-    return sendSupportMessage(db,userId,body);
+      return sendSupportMessage(
+        db,
+        userId,
+        body
+      );
 
     case "support_status_update":
-    return updateSupportStatus(db,userId,body);
+      return updateSupportStatus(
+        db,
+        userId,
+        body
+      );
 
-    case "delete_appointment": return deleteAppointment(db,body.id);
-    default: throw new Error("Unknown admin action.");
+    case "delete_appointment":
+      return deleteAppointment(
+        db,
+        body.id
+      );
+
+    default:
+      throw new Error("Unknown admin action.");
   }
 }
-async function dashboard(db:any) { const today=new Date().toLocaleDateString("en-CA"); const [{data:rows,error},{count:todays}]=await Promise.all([db.from("appointments").select("status"),db.from("appointments").select("id",{count:"exact",head:true}).eq("appointment_date",today)]); if(error) throw error; const counts=Object.fromEntries(statuses.map((status)=>[status,0])); (rows||[]).forEach((row:any)=>counts[row.status]++); return {today:todays||0,counts}; }
 
-async function appointments(db:any,body:any) {
-  let query = db
-    .from("appointments")
-    .select(
-      "id,appointment_id,appointment_code,customer_name,mobile,email,service_category,service_type,service_location_type,service_address,landmark,latitude,longitude,google_maps_url,appointment_date,appointment_time,status,job_code,technician_id,technicians(full_name)",
-      {count:"exact"}
-    )
-    .order("appointment_date")
-    .order("appointment_time");
 
-  const f = body.filters || {};
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
 
-  if (f.date) {
-    query = query.eq("appointment_date", f.date);
+async function dashboard(db: any) {
+
+  const today =
+    new Date().toLocaleDateString(
+      "en-CA"
+    );
+
+  const [
+    { data: rows, error },
+    { count: todays }
+  ] = await Promise.all([
+
+    db
+      .from("appointments")
+      .select("status"),
+
+    db
+      .from("appointments")
+      .select("id", {
+        count: "exact",
+        head: true
+      })
+      .eq(
+        "appointment_date",
+        today
+      )
+
+  ]);
+
+  if (error) {
+    throw error;
   }
 
-  if (f.status) {
-    query = query.eq("status", f.status);
+  const counts =
+    Object.fromEntries(
+      statuses.map((status) => [
+        status,
+        0
+      ])
+    );
+
+  (rows || []).forEach(
+    (row: any) => {
+      counts[row.status]++;
+    }
+  );
+
+  return {
+    today: todays || 0,
+    counts
+  };
+}
+
+
+/* =========================================================
+   APPOINTMENTS
+   ========================================================= */
+
+async function appointments(
+  db: any,
+  body: any
+) {
+
+  let query =
+    db
+      .from("appointments")
+      .select(
+        `
+        id,
+        appointment_id,
+        appointment_code,
+        customer_name,
+        mobile,
+        email,
+        service_category,
+        service_type,
+        service_location_type,
+        service_address,
+        landmark,
+        latitude,
+        longitude,
+        google_maps_url,
+        appointment_date,
+        appointment_time,
+        status,
+        job_code,
+        technician_id,
+        technicians(full_name)
+        `,
+        {
+          count: "exact"
+        }
+      )
+      .order(
+        "appointment_date"
+      )
+      .order(
+        "appointment_time"
+      );
+
+  const filters =
+    body.filters || {};
+
+  if (filters.date) {
+    query = query.eq(
+      "appointment_date",
+      filters.date
+    );
   }
 
-  if (f.service) {
-    query = query.eq("service_category", f.service);
+  if (filters.status) {
+    query = query.eq(
+      "status",
+      filters.status
+    );
   }
 
-  if (f.technician) {
-    query = query.eq("technician_id", f.technician);
+  if (filters.service) {
+    query = query.eq(
+      "service_category",
+      filters.service
+    );
   }
 
-  if (f.search) {
-    const value = String(f.search).trim();
+  if (filters.technician) {
+    query = query.eq(
+      "technician_id",
+      filters.technician
+    );
+  }
+
+  if (filters.search) {
+
+    const value =
+      String(
+        filters.search
+      ).trim();
 
     query = query.or(
       `appointment_id.ilike.%${value}%,appointment_code.eq.${value},customer_name.ilike.%${value}%,mobile.ilike.%${value}%`
     );
   }
 
-  const offset = Math.max(0, Number(body.offset) || 0);
+  const offset =
+    Math.max(
+      0,
+      Number(body.offset) || 0
+    );
 
-  const {data,error,count} = await query.range(
+  const {
+    data,
+    error,
+    count
+  } = await query.range(
     offset,
     offset + 49
   );
@@ -126,221 +370,354 @@ async function appointments(db:any,body:any) {
   };
 }
 
-async function detail(db:any,id:string) { const {data,error}=await db.from("appointments").select("*,technicians(id,full_name,technician_code),appointment_status_history(old_status,new_status,changed_at,note,changed_by),appointment_reschedule_history(old_date,old_time,new_date,new_time,reason,created_at)").eq("id",id).single(); if(error)throw new Error("Appointment not found."); const paths=Array.isArray(data.photo_references)?data.photo_references:[]; const {data:urls,error:urlError}=paths.length?await db.storage.from("appointment-photos").createSignedUrls(paths,3600):{data:[],error:null}; if(urlError)throw new Error("Appointment photos could not be loaded."); return {appointment:{...data,photo_urls:(urls||[]).filter((item:any)=>item.signedUrl).map((item:any)=>item.signedUrl)}}; }
-async function updateAppointment(db:any,userId:string,body:any) { if(!statuses.includes(body.status))throw new Error("Invalid status."); if(body.status==="job_id_created"&&!/^CFX-JOB-\d{4}-\d{5}$/.test(body.job_code||""))throw new Error("Enter a valid Job ID before activating Job ID Created."); const {data,error}=await db.rpc("admin_update_appointment",{appointment_uuid:body.id,new_status:body.status,actor:userId,note_input:clean(body.note,1000),technician_uuid:body.technician_id||null,job_code_input:body.job_code||null}); if(error)throw new Error(error.message); return {appointment:data}; }
-async function rescheduleAppointment(db:any,userId:string,body:any) { if(!/^\d{4}-\d{2}-\d{2}$/.test(body.date||"")||!/^\d{2}:\d{2}$/.test(body.time||"")) throw new Error("Enter a valid date and time."); const {data,error}=await db.rpc("admin_reschedule_appointment",{appointment_uuid:body.id,new_date_input:body.date,new_time_input:body.time,actor:userId,reason_input:clean(body.reason,500)});if(error)throw new Error(error.message);return {appointment:data}; }
-async function availability(db:any){const [{data:settings,error},{data:blocks,error:blocksError}]=await Promise.all([db.from("business_availability").select("*").eq("id",true).single(),db.from("availability_blocks").select("*").order("block_date")]);if(error||blocksError)throw error||blocksError;return{settings,blocks};}
-async function saveAvailability(db:any,input:any){const settings={id:true,business_days:input.business_days,opening_time:input.opening_time,closing_time:input.closing_time,slot_duration_minutes:Number(input.slot_duration_minutes),buffer_minutes:Number(input.buffer_minutes),max_appointments_per_slot:Number(input.max_appointments_per_slot),minimum_advance_minutes:Number(input.minimum_advance_minutes),maximum_future_days:Number(input.maximum_future_days),updated_at:new Date().toISOString()};if(!Array.isArray(settings.business_days)||settings.business_days.some((day:any)=>!Number.isInteger(day)||day<1||day>7))throw new Error("Invalid business days.");const{data,error}=await db.from("business_availability").upsert(settings).select().single();if(error)throw error;return{settings:data};}
-async function saveBlock(db:any,block:any){if(!/^\d{4}-\d{2}-\d{2}$/.test(block.block_date||""))throw new Error("A valid blocked date is required.");const{data,error}=await db.from("availability_blocks").upsert({id:block.id||undefined,block_date:block.block_date,starts_at:block.starts_at||null,ends_at:block.ends_at||null,reason:clean(block.reason,300)}).select().single();if(error)throw error;return{block:data};}
-async function deleteBlock(db:any,id:string){if(!/^[0-9a-f-]{36}$/i.test(id||""))throw new Error("Invalid blocked date.");const{error}=await db.from("availability_blocks").delete().eq("id",id);if(error)throw error;return{ok:true};}
 
-async function technicians(db:any){
-  const{data,error}=await db
-    .from("technicians")
-    .select("*")
-    .order("full_name");
+/* =========================================================
+   APPOINTMENT DETAIL
+   ========================================================= */
 
-  if(error)throw error;
-
-  const techniciansWithLoginEmail=await Promise.all(
-    (data||[]).map(async(technician:any)=>{
-      let login_email=null;
-
-      if(technician.auth_user_id){
-        const{
-          data:authData,
-          error:authError
-        }=await db.auth.admin.getUserById(
-          technician.auth_user_id
-        );
-
-        if(!authError&&authData?.user){
-          login_email=authData.user.email||null;
-        }
-      }
-
-      return{
-        ...technician,
-        login_email
-      };
-    })
-  );
-
-  return{
-    technicians:techniciansWithLoginEmail
-  };
-}
-
-async function createTechnician(db:any,input:any){if(!input||!/^CFX-TECH-\d{4}-\d{4,6}$/.test(input.technician_code||"")||!/^[6-9]\d{9}$/.test(String(input.mobile||"").replace(/\D/g,"")))throw new Error("Technician ID and mobile must be valid.");const email=clean(input.email,254),password=String(input.password||"");if(!email||!password)throw new Error("A technician login email and password are required.");if(password.length<6)throw new Error("Technician password must contain at least 6 characters.");const{data:authData,error:authError}=await db.auth.admin.createUser({email,password,email_confirm:true});if(authError)throw new Error(authError.message);const{data,error}=await db.from("technicians").insert({auth_user_id:authData.user.id,technician_code:input.technician_code,full_name:clean(input.full_name,120),mobile:String(input.mobile).replace(/\D/g,""),username:clean(input.username,80),specialization:Array.isArray(input.specialization)?input.specialization.slice(0,10):[],working_days:input.working_days||[1,2,3,4,5,6],working_start:input.working_start||"10:00",working_end:input.working_end||"19:00",is_active:input.is_active!==false}).select().single();if(error){await db.auth.admin.deleteUser(authData.user.id);throw error;}return{technician:data};}
-async function updateTechnician(db:any,input:any){
-
-  if(
-    !input?.id ||
-    !/^[0-9a-f-]{36}$/i.test(input.id) ||
-    !/^[6-9]\d{9}$/.test(String(input.mobile||"").replace(/\D/g,""))
-  ){
-    throw new Error("Technician details are invalid.");
-  }
-
-  const{
-    data:existing,
-    error:existingError
-  }=await db
-    .from("technicians")
-    .select("auth_user_id")
-    .eq("id",input.id)
-    .single();
-
-  if(existingError||!existing){
-    throw new Error("Technician not found.");
-  }
-
-  let authUserId=existing.auth_user_id;
-
-  const email=clean(input.email,254);
-  const password=String(input.password||"").trim();
-
-  /*
-   * Existing technician without a portal account.
-   * Account creation/repair will be handled separately.
-   */
-  if(!authUserId){
-
-    if(input.is_active===true){
-      throw new Error(
-        "This technician has no linked portal login account. Create or repair the login account before activating this technician."
-      );
-    }
-
-  }else{
-
-    /*
-     * Existing portal account:
-     * Update login email when supplied.
-     */
-    if(email){
-
-      const{
-        data:authUserData,
-        error:authLookupError
-      }=await db.auth.admin.getUserById(authUserId);
-
-      if(authLookupError||!authUserData?.user){
-        throw new Error(
-          "Technician portal login account could not be found."
-        );
-      }
-
-      if(email!==authUserData.user.email){
-
-        const{
-          error:authUpdateError
-        }=await db.auth.admin.updateUserById(
-          authUserId,
-          {
-            email,
-            email_confirm:true
-          }
-        );
-
-        if(authUpdateError){
-          throw new Error(authUpdateError.message);
-        }
-      }
-    }
-
-    /*
-     * Password change:
-     * Only update the password when a new password
-     * has actually been entered.
-     */
-    if(password){
-
-      if(password.length<6){
-        throw new Error(
-          "Technician password must contain at least 6 characters."
-        );
-      }
-
-      const{
-        error:passwordUpdateError
-      }=await db.auth.admin.updateUserById(
-        authUserId,
-        {
-          password
-        }
-      );
-
-      if(passwordUpdateError){
-        throw new Error(passwordUpdateError.message);
-      }
-    }
-  }
-
-  const{
-    data,
-    error
-  }=await db
-    .from("technicians")
-    .update({
-      auth_user_id:authUserId,
-      full_name:clean(input.full_name,120),
-      mobile:String(input.mobile).replace(/\D/g,""),
-      username:clean(input.username,80),
-      specialization:Array.isArray(input.specialization)
-        ? input.specialization.slice(0,10)
-        : [],
-      working_days:Array.isArray(input.working_days)
-        ? input.working_days
-        : [1,2,3,4,5,6],
-      working_start:input.working_start||"10:00",
-      working_end:input.working_end||"19:00",
-      is_active:input.is_active!==false
-    })
-    .eq("id",input.id)
-    .select()
-    .single();
-
-  if(error){
-    throw error;
-  }
-
-  return{
-    technician:data
-  };
-}
-async function toggleTechnicianStatus(db, body) {
-  if (
-    !body?.id ||
-    !/^[0-9a-f-]{36}$/i.test(body.id)
-  ) {
-    throw new Error("Invalid technician.");
-  }
-
-  const isActive = body.is_active === true;
+async function detail(
+  db: any,
+  id: string
+) {
 
   const {
-    data: technician,
-    error: technicianError
+    data,
+    error
   } = await db
-    .from("technicians")
-    .select("id,auth_user_id,is_active,full_name")
-    .eq("id", body.id)
+    .from("appointments")
+    .select(
+      `
+      *,
+      technicians(
+        id,
+        full_name,
+        technician_code
+      ),
+      appointment_status_history(
+        old_status,
+        new_status,
+        changed_at,
+        note,
+        changed_by
+      ),
+      appointment_reschedule_history(
+        old_date,
+        old_time,
+        new_date,
+        new_time,
+        reason,
+        created_at
+      )
+      `
+    )
+    .eq(
+      "id",
+      id
+    )
     .single();
 
-  if (technicianError || !technician) {
-    throw new Error("Technician not found.");
+  if (error) {
+    throw new Error(
+      "Appointment not found."
+    );
   }
 
-  /*
-   * A technician without a linked Supabase Auth account
-   * cannot be activated because they would have no portal login.
-   *
-   * Deactivation is always allowed.
-   */
-  if (isActive && !technician.auth_user_id) {
+  const paths =
+    Array.isArray(
+      data.photo_references
+    )
+      ? data.photo_references
+      : [];
+
+  const {
+    data: urls,
+    error: urlError
+  } = paths.length
+    ? await db.storage
+        .from("appointment-photos")
+        .createSignedUrls(
+          paths,
+          3600
+        )
+    : {
+        data: [],
+        error: null
+      };
+
+  if (urlError) {
     throw new Error(
-      "This technician has no linked portal login account. Create or repair the login account before activating this technician."
+      "Appointment photos could not be loaded."
+    );
+  }
+
+  return {
+    appointment: {
+      ...data,
+      photo_urls:
+        (urls || [])
+          .filter(
+            (item: any) =>
+              item.signedUrl
+          )
+          .map(
+            (item: any) =>
+              item.signedUrl
+          )
+    }
+  };
+}
+
+
+/* =========================================================
+   APPOINTMENT UPDATE
+   ========================================================= */
+
+async function updateAppointment(
+  db: any,
+  userId: string,
+  body: any
+) {
+
+  if (
+    !statuses.includes(
+      body.status
+    )
+  ) {
+    throw new Error(
+      "Invalid status."
+    );
+  }
+
+  if (
+    body.status ===
+      "job_id_created" &&
+    !/^CFX-JOB-\d{4}-\d{5}$/.test(
+      body.job_code || ""
+    )
+  ) {
+    throw new Error(
+      "Enter a valid Job ID before activating Job ID Created."
+    );
+  }
+
+  const {
+    data,
+    error
+  } = await db.rpc(
+    "admin_update_appointment",
+    {
+      appointment_uuid:
+        body.id,
+
+      new_status:
+        body.status,
+
+      actor:
+        userId,
+
+      note_input:
+        clean(
+          body.note,
+          1000
+        ),
+
+      technician_uuid:
+        body.technician_id ||
+        null,
+
+      job_code_input:
+        body.job_code ||
+        null
+    }
+  );
+
+  if (error) {
+    throw new Error(
+      error.message
+    );
+  }
+
+  return {
+    appointment: data
+  };
+}
+
+
+/* =========================================================
+   RESCHEDULE
+   ========================================================= */
+
+async function rescheduleAppointment(
+  db: any,
+  userId: string,
+  body: any
+) {
+
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(
+      body.date || ""
+    ) ||
+    !/^\d{2}:\d{2}$/.test(
+      body.time || ""
+    )
+  ) {
+    throw new Error(
+      "Enter a valid date and time."
+    );
+  }
+
+  const {
+    data,
+    error
+  } = await db.rpc(
+    "admin_reschedule_appointment",
+    {
+      appointment_uuid:
+        body.id,
+
+      new_date_input:
+        body.date,
+
+      new_time_input:
+        body.time,
+
+      actor:
+        userId,
+
+      reason_input:
+        clean(
+          body.reason,
+          500
+        )
+    }
+  );
+
+  if (error) {
+    throw new Error(
+      error.message
+    );
+  }
+
+  return {
+    appointment: data
+  };
+}
+
+
+/* =========================================================
+   AVAILABILITY
+   ========================================================= */
+
+async function availability(
+  db: any
+) {
+
+  const [
+    {
+      data: settings,
+      error
+    },
+    {
+      data: blocks,
+      error: blocksError
+    }
+  ] = await Promise.all([
+
+    db
+      .from("business_availability")
+      .select("*")
+      .eq("id", true)
+      .single(),
+
+    db
+      .from("availability_blocks")
+      .select("*")
+      .order(
+        "block_date"
+      )
+
+  ]);
+
+  if (
+    error ||
+    blocksError
+  ) {
+    throw (
+      error ||
+      blocksError
+    );
+  }
+
+  return {
+    settings,
+    blocks
+  };
+}
+
+
+/* =========================================================
+   SAVE AVAILABILITY
+   ========================================================= */
+
+async function saveAvailability(
+  db: any,
+  input: any
+) {
+
+  const settings = {
+    id: true,
+
+    business_days:
+      input.business_days,
+
+    opening_time:
+      input.opening_time,
+
+    closing_time:
+      input.closing_time,
+
+    slot_duration_minutes:
+      Number(
+        input.slot_duration_minutes
+      ),
+
+    buffer_minutes:
+      Number(
+        input.buffer_minutes
+      ),
+
+    max_appointments_per_slot:
+      Number(
+        input.max_appointments_per_slot
+      ),
+
+    minimum_advance_minutes:
+      Number(
+        input.minimum_advance_minutes
+      ),
+
+    maximum_future_days:
+      Number(
+        input.maximum_future_days
+      ),
+
+    updated_at:
+      new Date().toISOString()
+  };
+
+  if (
+    !Array.isArray(
+      settings.business_days
+    ) ||
+    settings.business_days.some(
+      (day: any) =>
+        !Number.isInteger(day) ||
+        day < 1 ||
+        day > 7
+    )
+  ) {
+    throw new Error(
+      "Invalid business days."
     );
   }
 
@@ -348,13 +725,566 @@ async function toggleTechnicianStatus(db, body) {
     data,
     error
   } = await db
-    .from("technicians")
-    .update({
-      is_active: isActive
-    })
-    .eq("id", body.id)
+    .from("business_availability")
+    .upsert(settings)
     .select()
     .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    settings: data
+  };
+}
+
+
+/* =========================================================
+   AVAILABILITY BLOCK
+   ========================================================= */
+
+async function saveBlock(
+  db: any,
+  block: any
+) {
+
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(
+      block.block_date || ""
+    )
+  ) {
+    throw new Error(
+      "A valid blocked date is required."
+    );
+  }
+
+  const {
+    data,
+    error
+  } = await db
+    .from("availability_blocks")
+    .upsert({
+      id:
+        block.id ||
+        undefined,
+
+      block_date:
+        block.block_date,
+
+      starts_at:
+        block.starts_at ||
+        null,
+
+      ends_at:
+        block.ends_at ||
+        null,
+
+      reason:
+        clean(
+          block.reason,
+          300
+        )
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    block: data
+  };
+}
+
+
+/* =========================================================
+   DELETE BLOCK
+   ========================================================= */
+
+async function deleteBlock(
+  db: any,
+  id: string
+) {
+
+  if (
+    !/^[0-9a-f-]{36}$/i.test(
+      id || ""
+    )
+  ) {
+    throw new Error(
+      "Invalid blocked date."
+    );
+  }
+
+  const {
+    error
+  } = await db
+    .from("availability_blocks")
+    .delete()
+    .eq(
+      "id",
+      id
+    );
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    ok: true
+  };
+}
+
+
+/* =========================================================
+   TECHNICIANS
+   ========================================================= */
+
+async function technicians(
+  db: any
+) {
+
+  const {
+    data,
+    error
+  } = await db
+    .from("technicians")
+    .select("*")
+    .order(
+      "full_name"
+    );
+
+  if (error) {
+    throw error;
+  }
+
+  const techniciansWithLoginEmail =
+    await Promise.all(
+      (data || []).map(
+        async (
+          technician: any
+        ) => {
+
+          let login_email =
+            null;
+
+          if (
+            technician.auth_user_id
+          ) {
+
+            const {
+              data: authData,
+              error: authError
+            } =
+              await db.auth.admin
+                .getUserById(
+                  technician.auth_user_id
+                );
+
+            if (
+              !authError &&
+              authData?.user
+            ) {
+              login_email =
+                authData.user.email ||
+                null;
+            }
+          }
+
+          return {
+            ...technician,
+            login_email
+          };
+        }
+      )
+    );
+
+  return {
+    technicians:
+      techniciansWithLoginEmail
+  };
+}
+
+
+/* =========================================================
+   CREATE TECHNICIAN
+   ========================================================= */
+
+async function createTechnician(
+  db: any,
+  input: any
+) {
+
+  if (
+    !input ||
+    !/^CFX-TECH-\d{4}-\d{4,6}$/.test(
+      input.technician_code || ""
+    ) ||
+    !/^[6-9]\d{9}$/.test(
+      String(
+        input.mobile || ""
+      ).replace(
+        /\D/g,
+        ""
+      )
+    )
+  ) {
+    throw new Error(
+      "Technician ID and mobile must be valid."
+    );
+  }
+
+  const email =
+    clean(
+      input.email,
+      254
+    );
+
+  const password =
+    String(
+      input.password || ""
+    );
+
+  if (
+    !email ||
+    !password
+  ) {
+    throw new Error(
+      "A technician login email and password are required."
+    );
+  }
+
+  if (
+    password.length < 6
+  ) {
+    throw new Error(
+      "Technician password must contain at least 6 characters."
+    );
+  }
+
+  const {
+    data: authData,
+    error: authError
+  } =
+    await db.auth.admin
+      .createUser({
+        email,
+        password,
+        email_confirm:
+          true
+      });
+
+  if (authError) {
+    throw new Error(
+      authError.message
+    );
+  }
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("technicians")
+      .insert({
+        auth_user_id:
+          authData.user.id,
+
+        technician_code:
+          input.technician_code,
+
+        full_name:
+          clean(
+            input.full_name,
+            120
+          ),
+
+        mobile:
+          String(
+            input.mobile
+          ).replace(
+            /\D/g,
+            ""
+          ),
+
+        username:
+          clean(
+            input.username,
+            80
+          ),
+
+        specialization:
+          Array.isArray(
+            input.specialization
+          )
+            ? input.specialization.slice(
+                0,
+                10
+              )
+            : [],
+
+        working_days:
+          input.working_days ||
+          [1, 2, 3, 4, 5, 6],
+
+        working_start:
+          input.working_start ||
+          "10:00",
+
+        working_end:
+          input.working_end ||
+          "19:00",
+
+        is_active:
+          input.is_active !== false
+      })
+      .select()
+      .single();
+
+  if (error) {
+
+    await db.auth.admin
+      .deleteUser(
+        authData.user.id
+      );
+
+    throw error;
+  }
+
+  return {
+    technician: data
+  };
+}
+
+
+/* =========================================================
+   UPDATE TECHNICIAN
+   ========================================================= */
+
+async function updateTechnician(
+  db: any,
+  input: any
+) {
+
+  if (
+    !input?.id ||
+    !/^[0-9a-f-]{36}$/i.test(
+      input.id
+    ) ||
+    !/^[6-9]\d{9}$/.test(
+      String(
+        input.mobile || ""
+      ).replace(
+        /\D/g,
+        ""
+      )
+    )
+  ) {
+    throw new Error(
+      "Technician details are invalid."
+    );
+  }
+
+  const {
+    data: existing,
+    error: existingError
+  } =
+    await db
+      .from("technicians")
+      .select(
+        "auth_user_id"
+      )
+      .eq(
+        "id",
+        input.id
+      )
+      .single();
+
+  if (
+    existingError ||
+    !existing
+  ) {
+    throw new Error(
+      "Technician not found."
+    );
+  }
+
+  const authUserId =
+    existing.auth_user_id;
+
+  const email =
+    clean(
+      input.email,
+      254
+    );
+
+  const password =
+    String(
+      input.password || ""
+    ).trim();
+
+  if (!authUserId) {
+
+    if (
+      input.is_active === true
+    ) {
+      throw new Error(
+        "This technician has no linked portal login account. Create or repair the login account before activating this technician."
+      );
+    }
+
+  } else {
+
+    if (email) {
+
+      const {
+        data: authUserData,
+        error: authLookupError
+      } =
+        await db.auth.admin
+          .getUserById(
+            authUserId
+          );
+
+      if (
+        authLookupError ||
+        !authUserData?.user
+      ) {
+        throw new Error(
+          "Technician portal login account could not be found."
+        );
+      }
+
+      if (
+        email !==
+        authUserData.user.email
+      ) {
+
+        const {
+          error: authUpdateError
+        } =
+          await db.auth.admin
+            .updateUserById(
+              authUserId,
+              {
+                email,
+                email_confirm:
+                  true
+              }
+            );
+
+        if (authUpdateError) {
+          throw new Error(
+            authUpdateError.message
+          );
+        }
+      }
+    }
+
+    if (password) {
+
+      if (
+        password.length < 6
+      ) {
+        throw new Error(
+          "Technician password must contain at least 6 characters."
+        );
+      }
+
+      const {
+        error: passwordUpdateError
+      } =
+        await db.auth.admin
+          .updateUserById(
+            authUserId,
+            {
+              password
+            }
+          );
+
+      if (
+        passwordUpdateError
+      ) {
+        throw new Error(
+          passwordUpdateError.message
+        );
+      }
+    }
+  }
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("technicians")
+      .update({
+        auth_user_id:
+          authUserId,
+
+        full_name:
+          clean(
+            input.full_name,
+            120
+          ),
+
+        mobile:
+          String(
+            input.mobile
+          ).replace(
+            /\D/g,
+            ""
+          ),
+
+        username:
+          clean(
+            input.username,
+            80
+          ),
+
+        specialization:
+          Array.isArray(
+            input.specialization
+          )
+            ? input.specialization.slice(
+                0,
+                10
+              )
+            : [],
+
+        working_days:
+          Array.isArray(
+            input.working_days
+          )
+            ? input.working_days
+            : [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+
+        working_start:
+          input.working_start ||
+          "10:00",
+
+        working_end:
+          input.working_end ||
+          "19:00",
+
+        is_active:
+          input.is_active !== false
+      })
+      .eq(
+        "id",
+        input.id
+      )
+      .select()
+      .single();
 
   if (error) {
     throw error;
@@ -365,117 +1295,329 @@ async function toggleTechnicianStatus(db, body) {
   };
 }
 
-async function deleteTechnician(db:any,id:string){
 
-  if(
-    !id ||
-    !/^[0-9a-f-]{36}$/i.test(id)
-  ){
-    throw new Error("Invalid technician.");
+/* =========================================================
+   TOGGLE TECHNICIAN STATUS
+   ========================================================= */
+
+async function toggleTechnicianStatus(
+  db: any,
+  body: any
+) {
+
+  if (
+    !body?.id ||
+    !/^[0-9a-f-]{36}$/i.test(
+      body.id
+    )
+  ) {
+    throw new Error(
+      "Invalid technician."
+    );
+  }
+
+  const isActive =
+    body.is_active === true;
+
+  const {
+    data: technician,
+    error: technicianError
+  } =
+    await db
+      .from("technicians")
+      .select(
+        "id,auth_user_id,is_active,full_name"
+      )
+      .eq(
+        "id",
+        body.id
+      )
+      .single();
+
+  if (
+    technicianError ||
+    !technician
+  ) {
+    throw new Error(
+      "Technician not found."
+    );
+  }
+
+  if (
+    isActive &&
+    !technician.auth_user_id
+  ) {
+    throw new Error(
+      "This technician has no linked portal login account. Create or repair the login account before activating this technician."
+    );
   }
 
   const {
-    data:technician,
-    error:technicianError
-  }=await db
-    .from("technicians")
-    .select("id,auth_user_id,is_active,full_name,technician_code")
-    .eq("id",id)
-    .single();
+    data,
+    error
+  } =
+    await db
+      .from("technicians")
+      .update({
+        is_active:
+          isActive
+      })
+      .eq(
+        "id",
+        body.id
+      )
+      .select()
+      .single();
 
-  if(technicianError||!technician){
-    throw new Error("Technician not found.");
+  if (error) {
+    throw error;
   }
 
-  /*
-   * Active technicians must never be deleted.
-   * They must be deactivated first.
-   */
-  if(technician.is_active){
+  return {
+    technician: data
+  };
+}
+
+
+/* =========================================================
+   DELETE TECHNICIAN
+   ========================================================= */
+
+async function deleteTechnician(
+  db: any,
+  id: string
+) {
+
+  if (
+    !id ||
+    !/^[0-9a-f-]{36}$/i.test(
+      id
+    )
+  ) {
+    throw new Error(
+      "Invalid technician."
+    );
+  }
+
+  const {
+    data: technician,
+    error: technicianError
+  } =
+    await db
+      .from("technicians")
+      .select(
+        "id,auth_user_id,is_active,full_name,technician_code"
+      )
+      .eq(
+        "id",
+        id
+      )
+      .single();
+
+  if (
+    technicianError ||
+    !technician
+  ) {
+    throw new Error(
+      "Technician not found."
+    );
+  }
+
+  if (
+    technician.is_active
+  ) {
     throw new Error(
       "Active technician cannot be deleted. Deactivate the technician first."
     );
   }
 
-  /*
-   * Check whether this technician is still assigned
-   * to any appointment.
-   *
-   * We do not delete a technician that is referenced
-   * by an appointment.
-   */
   const {
-    count:appointmentCount,
-    error:appointmentError
-  }=await db
-    .from("appointments")
-    .select("id",{count:"exact",head:true})
-    .eq("technician_id",id);
+    count: appointmentCount,
+    error: appointmentError
+  } =
+    await db
+      .from("appointments")
+      .select(
+        "id",
+        {
+          count: "exact",
+          head: true
+        }
+      )
+      .eq(
+        "technician_id",
+        id
+      );
 
-  if(appointmentError){
+  if (appointmentError) {
     throw appointmentError;
   }
 
-  if((appointmentCount||0)>0){
+  if (
+    (appointmentCount || 0) > 0
+  ) {
     throw new Error(
       "This technician is assigned to one or more appointments. Reassign those appointments before deleting the technician."
     );
   }
 
-  /*
-   * Delete linked Supabase Auth account first.
-   *
-   * If the technician has no Auth account,
-   * continue with database deletion.
-   */
-  if(technician.auth_user_id){
+  if (
+    technician.auth_user_id
+  ) {
 
     const {
-      error:authDeleteError
-    }=await db.auth.admin.deleteUser(
-      technician.auth_user_id
-    );
+      error: authDeleteError
+    } =
+      await db.auth.admin
+        .deleteUser(
+          technician.auth_user_id
+        );
 
-    if(authDeleteError){
+    if (authDeleteError) {
       throw new Error(
-        "Technician portal login could not be deleted: "+
+        "Technician portal login could not be deleted: " +
         authDeleteError.message
       );
     }
   }
 
-  /*
-   * Delete technician database record.
-   */
   const {
-    error:deleteError
-  }=await db
-    .from("technicians")
-    .delete()
-    .eq("id",id);
+    error: deleteError
+  } =
+    await db
+      .from("technicians")
+      .delete()
+      .eq(
+        "id",
+        id
+      );
 
-  if(deleteError){
+  if (deleteError) {
     throw deleteError;
   }
 
-  return{
-    ok:true
+  return {
+    ok: true
   };
 }
 
-async function notifications(db:any,userId:string){const{data,error}=await db.from("admin_notifications").select("*,appointments(appointment_id)").eq("admin_id",userId).order("created_at",{ascending:false}).limit(50);if(error)throw error;return{notifications:data||[]};}
-async function notificationLogs(db:any){const{data,error}=await db.from("notifications").select("id,channel,type,status,created_at,sent_at,error,appointments(appointment_id)").order("created_at",{ascending:false}).limit(100);if(error)throw error;return{logs:data||[]};}
-async function markRead(db:any,userId:string,id:string){const{error}=await db.from("admin_notifications").update({is_read:true,read_at:new Date().toISOString()}).eq("id",id).eq("admin_id",userId);if(error)throw error;return{ok:true};}
+
+/* =========================================================
+   NOTIFICATIONS
+   ========================================================= */
+
+async function notifications(
+  db: any,
+  userId: string
+) {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("admin_notifications")
+      .select(
+        "*,appointments(appointment_id)"
+      )
+      .eq(
+        "admin_id",
+        userId
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      )
+      .limit(50);
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    notifications:
+      data || []
+  };
+}
+
+
+async function notificationLogs(
+  db: any
+) {
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("notifications")
+      .select(
+        "id,channel,type,status,created_at,sent_at,error,appointments(appointment_id)"
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      )
+      .limit(100);
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    logs:
+      data || []
+  };
+}
+
+
+async function markRead(
+  db: any,
+  userId: string,
+  id: string
+) {
+
+  const {
+    error
+  } =
+    await db
+      .from("admin_notifications")
+      .update({
+        is_read: true,
+        read_at:
+          new Date().toISOString()
+      })
+      .eq(
+        "id",
+        id
+      )
+      .eq(
+        "admin_id",
+        userId
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    ok: true
+  };
+}
+
 
 /* =========================================================
    ADMIN SUPPORT
-   PHASE 6A.1
    SUPPORT REQUEST LIST
    ========================================================= */
 
 async function supportRequests(
-  db:any,
-  body:any
+  db: any,
+  body: any
 ) {
 
   const filters =
@@ -527,21 +1669,19 @@ async function supportRequests(
         )
         `,
         {
-          count:"exact"
+          count: "exact"
         }
       )
       .order(
         "created_at",
         {
-          ascending:false
+          ascending: false
         }
       );
 
-  /*
-   * Status filter
-   */
-
-  if(filters.status){
+  if (
+    filters.status
+  ) {
 
     const status =
       String(
@@ -559,16 +1699,14 @@ async function supportRequests(
       "CANCELLED"
     ];
 
-    if(
+    if (
       !allowedStatuses.includes(
         status
       )
-    ){
-
+    ) {
       throw new Error(
         "Invalid support status."
       );
-
     }
 
     query =
@@ -576,25 +1714,20 @@ async function supportRequests(
         "status",
         status
       );
-
   }
 
-  /*
-   * Technician filter
-   */
+  if (
+    filters.technician_id
+  ) {
 
-  if(filters.technician_id){
-
-    if(
+    if (
       !isUuid(
         filters.technician_id
       )
-    ){
-
+    ) {
       throw new Error(
         "Invalid technician."
       );
-
     }
 
     query =
@@ -602,14 +1735,11 @@ async function supportRequests(
         "technician_id",
         filters.technician_id
       );
-
   }
 
-  /*
-   * Support type filter
-   */
-
-  if(filters.support_type){
+  if (
+    filters.support_type
+  ) {
 
     query =
       query.eq(
@@ -618,19 +1748,11 @@ async function supportRequests(
           filters.support_type
         ).trim()
       );
-
   }
 
-  /*
-   * Search
-   *
-   * Search support token first.
-   * Appointment / technician searching
-   * will be handled from the UI/detail
-   * layer to avoid unsafe cross-table OR syntax.
-   */
-
-  if(filters.support_token){
+  if (
+    filters.support_token
+  ) {
 
     const token =
       String(
@@ -644,7 +1766,6 @@ async function supportRequests(
         "support_token",
         token
       );
-
   }
 
   const offset =
@@ -676,17 +1797,10 @@ async function supportRequests(
       offset + limit - 1
     );
 
-  if(error){
-
-    console.error(
-      "ADMIN SUPPORT REQUESTS QUERY ERROR:",
-      error
-    );
-
+  if (error) {
     throw new Error(
       "SUPPORT_REQUESTS_QUERY_FAILED"
     );
-
   }
 
   return {
@@ -697,21 +1811,19 @@ async function supportRequests(
       count || 0,
 
     offset,
-
     limit
   };
-
 }
+
 
 /* =========================================================
    ADMIN SUPPORT
-   PHASE 6A.2
-   SUPPORT REQUEST DETAILS
+   SUPPORT REQUEST DETAIL
    ========================================================= */
 
 async function supportGetRequest(
-  db:any,
-  body:any
+  db: any,
+  body: any
 ) {
 
   const requestId =
@@ -720,15 +1832,13 @@ async function supportGetRequest(
       ""
     ).trim();
 
-  if(
+  if (
     !requestId ||
     !isUuid(requestId)
-  ){
-
+  ) {
     throw new Error(
       "Invalid support request."
     );
-
   }
 
   const {
@@ -800,42 +1910,32 @@ async function supportGetRequest(
       )
       .maybeSingle();
 
-  if(error){
-
-    console.error(
-      "ADMIN SUPPORT REQUEST DETAIL ERROR:",
-      error
-    );
-
+  if (error) {
     throw new Error(
       "SUPPORT_REQUEST_DETAIL_FAILED"
     );
-
   }
 
-  if(!data){
-
+  if (!data) {
     throw new Error(
       "SUPPORT_REQUEST_NOT_FOUND"
     );
-
   }
 
   return {
-    request:data
+    request: data
   };
-
 }
+
 
 /* =========================================================
    ADMIN SUPPORT
-   PHASE 6A.3
    SUPPORT MESSAGES
    ========================================================= */
 
 async function supportMessages(
-  db:any,
-  body:any
+  db: any,
+  body: any
 ) {
 
   const requestId =
@@ -844,24 +1944,18 @@ async function supportMessages(
       ""
     ).trim();
 
-  if(
+  if (
     !requestId ||
     !isUuid(requestId)
-  ){
-
+  ) {
     throw new Error(
       "Invalid support request."
     );
-
   }
 
-  /*
-   * Verify that the support request exists.
-   */
-
   const {
-    data:supportRequest,
-    error:supportRequestError
+    data: supportRequest,
+    error: supportRequestError
   } =
     await db
       .from("support_requests")
@@ -879,30 +1973,17 @@ async function supportMessages(
       )
       .maybeSingle();
 
-  if(supportRequestError){
-
-    console.error(
-      "ADMIN SUPPORT MESSAGE REQUEST VERIFY ERROR:",
-      supportRequestError
-    );
-
+  if (supportRequestError) {
     throw new Error(
       "SUPPORT_REQUEST_VERIFY_FAILED"
     );
-
   }
 
-  if(!supportRequest){
-
+  if (!supportRequest) {
     throw new Error(
       "SUPPORT_REQUEST_NOT_FOUND"
     );
-
   }
-
-  /*
-   * Load conversation.
-   */
 
   const {
     data,
@@ -927,26 +2008,18 @@ async function supportMessages(
       .order(
         "created_at",
         {
-          ascending:true
+          ascending: true
         }
       );
 
-  if(error){
-
-    console.error(
-      "ADMIN SUPPORT MESSAGES QUERY ERROR:",
-      error
-    );
-
+  if (error) {
     throw new Error(
       "SUPPORT_MESSAGES_QUERY_FAILED"
     );
-
   }
 
   return {
-
-    support_request:{
+    support_request: {
       id:
         supportRequest.id,
 
@@ -962,33 +2035,29 @@ async function supportMessages(
 
     messages:
       data || []
-
   };
-
 }
+
 
 /* =========================================================
    ADMIN SUPPORT
-   PHASE 6A.4
-   SEND ADMIN MESSAGE
+   SEND MESSAGE
    ========================================================= */
 
 async function sendSupportMessage(
-  db:any,
-  adminUserId:string,
-  body:any
+  db: any,
+  adminUserId: string,
+  body: any
 ) {
 
-  if(
+  if (
     !isUuid(
       adminUserId
     )
-  ){
-
+  ) {
     throw new Error(
       "Invalid administrator."
     );
-
   }
 
   const requestId =
@@ -1003,44 +2072,32 @@ async function sendSupportMessage(
       ""
     ).trim();
 
-  if(
+  if (
     !requestId ||
     !isUuid(requestId)
-  ){
-
+  ) {
     throw new Error(
       "Invalid support request."
     );
-
   }
 
-  if(!message){
-
+  if (!message) {
     throw new Error(
       "Message is required."
     );
-
   }
 
-  if(message.length > 2000){
-
+  if (
+    message.length > 2000
+  ) {
     throw new Error(
       "Message cannot exceed 2000 characters."
     );
-
   }
 
-  /*
-   * Verify administrator.
-   *
-   * requireAdmin() already protects
-   * the Edge Function, but this keeps
-   * the operation explicit.
-   */
-
   const {
-    data:admin,
-    error:adminError
+    data: admin,
+    error: adminError
   } =
     await db
       .from("admin_users")
@@ -1053,34 +2110,21 @@ async function sendSupportMessage(
       )
       .maybeSingle();
 
-  if(adminError){
-
-    console.error(
-      "ADMIN SUPPORT ADMIN VERIFY ERROR:",
-      adminError
-    );
-
+  if (adminError) {
     throw new Error(
       "ADMIN_LOOKUP_FAILED"
     );
-
   }
 
-  if(!admin){
-
+  if (!admin) {
     throw new Error(
       "ADMIN_REQUIRED"
     );
-
   }
 
-  /*
-   * Verify support request.
-   */
-
   const {
-    data:supportRequest,
-    error:supportRequestError
+    data: supportRequest,
+    error: supportRequestError
   } =
     await db
       .from("support_requests")
@@ -1098,25 +2142,16 @@ async function sendSupportMessage(
       )
       .maybeSingle();
 
-  if(supportRequestError){
-
-    console.error(
-      "ADMIN SEND MESSAGE REQUEST VERIFY ERROR:",
-      supportRequestError
-    );
-
+  if (supportRequestError) {
     throw new Error(
       "SUPPORT_REQUEST_VERIFY_FAILED"
     );
-
   }
 
-  if(!supportRequest){
-
+  if (!supportRequest) {
     throw new Error(
       "SUPPORT_REQUEST_NOT_FOUND"
     );
-
   }
 
   const currentStatus =
@@ -1125,20 +2160,14 @@ async function sendSupportMessage(
       ""
     ).toUpperCase();
 
-  if(
+  if (
     currentStatus === "CLOSED" ||
     currentStatus === "CANCELLED"
-  ){
-
+  ) {
     throw new Error(
       "SUPPORT_REQUEST_CLOSED"
     );
-
   }
-
-  /*
-   * Insert admin message.
-   */
 
   const {
     data,
@@ -1147,7 +2176,6 @@ async function sendSupportMessage(
     await db
       .from("support_messages")
       .insert({
-
         support_request_id:
           requestId,
 
@@ -1157,9 +2185,7 @@ async function sendSupportMessage(
         sender_user_id:
           adminUserId,
 
-        message:
-          message
-
+        message
       })
       .select(
         `
@@ -1173,58 +2199,37 @@ async function sendSupportMessage(
       )
       .single();
 
-  if(error){
-
-    console.error(
-      "ADMIN SUPPORT MESSAGE INSERT ERROR:",
-      error
-    );
-
+  if (error) {
     throw new Error(
       "SUPPORT_MESSAGE_SEND_FAILED"
     );
-
   }
-
-  console.log(
-  "🔥 ADMIN SUPPORT MESSAGE INSERTED:",
-  {
-    id: data?.id,
-    support_request_id: data?.support_request_id,
-    sender_type: data?.sender_type,
-    sender_user_id: data?.sender_user_id,
-    created_at: data?.created_at
-  }
-);
 
   return {
-    message:data
+    message: data
   };
-
 }
+
 
 /* =========================================================
    ADMIN SUPPORT
-   PHASE 6A.5
    STATUS UPDATE
    ========================================================= */
 
 async function updateSupportStatus(
-  db:any,
-  adminUserId:string,
-  body:any
+  db: any,
+  adminUserId: string,
+  body: any
 ) {
 
-  if(
+  if (
     !isUuid(
       adminUserId
     )
-  ){
-
+  ) {
     throw new Error(
       "Invalid administrator."
     );
-
   }
 
   const requestId =
@@ -1247,15 +2252,13 @@ async function updateSupportStatus(
       1000
     );
 
-  if(
+  if (
     !requestId ||
     !isUuid(requestId)
-  ){
-
+  ) {
     throw new Error(
       "Invalid support request."
     );
-
   }
 
   const allowedStatuses = [
@@ -1267,25 +2270,19 @@ async function updateSupportStatus(
     "CANCELLED"
   ];
 
-  if(
+  if (
     !allowedStatuses.includes(
       newStatus
     )
-  ){
-
+  ) {
     throw new Error(
       "Invalid support status."
     );
-
   }
 
-  /*
-   * Verify admin.
-   */
-
   const {
-    data:admin,
-    error:adminError
+    data: admin,
+    error: adminError
   } =
     await db
       .from("admin_users")
@@ -1298,34 +2295,21 @@ async function updateSupportStatus(
       )
       .maybeSingle();
 
-  if(adminError){
-
-    console.error(
-      "ADMIN SUPPORT STATUS ADMIN VERIFY ERROR:",
-      adminError
-    );
-
+  if (adminError) {
     throw new Error(
       "ADMIN_LOOKUP_FAILED"
     );
-
   }
 
-  if(!admin){
-
+  if (!admin) {
     throw new Error(
       "ADMIN_REQUIRED"
     );
-
   }
 
-  /*
-   * Load current request.
-   */
-
   const {
-    data:supportRequest,
-    error:supportRequestError
+    data: supportRequest,
+    error: supportRequestError
   } =
     await db
       .from("support_requests")
@@ -1346,25 +2330,16 @@ async function updateSupportStatus(
       )
       .maybeSingle();
 
-  if(supportRequestError){
-
-    console.error(
-      "ADMIN SUPPORT STATUS REQUEST QUERY ERROR:",
-      supportRequestError
-    );
-
+  if (supportRequestError) {
     throw new Error(
       "SUPPORT_REQUEST_VERIFY_FAILED"
     );
-
   }
 
-  if(!supportRequest){
-
+  if (!supportRequest) {
     throw new Error(
       "SUPPORT_REQUEST_NOT_FOUND"
     );
-
   }
 
   const currentStatus =
@@ -1373,57 +2348,42 @@ async function updateSupportStatus(
       ""
     ).toUpperCase();
 
-  /*
-   * Same status = no-op.
-   */
-
-  if(
+  if (
     currentStatus === newStatus
-  ){
-
+  ) {
     return {
-      request:supportRequest
+      request:
+        supportRequest
     };
-
   }
 
-  /*
-   * Terminal statuses.
-   */
-
-  if(
+  if (
     currentStatus === "CLOSED" ||
     currentStatus === "CANCELLED"
-  ){
-
+  ) {
     throw new Error(
       "SUPPORT_STATUS_TERMINAL"
     );
-
   }
 
-  /*
-   * Strict workflow.
-   */
+  const transitions: any = {
 
-  const transitions:any = {
-
-    OPEN:[
+    OPEN: [
       "ACKNOWLEDGED",
       "CANCELLED"
     ],
 
-    ACKNOWLEDGED:[
+    ACKNOWLEDGED: [
       "IN_PROGRESS",
       "CANCELLED"
     ],
 
-    IN_PROGRESS:[
+    IN_PROGRESS: [
       "RESOLVED",
       "CANCELLED"
     ],
 
-    RESOLVED:[
+    RESOLVED: [
       "CLOSED"
     ]
 
@@ -1434,65 +2394,52 @@ async function updateSupportStatus(
       currentStatus
     ] || [];
 
-  if(
+  if (
     !allowedNext.includes(
       newStatus
     )
-  ){
-
+  ) {
     throw new Error(
       `Invalid support status transition: ${currentStatus} → ${newStatus}`
     );
-
   }
 
-  /*
-   * Build update.
-   */
+  const now =
+    new Date().toISOString();
 
-  const update:any = {
+  const update: any = {
 
     status:
       newStatus,
 
     updated_at:
-      new Date().toISOString()
+      now
 
   };
 
-  const now =
-    new Date().toISOString();
-
-  if(
-    newStatus === "ACKNOWLEDGED"
-  ){
-
+  if (
+    newStatus ===
+    "ACKNOWLEDGED"
+  ) {
     update.acknowledged_at =
       now;
-
   }
 
-  if(
-    newStatus === "RESOLVED"
-  ){
-
+  if (
+    newStatus ===
+    "RESOLVED"
+  ) {
     update.resolved_at =
       now;
-
   }
 
-  if(
-    newStatus === "CLOSED"
-  ){
-
+  if (
+    newStatus ===
+    "CLOSED"
+  ) {
     update.closed_at =
       now;
-
   }
-
-  /*
-   * Update request.
-   */
 
   const {
     data,
@@ -1527,37 +2474,20 @@ async function updateSupportStatus(
       )
       .single();
 
-  if(error){
-
-    console.error(
-      "ADMIN SUPPORT STATUS UPDATE ERROR:",
-      error
-    );
-
+  if (error) {
     throw new Error(
       "SUPPORT_STATUS_UPDATE_FAILED"
     );
-
   }
 
-  /*
-   * Optional status note.
-   *
-   * We do not create another table yet.
-   * If a note exists, add it as an ADMIN
-   * support message so the technician can
-   * see the reason/context.
-   */
-
-  if(note){
+  if (note) {
 
     const {
-      error:noteError
+      error: noteError
     } =
       await db
         .from("support_messages")
         .insert({
-
           support_request_id:
             requestId,
 
@@ -1569,46 +2499,91 @@ async function updateSupportStatus(
 
           message:
             `Status updated to ${newStatus}.\n${note}`
-
         });
 
-    if(noteError){
-
+    /*
+     * Status update is already successful.
+     * A note failure must not roll back it.
+     */
+    if (noteError) {
       console.error(
-        "ADMIN SUPPORT STATUS NOTE ERROR:",
-        noteError
+        "Support status note insert failed:",
+        noteError.message
       );
-
-      /*
-       * Do not roll back the status update.
-       * Status has already changed successfully.
-       */
-
     }
-
   }
 
   return {
-    request:data
+    request: data
   };
-
 }
 
 
+/* =========================================================
+   DELETE APPOINTMENT
+   ========================================================= */
 
-async function deleteAppointment(db:any,id:string){if(!/^[0-9a-f-]{36}$/i.test(id||""))throw new Error("Invalid appointment.");const{error}=await db.from("appointments").delete().eq("id",id);if(error)throw error;return{ok:true};}
+async function deleteAppointment(
+  db: any,
+  id: string
+) {
+
+  if (
+    !/^[0-9a-f-]{36}$/i.test(
+      id || ""
+    )
+  ) {
+    throw new Error(
+      "Invalid appointment."
+    );
+  }
+
+  const {
+    error
+  } =
+    await db
+      .from("appointments")
+      .delete()
+      .eq(
+        "id",
+        id
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    ok: true
+  };
+}
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
 
 function isUuid(
-  value:any
-){
+  value: any
+) {
 
   return /^[0-9a-f-]{36}$/i.test(
     String(
       value || ""
     )
   );
-
 }
 
 
-function clean(value:any,max:number){return typeof value==="string"?value.trim().slice(0,max):null;}
+function clean(
+  value: any,
+  max: number
+) {
+
+  return typeof value ===
+    "string"
+    ? value
+        .trim()
+        .slice(0, max)
+    : null;
+}

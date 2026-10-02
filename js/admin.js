@@ -3800,6 +3800,9 @@ function addAdminFloatingRealtimeMessage(message) {
     }
 }
 
+/*let adminSupportRealtimeRetryTimer = null;
+let adminSupportRealtimeRetryCount = 0;
+let adminSupportRealtimeStarting = false;*/
 
 /* =========================================================
    REALTIME
@@ -3814,6 +3817,134 @@ async function initAdminFloatingSupportRealtime() {
         return;
     }
 
+    if (adminFloatingSupportState.realtimeChannel) {
+
+        try {
+            await s.removeChannel(
+                adminFloatingSupportState.realtimeChannel
+            );
+        } catch (error) {
+            console.warn(
+                "⚠️ ADMIN REALTIME: old channel cleanup failed:",
+                error
+            );
+        }
+
+        adminFloatingSupportState.realtimeChannel =
+            null;
+    }
+
+
+    const channelName =
+        "admin-floating-support-live";
+
+
+    console.log(
+        "📡 ADMIN REALTIME: creating channel:",
+        channelName
+    );
+
+
+    const channel =
+        s
+            .channel(channelName)
+
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "support_messages"
+                },
+                payload => {
+
+                    console.log(
+                        "📨 ADMIN REALTIME: INSERT received:",
+                        payload?.new
+                    );
+
+
+                    if (
+                        typeof addAdminFloatingRealtimeMessage ===
+                        "function"
+                    ) {
+
+                        addAdminFloatingRealtimeMessage(
+                            payload?.new
+                        );
+
+                    }
+
+                }
+            )
+
+            .subscribe(
+                status => {
+
+                    console.log(
+                        "📡 ADMIN REALTIME STATUS:",
+                        status
+                    );
+
+
+                    if (
+                        status === "SUBSCRIBED"
+                    ) {
+
+                        console.log(
+                            "🟢 ADMIN REALTIME: SUBSCRIBED"
+                        );
+
+                        adminFloatingSupportState.realtimeChannel =
+                            channel;
+
+                        window.__adminSupportRealtimeChannel =
+                            channel;
+
+                    }
+
+
+                    if (
+                        status === "CHANNEL_ERROR" ||
+                        status === "TIMED_OUT" ||
+                        status === "CLOSED"
+                    ) {
+
+                        console.warn(
+                            "🔴 ADMIN REALTIME: connection lost:",
+                            status
+                        );
+
+                        adminFloatingSupportState.realtimeChannel =
+                            null;
+
+                        window.__adminSupportRealtimeChannel =
+                            null;
+
+                        setTimeout(
+                            () => {
+                                initAdminFloatingSupportRealtime();
+                            },
+                            3000
+                        );
+
+                    }
+
+                }
+            );
+
+
+    adminFloatingSupportState.realtimeChannel =
+        channel;
+
+    window.__adminSupportRealtimeChannel =
+        channel;
+
+
+    console.log(
+        "✅ ADMIN REALTIME: initialization complete."
+    );
+}
 
     /* -----------------------------------------------------
        3. REMOVE OLD REALTIME CHANNEL
@@ -3845,7 +3976,7 @@ async function initAdminFloatingSupportRealtime() {
         }
 
         window.__adminSupportRealtimeChannel = null;
-    }
+    
 
 
     /* -----------------------------------------------------
@@ -3921,22 +4052,39 @@ async function initAdminFloatingSupportRealtime() {
    REALTIME CLEANUP
    ========================================================= */
 
-function destroyAdminFloatingSupportRealtime() {
+async function destroyAdminFloatingSupportRealtime() {
 
-    if (
-        !adminFloatingSupportState.realtimeChannel
-    ) {
+    const channel =
+        adminFloatingSupportState.realtimeChannel ||
+        window.__adminSupportRealtimeChannel ||
+        null;
+
+
+    if (!channel) {
         return;
     }
 
 
-    s
-        ?.removeChannel(
-            adminFloatingSupportState.realtimeChannel
+    try {
+
+        await s?.removeChannel(
+            channel
         );
+
+    } catch (error) {
+
+        console.warn(
+            "⚠️ ADMIN REALTIME: cleanup failed:",
+            error
+        );
+
+    }
 
 
     adminFloatingSupportState.realtimeChannel =
+        null;
+
+    window.__adminSupportRealtimeChannel =
         null;
 
 }

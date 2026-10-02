@@ -2588,6 +2588,7 @@ const adminFloatingSupportState = {
     currentMessages: [],
     requests: [],
     unread: new Map(),
+    seenMessageIds: new Set(),
     open: false,
     loading: false
 };
@@ -2759,8 +2760,11 @@ async function openAdminFloatingSupport() {
 
 function closeAdminFloatingSupport() {
 
-    adminFloatingSupportState.open =
-        false;
+    adminFloatingSupportState.open = false;
+
+    adminFloatingSupportState.currentRequestId = "";
+    adminFloatingSupportState.currentRequest = null;
+    adminFloatingSupportState.currentMessages = [];
 
     const panel =
         document.getElementById(
@@ -3241,10 +3245,17 @@ async function openAdminFloatingSupportChat(
 
 
         adminFloatingSupportState.currentMessages =
-            messages;
+    messages;
 
+messages.forEach(message => {
+    if (message?.id) {
+        adminFloatingSupportState.seenMessageIds.add(
+            String(message.id)
+        );
+    }
+});
 
-        renderAdminFloatingSupportChat();
+renderAdminFloatingSupportChat();
 
     } catch (error) {
 
@@ -3582,67 +3593,98 @@ function renderAdminFloatingSupportMessages(
    ADD REALTIME MESSAGE WITHOUT DUPLICATE
    ========================================================= */
 
-function addAdminFloatingRealtimeMessage(
-    message
-) {
+function addAdminFloatingRealtimeMessage(message) {
 
     if (!message?.id) {
         return;
     }
 
+    const messageId = String(message.id);
+    const requestId = String(
+        message.support_request_id || ""
+    ).trim();
 
-    const exists =
-        adminFloatingSupportState.currentMessages
-            .some(
-                item =>
-                    item.id === message.id
-            );
-
-
-    if (exists) {
+    if (!requestId) {
         return;
     }
 
+    const sender = String(
+        message.sender_type || ""
+    ).toUpperCase();
 
-    adminFloatingSupportState.currentMessages
-        .push(message);
-
+    /*
+     * Prevent duplicate realtime/API delivery.
+     *
+     * currentMessages only contains the currently
+     * opened conversation, so duplicate protection
+     * must also work when another conversation is closed.
+     */
+    if (!adminFloatingSupportState.seenMessageIds) {
+        adminFloatingSupportState.seenMessageIds =
+            new Set();
+    }
 
     if (
-        adminFloatingSupportState.currentRequestId ===
-        message.support_request_id
+        adminFloatingSupportState.seenMessageIds.has(
+            messageId
+        )
     ) {
+        return;
+    }
+
+    adminFloatingSupportState.seenMessageIds.add(
+        messageId
+    );
+
+
+    /*
+     * ADMIN's own message never creates unread count.
+     */
+    const isAdmin =
+        sender === "ADMIN";
+
+
+    /*
+     * Check whether this exact conversation is
+     * currently visible to the admin.
+     */
+    const isCurrentChatVisible =
+        adminFloatingSupportState.open === true &&
+        adminFloatingSupportState.currentRequestId ===
+            requestId &&
+        document.getElementById(
+            "adminFloatingSupportMessages"
+        );
+
+
+    /*
+     * -----------------------------------------------------
+     * CURRENTLY OPEN CONVERSATION
+     * -----------------------------------------------------
+     */
+    if (isCurrentChatVisible) {
+
+        adminFloatingSupportState.currentMessages.push(
+            message
+        );
 
         const container =
             document.getElementById(
                 "adminFloatingSupportMessages"
             );
 
-
         if (!container) {
             return;
         }
-
 
         const empty =
             container.querySelector(
                 ".admin-floating-support-no-messages"
             );
 
-
         if (empty) {
             empty.remove();
         }
-
-
-        const sender =
-            String(
-                message.sender_type || ""
-            ).toUpperCase();
-
-
-        const isAdmin =
-            sender === "ADMIN";
 
 
         const isBot =
@@ -3652,7 +3694,6 @@ function addAdminFloatingRealtimeMessage(
         const wrapper =
             document.createElement("div");
 
-
         wrapper.className =
             `
                 admin-floating-support-message
@@ -3660,9 +3701,8 @@ function addAdminFloatingRealtimeMessage(
                 ${isBot ? "bot" : "technician"}
             `;
 
-
         wrapper.dataset.floatingMessageId =
-            message.id;
+            messageId;
 
 
         wrapper.innerHTML = `
@@ -3710,41 +3750,54 @@ function addAdminFloatingRealtimeMessage(
             wrapper
         );
 
-
         scrollAdminFloatingSupportMessages();
 
+        return;
+    }
 
-    } else {
+
+    /*
+     * -----------------------------------------------------
+     * CONVERSATION IS NOT CURRENTLY OPEN
+     * -----------------------------------------------------
+     *
+     * Only technician messages create unread count.
+     * Admin messages must never create unread count.
+     */
+    if (sender === "TECHNICIAN") {
 
         const currentUnread =
             Number(
                 adminFloatingSupportState.unread.get(
-                    message.support_request_id
+                    requestId
                 ) || 0
             );
 
-
         adminFloatingSupportState.unread.set(
-            message.support_request_id,
+            requestId,
             currentUnread + 1
         );
-
 
         updateAdminFloatingSupportBadge();
 
 
+        /*
+         * If the popup is showing the request LIST,
+         * refresh the list so the per-request unread
+         * count appears immediately.
+         *
+         * If a chat is currently open, do NOT replace
+         * that chat with the request list.
+         */
         if (
-            adminFloatingSupportState.open
+            adminFloatingSupportState.open &&
+            !adminFloatingSupportState.currentRequestId
         ) {
-
             renderAdminFloatingSupportRequestList(
                 adminFloatingSupportState.requests
             );
-
         }
-
     }
-
 }
 
 
@@ -3761,198 +3814,6 @@ async function initAdminFloatingSupportRealtime() {
         return;
     }
 
-    console.log(
-        "🔵 ADMIN REALTIME: initializing..."
-    );
-
-    /* -----------------------------------------------------
-       1. CHECK AUTH SESSION
-       ----------------------------------------------------- */
-
-    try {
-
-        const {
-            data: sessionData,
-            error: sessionError
-        } = await s.auth.getSession();
-
-        console.log(
-            "🔐 ADMIN REALTIME SESSION:",
-            sessionData?.session
-                ? {
-                    user_id:
-                        sessionData.session.user?.id || null,
-
-                    email:
-                        sessionData.session.user?.email || null,
-
-                    has_access_token:
-                        !!sessionData.session.access_token
-                }
-                : null
-        );
-
-        if (sessionError) {
-
-            console.error(
-                "❌ ADMIN REALTIME SESSION ERROR:",
-                sessionError
-            );
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "❌ ADMIN REALTIME SESSION CHECK FAILED:",
-            error
-        );
-
-    }
-
-
-    /* -----------------------------------------------------
-       2. DIRECT SELECT TEST
-       ----------------------------------------------------- */
-
-    try {
-
-        const {
-            data,
-            error
-        } = await s
-            .from("support_messages")
-            .select(
-                "id, support_request_id, sender_type, message, created_at"
-            )
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            )
-            .limit(5);
-
-        console.log(
-            "📥 ADMIN DIRECT SELECT DATA:",
-            data
-        );
-
-        console.log(
-            "📥 ADMIN DIRECT SELECT ERROR:",
-            error
-        );
-
-    } catch (error) {
-
-        console.error(
-            "❌ ADMIN DIRECT SELECT FAILED:",
-            error
-        );
-
-    }
-
-    /* -----------------------------------------------------
-   2B. REALTIME / DATABASE DIAGNOSTIC
-   ----------------------------------------------------- */
-
-try {
-
-    const {
-        data: {
-            user
-        } = {},
-        error: userError
-    } = await s.auth.getUser();
-
-    console.log(
-        "👤 ADMIN AUTH USER:",
-        user
-    );
-
-    console.log(
-        "🌐 ADMIN SUPABASE URL:",
-        c.supabaseUrl
-    );
-
-try {
-    const { data: adminRows, error: adminRowsError } = await s
-        .from("admin_users")
-        .select("user_id")
-        .eq("user_id", user?.id || "");
-
-    console.log("👑 ADMIN USERS DIRECT SELECT:", adminRows);
-    console.log("👑 ADMIN USERS DIRECT SELECT ERROR:", adminRowsError);
-} catch (error) {
-    console.error("❌ ADMIN USERS DIRECT SELECT FAILED:", error);
-}
-
-    console.log(
-        "🗄️ ADMIN DATABASE TEST: checking support_requests..."
-    );
-
-    const {
-        data: requests,
-        error: requestsError
-    } = await s
-        .from("support_requests")
-        .select(
-            "id, support_token, technician_id, status, created_at"
-        )
-        .order(
-            "created_at",
-            {
-                ascending: false
-            }
-        )
-        .limit(5);
-
-    console.log(
-        "📋 ADMIN SUPPORT REQUESTS:",
-        requests
-    );
-
-    console.log(
-        "📋 ADMIN SUPPORT REQUESTS ERROR:",
-        requestsError
-    );
-
-
-    console.log(
-        "💬 ADMIN SUPPORT MESSAGES COUNT TEST..."
-    );
-
-    const {
-        count: messageCount,
-        error: countError
-    } = await s
-        .from("support_messages")
-        .select(
-            "*",
-            {
-                count: "exact",
-                head: true
-            }
-        );
-
-    console.log(
-        "💬 SUPPORT MESSAGE COUNT:",
-        messageCount
-    );
-
-    console.log(
-        "💬 SUPPORT MESSAGE COUNT ERROR:",
-        countError
-    );
-
-} catch (error) {
-
-    console.error(
-        "❌ ADMIN DATABASE DIAGNOSTIC FAILED:",
-        error
-    );
-
-}
 
     /* -----------------------------------------------------
        3. REMOVE OLD REALTIME CHANNEL
@@ -3999,134 +3860,49 @@ try {
         channelName
     );
 
-    const channel = s
-        .channel(channelName)
+   const channel = s
+    .channel(channelName)
+    .on(
+        "postgres_changes",
+        {
+            event: "INSERT",
+            schema: "public",
+            table: "support_messages"
+        },
+        payload => {
 
-        .on(
-            "postgres_changes",
-            {
-                event: "INSERT",
-                schema: "public",
-                table: "support_messages"
-            },
-            payload => {
-
-                console.group(
-                    "🚨 ADMIN REALTIME INSERT EVENT"
-                );
-
-                console.log(
-                    "📦 FULL PAYLOAD:",
-                    payload
-                );
-
-                console.log(
-                    "🆕 NEW ROW:",
+            if (
+                typeof addAdminFloatingRealtimeMessage ===
+                "function"
+            ) {
+                addAdminFloatingRealtimeMessage(
                     payload?.new
                 );
-
-                console.log(
-                    "🆔 MESSAGE ID:",
-                    payload?.new?.id
-                );
-
-                console.log(
-                    "🆔 SUPPORT REQUEST ID:",
-                    payload?.new?.support_request_id
-                );
-
-                console.log(
-                    "👤 SENDER TYPE:",
-                    payload?.new?.sender_type
-                );
-
-                console.log(
-                    "💬 MESSAGE:",
-                    payload?.new?.message
-                );
-
-                console.log(
-                    "🕒 CREATED AT:",
-                    payload?.new?.created_at
-                );
-
-                console.groupEnd();
-
-
-                /* -----------------------------------------
-                   SEND EVENT TO FLOATING CHAT
-                   ----------------------------------------- */
-
-                if (
-                    typeof addAdminFloatingRealtimeMessage ===
-                    "function"
-                ) {
-
-                    console.log(
-                        "💬 ADMIN REALTIME: sending message to UI..."
-                    );
-
-                    addAdminFloatingRealtimeMessage(
-                        payload?.new
-                    );
-
-                } else {
-
-                    console.warn(
-                        "⚠️ ADMIN REALTIME: addAdminFloatingRealtimeMessage() not found."
-                    );
-
-                }
-
             }
-        )
 
-        .subscribe(
-            status => {
+        }
+    )
+    .subscribe(status => {
 
-                console.log(
-                    "📡 ADMIN SUPPORT REALTIME STATUS:",
-                    status
-                );
+        if (status === "CHANNEL_ERROR") {
+            console.error(
+                "❌ ADMIN REALTIME: CHANNEL_ERROR"
+            );
+        }
 
-                if (status === "SUBSCRIBED") {
+        if (status === "TIMED_OUT") {
+            console.error(
+                "⏱️ ADMIN REALTIME: TIMED_OUT"
+            );
+        }
 
-                    console.log(
-                        "✅ ADMIN REALTIME: channel SUBSCRIBED successfully."
-                    );
+        if (status === "CLOSED") {
+            console.warn(
+                "🔴 ADMIN REALTIME: channel CLOSED"
+            );
+        }
 
-                    console.log(
-                        "👂 ADMIN REALTIME: listening for INSERT on public.support_messages"
-                    );
-
-                }
-
-                if (status === "CHANNEL_ERROR") {
-
-                    console.error(
-                        "❌ ADMIN REALTIME: CHANNEL_ERROR"
-                    );
-
-                }
-
-                if (status === "TIMED_OUT") {
-
-                    console.error(
-                        "⏱️ ADMIN REALTIME: TIMED_OUT"
-                    );
-
-                }
-
-                if (status === "CLOSED") {
-
-                    console.warn(
-                        "🔴 ADMIN REALTIME: channel CLOSED"
-                    );
-
-                }
-
-            }
-        );
+    });
 
 
     /* -----------------------------------------------------
@@ -4135,36 +3911,6 @@ try {
 
     window.__adminSupportRealtimeChannel =
         channel;
-
-        window.__adminRealtimeDebugChannel = s
-    .channel(
-        "admin-support-debug-" +
-        Date.now()
-    )
-    .on(
-        "postgres_changes",
-        {
-            event: "*",
-            schema: "public",
-            table: "support_messages"
-        },
-        payload => {
-
-            console.log(
-                "🚨🚨🚨 ADMIN DEBUG ANY EVENT 🚨🚨🚨",
-                payload
-            );
-
-        }
-    )
-    .subscribe(status => {
-
-        console.log(
-            "🧪 ADMIN DEBUG REALTIME STATUS:",
-            status
-        );
-
-    });
 
     console.log(
         "✅ ADMIN REALTIME: initialization complete."

@@ -7003,16 +7003,23 @@ async function startSupportChatRealtime(
     supportChatRealtimeChannel =
     sb
         .channel(channelName)
-            .on(
-                "postgres_changes",
-                {
-                    event: "INSERT",
-                    schema: "public",
-                    table: "support_messages",
-                    filter:
-                        `support_request_id=eq.${id}`
-                },
-                payload => {
+            
+.on(
+    "postgres_changes",
+    {
+        event: "INSERT",
+        schema: "public",
+        table: "support_messages"
+    },
+    payload => {
+        console.log(
+            "🔴 TECHNICIAN REALTIME PAYLOAD:",
+            payload
+        );
+
+        handleSupportChatRealtimeMessage(payload);
+    }
+)
 
                      console.log(
             "🔴 TECHNICIAN REALTIME PAYLOAD:",

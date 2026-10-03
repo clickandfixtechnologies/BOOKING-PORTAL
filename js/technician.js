@@ -7485,6 +7485,16 @@ function showSupportChatRequestPicker(
                                     )}
                                 </span>
 
+                                ${
+    unreadCount > 0
+        ? `
+            <span class="tech-support-chat-unread-badge">
+                ${unreadCount}
+            </span>
+          `
+        : ""
+}
+
                                 <small>
                                     ${escapeHtml(
                                         supportType
@@ -7758,6 +7768,11 @@ function renderSupportChat(
     const supportToken =
         request?.support_token ||
         "—";
+
+        const unreadCount = Math.max(
+    0,
+    Number(request?.unread_count) || 0
+);
 
     const supportType =
         formatSupportType(

@@ -7405,128 +7405,123 @@ function showSupportChatLoading() {
 
 }
 
+
 /* =========================================================
    SUPPORT CHAT
    REQUEST PICKER
    ========================================================= */
 
-function showSupportChatRequestPicker(
-    requests
-) {
+function showSupportChatRequestPicker(requests) {
 
     removeSupportChatModal();
 
-    const modal =
-        document.createElement("div");
+    const modal = document.createElement("div");
 
-    modal.id =
-        "techSupportChatModal";
+    modal.id = "techSupportChatModal";
+    modal.className = "tech-support-chat-modal";
 
-    modal.className =
-        "tech-support-chat-modal";
+    const requestCards = requests
+        .map(request => {
 
-    const requestCards =
-        requests
-            .map(
-                request => {
+            const status = String(
+                request?.status || "OPEN"
+            ).toUpperCase();
 
-                    const status =
-                        String(
-                            request?.status ||
-                            "OPEN"
-                        ).toUpperCase();
+            const appointment =
+                request?.appointment_reference ||
+                request?.appointment_code ||
+                "Service Request";
 
-                    const appointment =
-                        request?.appointment_reference ||
-                        request?.appointment_code ||
-                        "Service Request";
+            const supportToken =
+                request?.support_token || "—";
 
-                    const supportToken =
-                        request?.support_token ||
-                        "—";
+            // Unread message count for this request
+            const unreadCount = Math.max(
+                0,
+                Number(request?.unread_count) || 0
+            );
 
-                    const supportType =
-                        formatSupportType(
-                            request?.support_type
-                        );
+            const supportType = formatSupportType(
+                request?.support_type
+            );
 
-                    return `
+            return `
 
-                        <button
-                            type="button"
-                            class="tech-support-chat-request"
-                            data-support-request-id="${escapeHtml(
-                                request.id
-                            )}"
+                <button
+                    type="button"
+                    class="tech-support-chat-request"
+                    data-support-request-id="${escapeHtml(
+                        request.id
+                    )}"
+                >
+
+                    <div
+                        class="tech-support-chat-request-icon"
+                    >
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+
+                    <div
+                        class="tech-support-chat-request-content"
+                    >
+
+                        <div
+                            class="tech-support-chat-request-top"
                         >
 
-                            <div
-                                class="tech-support-chat-request-icon"
-                            >
-                                <i class="fa-solid fa-comments"></i>
-                            </div>
+                            <strong>
+                                ${escapeHtml(appointment)}
+                            </strong>
 
-                            <div
-                                class="tech-support-chat-request-content"
-                            >
+                            <div class="tech-support-chat-request-indicators">
 
-                                <div
-                                    class="tech-support-chat-request-top"
+                                <span
+                                    class="
+                                        tech-support-chat-status
+                                        ${getSupportStatusClass(status)}
+                                    "
                                 >
-
-                                    <strong>
-                                        ${escapeHtml(
-                                            appointment
-                                        )}
-                                    </strong>
-
-                                    <span
-                                        class="
-                                            tech-support-chat-status
-                                            ${getSupportStatusClass(status)}
-                                        "
-                                    >
-                                        ${escapeHtml(status)}
-                                    </span>
-
-                                </div>
-
-                                <span>
-                                    ${escapeHtml(
-                                        supportToken
-                                    )}
+                                    ${escapeHtml(status)}
                                 </span>
 
                                 ${
-    unreadCount > 0
-        ? `
-            <span class="tech-support-chat-unread-badge">
-                ${unreadCount}
-            </span>
-          `
-        : ""
-}
-
-                                <small>
-                                    ${escapeHtml(
-                                        supportType
-                                    )}
-                                </small>
+                                    unreadCount > 0
+                                        ? `
+                                            <span
+                                                class="tech-support-chat-unread-badge"
+                                                aria-label="${unreadCount} unread messages"
+                                            >
+                                                ${unreadCount}
+                                            </span>
+                                        `
+                                        : ""
+                                }
 
                             </div>
 
-                            <i
-                                class="fa-solid fa-chevron-right
-                                       tech-support-chat-request-arrow"
-                            ></i>
+                        </div>
 
-                        </button>
+                        <span>
+                            ${escapeHtml(supportToken)}
+                        </span>
 
-                    `;
+                        <small>
+                            ${escapeHtml(supportType)}
+                        </small>
 
-                }
-            )
-            .join("");
+                    </div>
+
+                    <i
+                        class="fa-solid fa-chevron-right
+                               tech-support-chat-request-arrow"
+                    ></i>
+
+                </button>
+
+            `;
+
+        })
+        .join("");
 
     modal.innerHTML = `
 
@@ -7590,34 +7585,28 @@ function showSupportChatRequestPicker(
     bindSupportChatClose(modal);
 
     modal
-        .querySelectorAll(
-            "[data-support-request-id]"
-        )
-        .forEach(
-            button => {
+        .querySelectorAll("[data-support-request-id]")
+        .forEach(button => {
 
-                button.addEventListener(
-                    "click",
-                    async () => {
+            button.addEventListener(
+                "click",
+                async () => {
 
-                        const requestId =
-                            button.getAttribute(
-                                "data-support-request-id"
-                            );
-
-                        if (!requestId) {
-                            return;
-                        }
-
-                        await openSupportRequestChat(
-                            requestId
+                    const requestId =
+                        button.getAttribute(
+                            "data-support-request-id"
                         );
 
+                    if (!requestId) {
+                        return;
                     }
-                );
 
-            }
-        );
+                    await openSupportRequestChat(requestId);
+
+                }
+            );
+
+        });
 
 }
 

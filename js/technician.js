@@ -2,11 +2,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const c = window.CFX_CONFIG || {};
 
-console.log("TECHNICIAN SUPABASE CONFIG:", {
-    supabaseUrl: c.supabaseUrl,
-    hasAnonKey: !!c.supabaseAnonKey
-});
-
 const sb =
     c.supabaseUrl &&
     createClient(

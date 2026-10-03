@@ -3988,11 +3988,41 @@ async function loadSupport() {
                     </a>
 
                 </div>
+       <!-- =================================================
+                 TECHNICIAN FLOATING SUPPORT
+                       PHASE 1
+                    UI SHELL ONLY
+         ================================================= -->
 
-            </div>
+<div
+    id="technicianFloatingSupport"
+    class="technician-floating-support"
+>
 
-        </section>
-    `;
+    <button
+        type="button"
+        id="technicianFloatingSupportButton"
+        class="technician-floating-support-button"
+        aria-label="Open Support Chat"
+        title="Support Chat"
+    >
+
+        <i class="fa-solid fa-headset"></i>
+
+        <span
+            id="technicianFloatingSupportBadge"
+            class="technician-floating-support-badge"
+            hidden
+        >
+            0
+        </span>
+
+    </button>
+
+</div>
+
+</section>
+`;
 
     /* =========================================================
    SUPPORT CHAT

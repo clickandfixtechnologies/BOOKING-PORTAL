@@ -1732,6 +1732,7 @@ async function supportMessages(
   }
 
 
+  
   if (!supportRequest) {
 
     throw new Error(
@@ -1739,6 +1740,32 @@ async function supportMessages(
     );
 
   }
+
+
+  /* =====================================================
+     MARK ADMIN MESSAGES AS READ BY TECHNICIAN
+     MY CODE STARTS HERE
+     ===================================================== */
+
+  const { error: readError } = await db
+    .from("support_messages")
+    .update({
+      read_at_technician: new Date().toISOString()
+    })
+    .eq("support_request_id", requestId)
+    .eq("sender_type", "ADMIN")
+    .is("read_at_technician", null);
+
+  if (readError) {
+    console.error(
+      "TECHNICIAN MARK READ ERROR:",
+      readError.message
+    );
+
+    throw new Error("MESSAGES_MARK_READ_FAILED");
+  }
+
+  /* MY CODE ENDS HERE */
 
 
   /*

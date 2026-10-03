@@ -7009,6 +7009,11 @@ async function startSupportChatRealtime(
                 },
                 payload => {
 
+                     console.log(
+            "🔴 TECHNICIAN REALTIME PAYLOAD:",
+            payload
+        );
+
                     handleSupportChatRealtimeMessage(
                         payload
                     );

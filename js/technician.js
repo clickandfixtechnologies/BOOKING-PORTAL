@@ -7004,13 +7004,50 @@ async function startSupportChatRealtime(requestId) {
                 },
                 (payload) => {
 
+                    /*
+                     * Mobile debug only
+                     */
+                    if (
+                        new URLSearchParams(
+                            window.location.search
+                        ).get("debug") === "1"
+                    ) {
+                        console.log(
+                            "[Realtime] New message received:",
+                            payload
+                        );
+                    }
+
                     handleSupportChatRealtimeMessage(
                         payload
                     );
 
                 }
             )
-            .subscribe();
+            .subscribe((status, error) => {
+
+                /*
+                 * Mobile debug only
+                 */
+                if (
+                    new URLSearchParams(
+                        window.location.search
+                    ).get("debug") === "1"
+                ) {
+                    console.log(
+                        "[Realtime] Status:",
+                        status
+                    );
+
+                    if (error) {
+                        console.error(
+                            "[Realtime] Error:",
+                            error
+                        );
+                    }
+                }
+
+            });
 
 }
 

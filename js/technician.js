@@ -4010,6 +4010,23 @@ document
         }
     );
 
+    /* =========================================================
+   TECHNICIAN FLOATING SUPPORT
+   OPEN SUPPORT CHAT
+   ========================================================= */
+
+document
+    .getElementById(
+        "technicianFloatingSupportButton"
+    )
+    ?.addEventListener(
+        "click",
+        async () => {
+
+            await openSupportChat();
+
+        }
+    );
 
     /* =========================================================
        RAISE SUPPORT REQUEST

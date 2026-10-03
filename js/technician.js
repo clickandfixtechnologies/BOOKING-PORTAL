@@ -6995,6 +6995,11 @@ async function startSupportChatRealtime(
     const channelName =
         `support-chat-${id}`;
 
+        console.log(
+    "TECHNICIAN REALTIME REQUEST ID:",
+    id
+);
+
     supportChatRealtimeChannel =
     sb
         .channel(channelName)

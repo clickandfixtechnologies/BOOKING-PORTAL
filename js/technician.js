@@ -7243,16 +7243,15 @@ async function openSupportChat() {
                 ? response.requests
                 : [];
 
-                console.log(
+                
+console.log(
     "SUPPORT UNREAD DEBUG:",
     {
         total: response?.total_unread_count,
-        requests: response?.requests?.map(
-            request => ({
-                id: request.id,
-                unread_count: request.unread_count
-            })
-        )
+        requests: response?.requests?.map(request => ({
+            id: request.id,
+            unread_count: request.unread_count
+        }))
     }
 );
 

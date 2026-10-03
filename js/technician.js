@@ -7018,23 +7018,16 @@ function handleSupportChatRealtimeMessage(payload) {
 
     appendSupportChatMessageIfNew(message);
 
-        /*
-     * Refresh floating unread badge only for
-     * incoming support/bot messages.
-     *
-     * Technician's own messages must not
-     * increase unread count.
-     */
     const senderType =
-        String(
-            message?.sender_type || ""
-        ).toUpperCase();
+    String(
+        message?.sender_type || ""
+    ).toUpperCase();
 
-    if (senderType !== "TECHNICIAN") {
+if (senderType !== "TECHNICIAN") {
 
-        refreshTechnicianSupportUnreadBadge();
+    incrementTechnicianSupportUnreadBadge();
 
-    }
+}
 }
 
 /* =========================================================
@@ -7125,63 +7118,39 @@ function appendSupportChatMessageIfNew(
 
 /* =========================================================
    SUPPORT CHAT
-   REFRESH FLOATING UNREAD BADGE
+   LIVE UNREAD BADGE INCREMENT
    ========================================================= */
 
-async function refreshTechnicianSupportUnreadBadge() {
+function incrementTechnicianSupportUnreadBadge() {
 
-    try {
-
-        const response =
-            await api(
-                "support_my_requests"
-            );
-
-        const totalUnreadCount =
-            Math.max(
-                0,
-                Number(
-                    response?.total_unread_count
-                ) || 0
-            );
-
-        const floatingSupportBadge =
-            document.getElementById(
-                "technicianFloatingSupportBadge"
-            );
-
-        if (!floatingSupportBadge) {
-            return;
-        }
-
-        if (totalUnreadCount > 0) {
-
-            floatingSupportBadge.textContent =
-                totalUnreadCount > 99
-                    ? "99+"
-                    : String(totalUnreadCount);
-
-            floatingSupportBadge.hidden =
-                false;
-
-        } else {
-
-            floatingSupportBadge.textContent =
-                "0";
-
-            floatingSupportBadge.hidden =
-                true;
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "Support unread badge refresh failed:",
-            error
+    const badge =
+        document.getElementById(
+            "technicianFloatingSupportBadge"
         );
 
+    if (!badge) {
+        return;
     }
+
+    const currentCount =
+        Math.max(
+            0,
+            Number(
+                String(
+                    badge.textContent || "0"
+                ).replace("+", "")
+            ) || 0
+        );
+
+    const newCount =
+        currentCount + 1;
+
+    badge.textContent =
+        newCount > 99
+            ? "99+"
+            : String(newCount);
+
+    badge.hidden = false;
 
 }
 

@@ -1298,8 +1298,76 @@ async function supportMyRequests(
   const requests =
     data || [];
 
+      /* =====================================================
+     UNREAD ADMIN MESSAGES
+     COUNT ONLY MESSAGES NOT YET READ BY TECHNICIAN
+     ===================================================== */
 
-  return {
+  const requestIds =
+    requests.map(
+      (request: any) => request.id
+    );
+
+  const unreadCounts =
+    new Map<string, number>();
+
+  if (requestIds.length > 0) {
+
+    const {
+      data: unreadMessages,
+      error: unreadError
+    } = await db
+      .from("support_messages")
+      .select("support_request_id")
+      .in(
+        "support_request_id",
+        requestIds
+      )
+      .eq(
+        "sender_type",
+        "ADMIN"
+      )
+      .is(
+        "read_at_technician",
+        null
+      );
+
+    if (unreadError) {
+
+      console.error(
+        "SUPPORT UNREAD COUNT ERROR:",
+        unreadError.message
+      );
+
+      throw new Error(
+        "SUPPORT_UNREAD_COUNT_FAILED"
+      );
+    }
+
+    for (const message of unreadMessages || []) {
+
+      const requestId =
+        message.support_request_id;
+
+      unreadCounts.set(
+        requestId,
+        (unreadCounts.get(requestId) || 0) + 1
+      );
+    }
+  }
+
+  const totalUnreadCount =
+    Array.from(
+      unreadCounts.values()
+    ).reduce(
+      (total, count) => total + count,
+      0
+    );
+
+    return {
+
+    total_unread_count:
+      totalUnreadCount,
 
     requests:
       requests.map(
@@ -1320,6 +1388,8 @@ async function supportMyRequests(
 
             id:
               request.id,
+                          unread_count:
+              unreadCounts.get(request.id) || 0,
 
             support_token:
               request.support_token,

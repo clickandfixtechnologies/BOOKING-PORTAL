@@ -7327,16 +7327,74 @@ if (floatingSupportBadge) {
          */
 
         if (
-            activeRequests.length === 1
-        ) {
+    activeRequests.length === 1
+) {
 
-            await openSupportRequestChat(
-                activeRequests[0].id
+    await openSupportRequestChat(
+        activeRequests[0].id
+    );
+
+    /* =====================================================
+       REFRESH FLOATING SUPPORT UNREAD BADGE
+       AFTER MESSAGE READ
+       ===================================================== */
+
+    try {
+
+        const updatedResponse =
+            await api(
+                "support_my_requests"
             );
 
-            return;
+        const updatedUnreadCount =
+            Math.max(
+                0,
+                Number(
+                    updatedResponse?.total_unread_count
+                ) || 0
+            );
+
+        const updatedFloatingBadge =
+            document.getElementById(
+                "technicianFloatingSupportBadge"
+            );
+
+        if (updatedFloatingBadge) {
+
+            if (updatedUnreadCount > 0) {
+
+                updatedFloatingBadge.textContent =
+                    updatedUnreadCount > 99
+                        ? "99+"
+                        : String(updatedUnreadCount);
+
+                updatedFloatingBadge.hidden =
+                    false;
+
+            } else {
+
+                updatedFloatingBadge.textContent =
+                    "0";
+
+                updatedFloatingBadge.hidden =
+                    true;
+
+            }
 
         }
+
+    } catch (error) {
+
+        console.warn(
+            "Support unread badge refresh after chat open failed:",
+            error
+        );
+
+    }
+
+    return;
+
+}
 
         /*
          * Multiple active requests.

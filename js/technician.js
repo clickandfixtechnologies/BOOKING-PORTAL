@@ -6964,6 +6964,24 @@ async function startSupportChatRealtime(
 
     await stopSupportChatRealtime();
 
+        /* =====================================================
+       SUPABASE AUTH READINESS
+       REQUIRED BEFORE REALTIME CHANNEL
+       ===================================================== */
+
+    try {
+
+        await sb.auth.getUser();
+
+    } catch (error) {
+
+        console.warn(
+            "⚠️ TECHNICIAN AUTH READINESS CHECK FAILED:",
+            error
+        );
+
+    }
+
     supportChatRealtimeRequestId =
         id;
 

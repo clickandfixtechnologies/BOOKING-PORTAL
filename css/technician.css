@@ -7901,38 +7901,25 @@ i[class*="fa-"]{
 }
 
 /* =========================================================
-   TECHNICIAN FLOATING SUPPORT
-   MOBILE SIZE FIX
+   TECHNICIAN SUPPORT CHAT
+   MOBILE CHAT BOX SIZE FIX
    ========================================================= */
 
 @media (max-width: 600px) {
 
-    .technician-floating-support {
-        right: 14px;
-        bottom: 14px;
+    .tech-support-chat-modal {
+        padding: 12px !important;
     }
 
-    .technician-floating-support-button {
-        width: 46px !important;
-        height: 46px !important;
+    .tech-support-chat-dialog {
+        width: calc(100vw - 28px) !important;
+        max-width: 420px !important;
 
-        min-width: 46px !important;
-        min-height: 46px !important;
+        height: 70vh !important;
+        max-height: 620px !important;
 
-        font-size: 16px !important;
-    }
-
-    .technician-floating-support-badge {
-        top: -3px;
-        right: -3px;
-
-        min-width: 18px !important;
-        height: 18px !important;
-
-        padding: 0 4px;
-
-        font-size: 9px !important;
+        margin: 0 auto !important;
+        border-radius: 18px !important;
     }
 
 }
-

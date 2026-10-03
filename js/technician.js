@@ -8561,7 +8561,7 @@ function bindSupportChatClose(
 
 /* =========================================================
    SUPPORT CHAT
-   REMOVE MODAL + REALTIME CLEANUP
+   REMOVE MODAL
    ========================================================= */
 
 function removeSupportChatModal() {
@@ -8571,22 +8571,6 @@ function removeSupportChatModal() {
             "techSupportChatModal"
         )
         ?.remove();
-
-    /*
-     * Cleanup realtime asynchronously.
-     */
-
-    stopSupportChatRealtime()
-        .catch(
-            error => {
-
-                console.warn(
-                    "Support chat realtime cleanup error:",
-                    error
-                );
-
-            }
-        );
 
 }
 

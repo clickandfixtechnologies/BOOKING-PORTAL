@@ -6934,120 +6934,81 @@ async function stopSupportChatRealtime() {
 
 }
 
+
 /* =========================================================
    SUPPORT CHAT REALTIME
    SUBSCRIBE
    ========================================================= */
 
-async function startSupportChatRealtime(
-    requestId
-) {
+async function startSupportChatRealtime(requestId) {
 
-    const id =
-        String(
-            requestId || ""
-        ).trim();
+    const id = String(requestId || "").trim();
 
     if (!id) {
-
-        console.warn(
-            "Support realtime: Missing request ID."
-        );
-
+        console.warn("Support realtime: Missing request ID.");
         return;
-
     }
 
-    /*
-     * Stop any previous support chat channel.
-     */
-
+    // Stop any previous support chat channel.
     await stopSupportChatRealtime();
 
-        /* =====================================================
-       SUPABASE AUTH READINESS
-       REQUIRED BEFORE REALTIME CHANNEL
-       ===================================================== */
-
+    // Check Supabase authentication readiness.
     try {
+        const { data, error } = await sb.auth.getUser();
 
-        await sb.auth.getUser();
-
+        if (error) {
+            console.warn(
+                "TECHNICIAN AUTH READINESS CHECK FAILED:",
+                error
+            );
+        } else if (!data?.user) {
+            console.warn("TECHNICIAN: No authenticated user found.");
+        }
     } catch (error) {
-
         console.warn(
-            "⚠️ TECHNICIAN AUTH READINESS CHECK FAILED:",
+            "TECHNICIAN AUTH READINESS CHECK FAILED:",
             error
         );
-
     }
 
-    supportChatRealtimeRequestId =
-        id;
+    supportChatRealtimeRequestId = id;
+    supportChatRealtimeReady = false;
 
-    supportChatRealtimeReady =
-        false;
+    const channelName = `support-chat-${id}`;
 
-    /*
-     * Create a unique channel name.
-     */
+    console.log("TECHNICIAN REALTIME REQUEST ID:", id);
 
-    const channelName =
-        `support-chat-${id}`;
-
-        console.log(
-    "TECHNICIAN REALTIME REQUEST ID:",
-    id
-);
-
-    supportChatRealtimeChannel =
-    sb
+    supportChatRealtimeChannel = sb
         .channel(channelName)
-            
-.on(
-    "postgres_changes",
-    {
-        event: "INSERT",
-        schema: "public",
-        table: "support_messages"
-    },
-    payload => {
-        console.log(
-            "🔴 TECHNICIAN REALTIME PAYLOAD:",
-            payload
-        );
+        .on(
+            "postgres_changes",
+            {
+                event: "INSERT",
+                schema: "public",
+                table: "support_messages"
+            },
+            (payload) => {
+                console.log(
+                    "🔴 TECHNICIAN REALTIME PAYLOAD:",
+                    payload
+                );
 
-        handleSupportChatRealtimeMessage(payload);
-    }
-)
+                handleSupportChatRealtimeMessage(payload);
+            }
+        )
+        .subscribe((status, err) => {
+            console.log(
+                "TECHNICIAN REALTIME STATUS:",
+                status
+            );
 
-                     console.log(
-            "🔴 TECHNICIAN REALTIME PAYLOAD:",
-            payload
-        );
-
-                    handleSupportChatRealtimeMessage(
-                        payload
-                    );
-
-                }
-            )
-            
-            .subscribe((status, err) => {
-    console.log(
-        "TECHNICIAN REALTIME STATUS:",
-        status
-    );
-
-    if (err) {
-        console.error(
-            "TECHNICIAN REALTIME ERROR:",
-            err
-        );
-    }
-
-});
-
+            if (err) {
+                console.error(
+                    "TECHNICIAN REALTIME ERROR:",
+                    err
+                );
+            }
+        });
 }
 
 /* =========================================================

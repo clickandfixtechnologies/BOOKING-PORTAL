@@ -1,37 +1,3 @@
-/* =========================================================
-   OPTIONAL MOBILE DEBUG MODE
-   Enable only with: ?debug=1
-   ========================================================= */
-
-(function initMobileDebugMode() {
-
-    const params = new URLSearchParams(window.location.search);
-
-    if (params.get("debug") !== "1") {
-        return;
-    }
-
-    const script = document.createElement("script");
-
-    script.src = "https://cdn.jsdelivr.net/npm/eruda";
-    script.async = true;
-
-    script.onload = function () {
-
-        if (window.eruda) {
-            window.eruda.init();
-        }
-
-    };
-
-    script.onerror = function () {
-        console.error("Mobile debug console failed to load.");
-    };
-
-    document.head.appendChild(script);
-
-})();
-
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const c = window.CFX_CONFIG || {};
@@ -7004,50 +6970,13 @@ async function startSupportChatRealtime(requestId) {
                 },
                 (payload) => {
 
-                    /*
-                     * Mobile debug only
-                     */
-                    if (
-                        new URLSearchParams(
-                            window.location.search
-                        ).get("debug") === "1"
-                    ) {
-                        console.log(
-                            "[Realtime] New message received:",
-                            payload
-                        );
-                    }
-
                     handleSupportChatRealtimeMessage(
                         payload
                     );
 
                 }
             )
-            .subscribe((status, error) => {
-
-                /*
-                 * Mobile debug only
-                 */
-                if (
-                    new URLSearchParams(
-                        window.location.search
-                    ).get("debug") === "1"
-                ) {
-                    console.log(
-                        "[Realtime] Status:",
-                        status
-                    );
-
-                    if (error) {
-                        console.error(
-                            "[Realtime] Error:",
-                            error
-                        );
-                    }
-                }
-
-            });
+            .subscribe();
 
 }
 

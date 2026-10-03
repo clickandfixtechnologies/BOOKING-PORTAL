@@ -9967,6 +9967,63 @@ signOut.onclick = async () => {
 
                 await load();
 
+/* =====================================================
+   INITIAL SUPPORT UNREAD BADGE
+   ===================================================== */
+
+try {
+
+    const response =
+        await api(
+            "support_my_requests"
+        );
+
+    const totalUnreadCount =
+        Math.max(
+            0,
+            Number(
+                response?.total_unread_count
+            ) || 0
+        );
+
+    const floatingSupportBadge =
+        document.getElementById(
+            "technicianFloatingSupportBadge"
+        );
+
+    if (floatingSupportBadge) {
+
+        if (totalUnreadCount > 0) {
+
+            floatingSupportBadge.textContent =
+                totalUnreadCount > 99
+                    ? "99+"
+                    : String(totalUnreadCount);
+
+            floatingSupportBadge.hidden =
+                false;
+
+        } else {
+
+            floatingSupportBadge.textContent =
+                "0";
+
+            floatingSupportBadge.hidden =
+                true;
+
+        }
+
+    }
+
+} catch (error) {
+
+    console.warn(
+        "Initial support unread badge refresh failed:",
+        error
+    );
+
+}
+
             }
 
         }

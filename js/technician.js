@@ -7123,7 +7123,67 @@ function appendSupportChatMessageIfNew(
 
 }
 
+/* =========================================================
+   SUPPORT CHAT
+   REFRESH FLOATING UNREAD BADGE
+   ========================================================= */
 
+async function refreshTechnicianSupportUnreadBadge() {
+
+    try {
+
+        const response =
+            await api(
+                "support_my_requests"
+            );
+
+        const totalUnreadCount =
+            Math.max(
+                0,
+                Number(
+                    response?.total_unread_count
+                ) || 0
+            );
+
+        const floatingSupportBadge =
+            document.getElementById(
+                "technicianFloatingSupportBadge"
+            );
+
+        if (!floatingSupportBadge) {
+            return;
+        }
+
+        if (totalUnreadCount > 0) {
+
+            floatingSupportBadge.textContent =
+                totalUnreadCount > 99
+                    ? "99+"
+                    : String(totalUnreadCount);
+
+            floatingSupportBadge.hidden =
+                false;
+
+        } else {
+
+            floatingSupportBadge.textContent =
+                "0";
+
+            floatingSupportBadge.hidden =
+                true;
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Support unread badge refresh failed:",
+            error
+        );
+
+    }
+
+}
 
 /* =========================================================
    SUPPORT CHAT

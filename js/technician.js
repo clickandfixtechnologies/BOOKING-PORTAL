@@ -6960,6 +6960,29 @@ async function startSupportChatRealtime(requestId) {
             error: authError
         } = await sb.auth.getUser();
 
+        
+const userId = authData?.user?.id;
+
+const { data: requestTest, error: requestError } = await sb
+    .from("support_requests")
+    .select("id, technician_id")
+    .eq("id", id);
+
+console.log("TECHNICIAN REQUEST ACCESS TEST:", {
+    data: requestTest,
+    error: requestError?.message || null
+});
+
+const { data: technicianTest, error: technicianError } = await sb
+    .from("technicians")
+    .select("id, auth_user_id, is_active")
+    .eq("auth_user_id", userId);
+
+console.log("TECHNICIAN PROFILE ACCESS TEST:", {
+    data: technicianTest,
+    error: technicianError?.message || null
+});
+
         console.log("TECHNICIAN AUTH CHECK:", {
             userId: authData?.user?.id || null,
             error: authError?.message || null

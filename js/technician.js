@@ -7029,15 +7029,20 @@ async function startSupportChatRealtime(
                     );
 
                     if (
-                        status === "SUBSCRIBED"
-                    ) {
+    status === "SUBSCRIBED"
+) {
 
-                        supportChatRealtimeReady =
-                            true;
+    /*
+     * Realtime channel is connected,
+     * but initial chat rendering may still
+     * be in progress.
+     *
+     * Keep realtime messages pending until
+     * openSupportRequestChat() finishes
+     * rendering the chat UI.
+     */
 
-                        flushSupportChatRealtimePending();
-
-                    }
+}
 
                 }
             );

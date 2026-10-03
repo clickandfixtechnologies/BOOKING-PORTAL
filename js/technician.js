@@ -6943,114 +6943,41 @@ async function stopSupportChatRealtime() {
 
 async function startSupportChatRealtime(requestId) {
 
-    const id = String(requestId || "").trim();
+    const id =
+        String(requestId || "").trim();
 
     if (!id) {
-        console.warn("Support realtime: Missing request ID.");
         return;
     }
 
-    // Stop any previous support chat channel.
     await stopSupportChatRealtime();
-
-    // Check authentication and message read access.
-    try {
-        const {
-            data: authData,
-            error: authError
-        } = await sb.auth.getUser();
-
-        
-const userId = authData?.user?.id;
-
-const { data: requestTest, error: requestError } = await sb
-    .from("support_requests")
-    .select("id, technician_id")
-    .eq("id", id);
-
-console.log("TECHNICIAN REQUEST ACCESS TEST:", {
-    data: requestTest,
-    error: requestError?.message || null
-});
-
-const { data: technicianTest, error: technicianError } = await sb
-    .from("technicians")
-    .select("id, auth_user_id, is_active")
-    .eq("auth_user_id", userId);
-
-console.log("TECHNICIAN PROFILE ACCESS TEST:", {
-    data: technicianTest,
-    error: technicianError?.message || null
-});
-
-        console.log("TECHNICIAN AUTH CHECK:", {
-            userId: authData?.user?.id || null,
-            error: authError?.message || null
-        });
-
-        const {
-            data: testMessages,
-            error: testError
-        } = await sb
-            .from("support_messages")
-            .select(
-                "id, support_request_id, sender_type, message"
-            )
-            .eq("support_request_id", id)
-            .order("created_at", { ascending: false })
-            .limit(3);
-
-        console.log("TECHNICIAN MESSAGE READ TEST:", {
-            messages: testMessages,
-            error: testError?.message || null
-        });
-
-    } catch (error) {
-        console.error(
-            "TECHNICIAN REALTIME DIAGNOSTIC:",
-            error
-        );
-    }
 
     supportChatRealtimeRequestId = id;
     supportChatRealtimeReady = false;
 
-    const channelName = `support-chat-${id}`;
+    const channelName =
+        `support-chat-${id}`;
 
-    console.log("TECHNICIAN REALTIME REQUEST ID:", id);
+    supportChatRealtimeChannel =
+        sb
+            .channel(channelName)
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "support_messages"
+                },
+                (payload) => {
 
-    // Subscribe to INSERT events temporarily without a filter.
-    supportChatRealtimeChannel = sb
-        .channel(channelName)
-        .on(
-            "postgres_changes",
-            {
-                event: "INSERT",
-                schema: "public",
-                table: "support_messages"
-            },
-            (payload) => {
-                console.log(
-                    "🔴 TECHNICIAN REALTIME PAYLOAD:",
-                    payload
-                );
+                    handleSupportChatRealtimeMessage(
+                        payload
+                    );
 
-                handleSupportChatRealtimeMessage(payload);
-            }
-        )
-        .subscribe((status, err) => {
-            console.log(
-                "TECHNICIAN REALTIME STATUS:",
-                status
-            );
+                }
+            )
+            .subscribe();
 
-            if (err) {
-                console.error(
-                    "TECHNICIAN REALTIME ERROR:",
-                    err
-                );
-            }
-        });
 }
 
 /* =========================================================

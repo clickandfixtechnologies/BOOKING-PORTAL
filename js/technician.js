@@ -6985,74 +6985,44 @@ async function startSupportChatRealtime(requestId) {
    MESSAGE HANDLER
    ========================================================= */
 
-function handleSupportChatRealtimeMessage(
-    payload
-) {
+function handleSupportChatRealtimeMessage(payload) {
 
-    const message =
-        payload?.new;
+    const message = payload?.new;
 
-    if (
-        !message ||
-        !message.id
-    ) {
-
+    if (!message?.id) {
         return;
-
     }
 
-    /*
-     * Extra safety:
-     * Ignore messages from another request.
-     */
-
     if (
-        String(
-            message.support_request_id || ""
-        ) !==
-        String(
-            supportChatRealtimeRequestId || ""
-        )
+        String(message.support_request_id) !==
+        String(supportChatRealtimeRequestId)
     ) {
-
         return;
-
     }
 
-    /*
-     * If initial chat rendering has not completed,
-     * temporarily hold the realtime message.
-     */
+    if (!supportChatRealtimeReady) {
 
-    if (
-        !supportChatRealtimeReady
-    ) {
-
-        const alreadyPending =
-            supportChatRealtimePending
-                .some(
-                    item =>
-                        item.id ===
-                        message.id
-                );
-
-        if (
-            !alreadyPending
-        ) {
-
-            supportChatRealtimePending.push(
-                message
+        const alreadyQueued =
+            supportChatRealtimePending.some(
+                item =>
+                    String(item.id) ===
+                    String(message.id)
             );
 
+        if (!alreadyQueued) {
+            supportChatRealtimePending.push(message);
         }
 
         return;
-
     }
 
-    appendSupportChatMessageIfNew(
-        message
-    );
+    appendSupportChatMessageIfNew(message);
+
+    /*
+     * Refresh support unread count
+     * after receiving a live message.
+     */
+    refreshSupportUnreadBadge();
 
 }
 

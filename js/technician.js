@@ -4010,23 +4010,7 @@ document
         }
     );
 
-    /* =========================================================
-   TECHNICIAN FLOATING SUPPORT
-   OPEN SUPPORT CHAT
-   ========================================================= */
-
-document
-    .getElementById(
-        "technicianFloatingSupportButton"
-    )
-    ?.addEventListener(
-        "click",
-        async () => {
-
-            await openSupportChat();
-
-        }
-    );
+    
 
     /* =========================================================
        RAISE SUPPORT REQUEST
@@ -10034,6 +10018,24 @@ techSidebarOverlay?.addEventListener(
     closeTechnicianMenu
 );
 
+/* =========================================================
+   TECHNICIAN FLOATING SUPPORT
+   OPEN SUPPORT CHAT
+   GLOBAL
+   ========================================================= */
+
+document
+    .getElementById(
+        "technicianFloatingSupportButton"
+    )
+    ?.addEventListener(
+        "click",
+        async () => {
+
+            await openSupportChat();
+
+        }
+    );
 
 document
     .querySelectorAll(".tech-nav-item")

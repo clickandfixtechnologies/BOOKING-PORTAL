@@ -7807,3 +7807,54 @@ i[class*="fa-"]{
 
 }
 
+/* =========================================================
+   TECHNICIAN FLOATING SUPPORT CHAT
+   SMALL CHAT BOX
+   ========================================================= */
+
+.tech-support-chat-modal {
+    padding: 20px;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+.tech-support-chat-dialog {
+    width: 390px;
+    max-width: calc(100vw - 40px);
+    height: 560px;
+    max-height: calc(100vh - 40px);
+    border-radius: 20px;
+}
+
+.tech-support-chat-dialog-live {
+    height: 560px;
+    max-height: calc(100vh - 40px);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+    .tech-support-chat-modal {
+        padding: 12px;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    .tech-support-chat-dialog {
+        width: 100%;
+        max-width: 100%;
+        height: calc(100vh - 24px);
+        max-height: calc(100vh - 24px);
+        border-radius: 20px;
+    }
+
+    .tech-support-chat-dialog-live {
+        height: calc(100vh - 24px);
+        max-height: calc(100vh - 24px);
+    }
+
+}

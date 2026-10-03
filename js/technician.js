@@ -7020,32 +7020,21 @@ async function startSupportChatRealtime(
 
                 }
             )
-            .subscribe(
-                status => {
+            
+            .subscribe((status, err) => {
+    console.log(
+        "TECHNICIAN REALTIME STATUS:",
+        status
+    );
 
-                    console.log(
-                        "Support chat realtime status:",
-                        status
-                    );
+    if (err) {
+        console.error(
+            "TECHNICIAN REALTIME ERROR:",
+            err
+        );
+    }
 
-                    if (
-    status === "SUBSCRIBED"
-) {
-
-    /*
-     * Realtime channel is connected,
-     * but initial chat rendering may still
-     * be in progress.
-     *
-     * Keep realtime messages pending until
-     * openSupportRequestChat() finishes
-     * rendering the chat UI.
-     */
-
-}
-
-                }
-            );
+});
 
 }
 

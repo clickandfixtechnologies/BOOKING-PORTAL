@@ -7018,12 +7018,23 @@ function handleSupportChatRealtimeMessage(payload) {
 
     appendSupportChatMessageIfNew(message);
 
-    /*
-     * Refresh support unread count
-     * after receiving a live message.
+        /*
+     * Refresh floating unread badge only for
+     * incoming support/bot messages.
+     *
+     * Technician's own messages must not
+     * increase unread count.
      */
-    refreshSupportUnreadBadge();
+    const senderType =
+        String(
+            message?.sender_type || ""
+        ).toUpperCase();
 
+    if (senderType !== "TECHNICIAN") {
+
+        refreshTechnicianSupportUnreadBadge();
+
+    }
 }
 
 /* =========================================================

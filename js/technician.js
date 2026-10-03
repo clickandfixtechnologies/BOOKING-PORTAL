@@ -6935,9 +6935,10 @@ async function stopSupportChatRealtime() {
 }
 
 
+
 /* =========================================================
    SUPPORT CHAT REALTIME
-   SUBSCRIBE
+   SUBSCRIBE + DIAGNOSTICS
    ========================================================= */
 
 async function startSupportChatRealtime(requestId) {
@@ -6952,21 +6953,38 @@ async function startSupportChatRealtime(requestId) {
     // Stop any previous support chat channel.
     await stopSupportChatRealtime();
 
-    // Check Supabase authentication readiness.
+    // Check authentication and message read access.
     try {
-        const { data, error } = await sb.auth.getUser();
+        const {
+            data: authData,
+            error: authError
+        } = await sb.auth.getUser();
 
-        if (error) {
-            console.warn(
-                "TECHNICIAN AUTH READINESS CHECK FAILED:",
-                error
-            );
-        } else if (!data?.user) {
-            console.warn("TECHNICIAN: No authenticated user found.");
-        }
+        console.log("TECHNICIAN AUTH CHECK:", {
+            userId: authData?.user?.id || null,
+            error: authError?.message || null
+        });
+
+        const {
+            data: testMessages,
+            error: testError
+        } = await sb
+            .from("support_messages")
+            .select(
+                "id, support_request_id, sender_type, message"
+            )
+            .eq("support_request_id", id)
+            .order("created_at", { ascending: false })
+            .limit(3);
+
+        console.log("TECHNICIAN MESSAGE READ TEST:", {
+            messages: testMessages,
+            error: testError?.message || null
+        });
+
     } catch (error) {
-        console.warn(
-            "TECHNICIAN AUTH READINESS CHECK FAILED:",
+        console.error(
+            "TECHNICIAN REALTIME DIAGNOSTIC:",
             error
         );
     }
@@ -6978,6 +6996,7 @@ async function startSupportChatRealtime(requestId) {
 
     console.log("TECHNICIAN REALTIME REQUEST ID:", id);
 
+    // Subscribe to INSERT events temporarily without a filter.
     supportChatRealtimeChannel = sb
         .channel(channelName)
         .on(

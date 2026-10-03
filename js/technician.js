@@ -7250,6 +7250,47 @@ console.log(
     JSON.stringify(response?.requests, null, 2)
 );
 
+/* =====================================================
+   UPDATE FLOATING SUPPORT UNREAD BADGE
+   ===================================================== */
+
+const floatingSupportBadge =
+    document.getElementById(
+        "technicianFloatingSupportBadge"
+    );
+
+const totalUnreadCount =
+    Math.max(
+        0,
+        Number(
+            response?.total_unread_count
+        ) || 0
+    );
+
+if (floatingSupportBadge) {
+
+    if (totalUnreadCount > 0) {
+
+        floatingSupportBadge.textContent =
+            totalUnreadCount > 99
+                ? "99+"
+                : String(totalUnreadCount);
+
+        floatingSupportBadge.hidden =
+            false;
+
+    } else {
+
+        floatingSupportBadge.textContent =
+            "0";
+
+        floatingSupportBadge.hidden =
+            true;
+
+    }
+
+}
+
         /*
          * Only support requests that are
          * still relevant for conversation.

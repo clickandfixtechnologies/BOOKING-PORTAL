@@ -1344,6 +1344,18 @@ async function supportMyRequests(
       );
     }
 
+    
+console.log(
+  "SUPPORT UNREAD QUERY DEBUG:",
+  {
+    technicianId,
+    requestIds,
+    unreadError: unreadError?.message ?? null,
+    unreadMessages: unreadMessages ?? null,
+    unreadRows: unreadMessages?.length ?? 0
+  }
+);
+
     for (const message of unreadMessages || []) {
 
       const requestId =

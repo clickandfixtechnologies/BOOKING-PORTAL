@@ -7165,18 +7165,6 @@ async function openSupportChat() {
                 ? response.requests
                 : [];
 
-                
-
-console.log(
-    "SUPPORT UNREAD TOTAL:",
-    response?.total_unread_count
-);
-
-console.log(
-    "SUPPORT REQUEST DETAILS:",
-    JSON.stringify(response?.requests, null, 2)
-);
-
 /* =====================================================
    UPDATE FLOATING SUPPORT UNREAD BADGE
    ===================================================== */

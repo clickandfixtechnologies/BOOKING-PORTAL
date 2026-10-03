@@ -34,6 +34,8 @@ let supportChatRealtimeReady = false;
 
 let supportChatRealtimePending = [];
 
+let supportUnreadRealtimeChannel = null;
+
 /* =========================================================
    TECHNICIAN JOB CARD CLICK HANDLER
    Event Delegation
@@ -6981,6 +6983,200 @@ async function startSupportChatRealtime(requestId) {
 }
 
 /* =========================================================
+   SUPPORT UNREAD COUNT REALTIME
+   ========================================================= */
+
+async function startSupportUnreadRealtime() {
+
+    /*
+     * Get currently authenticated technician.
+     */
+    const {
+        data,
+        error
+    } = await sb.auth.getUser();
+
+    if (error || !data?.user?.id) {
+        return;
+    }
+
+    const authUserId =
+        data.user.id;
+
+    /*
+     * Get technician profile ID.
+     *
+     * support_requests.technician_id
+     * uses technicians.id, not auth user id.
+     */
+    const {
+        data: technician,
+        error: technicianError
+    } = await sb
+        .from("technicians")
+        .select("id")
+        .eq(
+            "auth_user_id",
+            authUserId
+        )
+        .maybeSingle();
+
+    if (
+        technicianError ||
+        !technician?.id
+    ) {
+        return;
+    }
+
+    /*
+     * Remove previous unread channel.
+     */
+    if (supportUnreadRealtimeChannel) {
+
+        try {
+
+            await sb.removeChannel(
+                supportUnreadRealtimeChannel
+            );
+
+        } catch (error) {
+            console.warn(
+                "Support unread realtime cleanup failed:",
+                error
+            );
+        }
+
+        supportUnreadRealtimeChannel =
+            null;
+
+    }
+
+    const technicianId =
+        technician.id;
+
+    const channelName =
+        `support-unread-${technicianId}`;
+
+    supportUnreadRealtimeChannel =
+        sb
+            .channel(channelName)
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "support_messages"
+                },
+                async (payload) => {
+
+                    const message =
+                        payload?.new;
+
+                    if (!message?.id) {
+                        return;
+                    }
+
+                    /*
+                     * Only ADMIN messages are unread
+                     * for the technician.
+                     */
+                    const senderType =
+                        String(
+                            message?.sender_type ||
+                            ""
+                        ).toUpperCase();
+
+                    if (
+                        senderType !== "ADMIN"
+                    ) {
+                        return;
+                    }
+
+                    /*
+                     * If the message is already marked
+                     * as read, do not increase the badge.
+                     */
+                    if (
+                        message?.read_at_technician
+                    ) {
+                        return;
+                    }
+
+                    await refreshTechnicianSupportUnreadBadge();
+
+                }
+            )
+            .subscribe();
+
+}
+
+/* =========================================================
+   SUPPORT UNREAD COUNT
+   REFRESH BADGE FROM SERVER
+   ========================================================= */
+
+async function refreshTechnicianSupportUnreadBadge() {
+
+    try {
+
+        const response =
+            await api(
+                "support_my_requests"
+            );
+
+        const totalUnreadCount =
+            Math.max(
+                0,
+                Number(
+                    response?.total_unread_count
+                ) || 0
+            );
+
+        const badge =
+            document.getElementById(
+                "technicianFloatingSupportBadge"
+            );
+
+        if (!badge) {
+            return;
+        }
+
+        if (totalUnreadCount > 0) {
+
+            badge.textContent =
+                totalUnreadCount > 99
+                    ? "99+"
+                    : String(
+                        totalUnreadCount
+                    );
+
+            badge.hidden =
+                false;
+
+        } else {
+
+            badge.textContent =
+                "0";
+
+            badge.hidden =
+                true;
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Support unread badge refresh failed:",
+            error
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
    SUPPORT CHAT REALTIME
    MESSAGE HANDLER
    ========================================================= */
@@ -7018,16 +7214,6 @@ function handleSupportChatRealtimeMessage(payload) {
 
     appendSupportChatMessageIfNew(message);
 
-    const senderType =
-    String(
-        message?.sender_type || ""
-    ).toUpperCase();
-
-if (senderType !== "TECHNICIAN") {
-
-    incrementTechnicianSupportUnreadBadge();
-
-}
 }
 
 /* =========================================================
@@ -9949,6 +10135,8 @@ signOut.onclick = async () => {
                 }
 
                 await load();
+
+await startSupportUnreadRealtime();
 
 /* =====================================================
    INITIAL SUPPORT UNREAD BADGE

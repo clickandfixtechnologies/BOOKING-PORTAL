@@ -9012,15 +9012,23 @@ async function requestSupportBotStep(
     try {
 
         const response =
-            await api(
-                "support_bot",
-                {
-                    support_request_id:
-                        request.id,
+    await api(
+        "support_bot",
+        {
+            support_request_id:
+                request.id,
 
-                    ...payload
-                }
-            );
+            bot_action:
+                payload?.action ||
+                "START",
+
+            category:
+                payload?.category,
+
+            subcategory:
+                payload?.subcategory
+        }
+    );
 
 
         const bot =
@@ -9701,13 +9709,13 @@ async function requestStandaloneSupportBot(
     try {
 
         const response =
-            await api(
-                "support_bot",
-                {
-                    action:
-                        "START"
-                }
-            );
+    await api(
+        "support_bot",
+        {
+            bot_action:
+                "START"
+        }
+    );
 
 
         const bot =

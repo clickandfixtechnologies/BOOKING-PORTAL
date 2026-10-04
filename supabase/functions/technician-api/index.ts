@@ -2207,12 +2207,12 @@ async function supportBot(
 
 
   const action =
-    String(
-      body?.action ||
-      "START"
-    )
-      .trim()
-      .toUpperCase();
+  String(
+    body?.bot_action ||
+    "START"
+  )
+    .trim()
+    .toUpperCase();
 
 
   const category =

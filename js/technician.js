@@ -7407,30 +7407,113 @@ if (floatingSupportBadge) {
          * still relevant for conversation.
          */
 
-        const activeRequests =
-            requests.filter(
-                request => {
+        /* =====================================================
+   SUPPORT REQUESTS
+   PHASE 5 - INCLUDE CLOSED REQUESTS
+   ===================================================== */
 
-                    const status =
-                        String(
-                            request?.status || ""
-                        ).toUpperCase();
+const supportRequests =
+    requests;
 
-                    return (
-                        status !== "CLOSED" &&
-                        status !== "CANCELLED"
-                    );
+if (!supportRequests.length) {
 
-                }
+    /*
+     * No previous support request.
+     * Open Bot directly.
+     */
+
+    showSupportBotStandalone();
+
+    return;
+
+}
+
+
+/*
+ * If only one support request exists,
+ * open it directly.
+ */
+
+if (
+    supportRequests.length === 1
+) {
+
+    await openSupportRequestChat(
+        supportRequests[0].id
+    );
+
+    /* =====================================================
+       REFRESH FLOATING SUPPORT UNREAD BADGE
+       AFTER MESSAGE READ
+       ===================================================== */
+
+    try {
+
+        const updatedResponse =
+            await api(
+                "support_my_requests"
             );
 
-        if (!activeRequests.length) {
+        const updatedUnreadCount =
+            Math.max(
+                0,
+                Number(
+                    updatedResponse?.total_unread_count
+                ) || 0
+            );
 
-            showSupportChatEmpty();
+        const updatedFloatingBadge =
+            document.getElementById(
+                "technicianFloatingSupportBadge"
+            );
 
-            return;
+        if (updatedFloatingBadge) {
+
+            if (updatedUnreadCount > 0) {
+
+                updatedFloatingBadge.textContent =
+                    updatedUnreadCount > 99
+                        ? "99+"
+                        : String(updatedUnreadCount);
+
+                updatedFloatingBadge.hidden =
+                    false;
+
+            } else {
+
+                updatedFloatingBadge.textContent =
+                    "0";
+
+                updatedFloatingBadge.hidden =
+                    true;
+
+            }
 
         }
+
+    } catch (error) {
+
+        console.warn(
+            "Support unread badge refresh after chat open failed:",
+            error
+        );
+
+    }
+
+    return;
+
+}
+
+
+/*
+ * Multiple requests.
+ * Include OPEN + CLOSED + CANCELLED
+ * so previous conversations remain accessible.
+ */
+
+showSupportChatRequestPicker(
+    supportRequests
+);
 
         /*
          * If only one active support request exists,
@@ -8070,6 +8153,16 @@ function renderSupportChat(
                 id="supportChatMessages"
             ></div>
 
+            <!-- =====================================================
+                                SUPPORT BOT
+                                  PHASE 5
+                 ===================================================== -->
+
+<div
+    class="tech-support-bot-panel"
+    id="supportChatBotPanel"
+>
+</div>
 
             <!-- COMPOSER -->
 
@@ -8144,18 +8237,29 @@ function renderSupportChat(
 
     bindSupportChatClose(modal);
 
-    renderSupportChatMessages(
-        messages
+   renderSupportChatMessages(
+    messages
+);
+
+if (!isClosed) {
+
+    bindSupportChatComposer(
+        modal,
+        request.id
     );
 
-    if (!isClosed) {
+}
 
-        bindSupportChatComposer(
-            modal,
-            request.id
-        );
 
-    }
+/* =====================================================
+   SUPPORT BOT
+   INITIALIZE
+   ===================================================== */
+
+initializeSupportBot(
+    request,
+    messages
+);
 
 }
 
@@ -8290,6 +8394,756 @@ function renderSupportChatMessages(
 
         }
     );
+
+}
+
+/* =========================================================
+   SUPPORT BOT
+   PHASE 5
+   ========================================================= */
+
+/* =========================================================
+   INITIALIZE BOT
+   ========================================================= */
+
+async function initializeSupportBot(
+    request,
+    messages
+) {
+
+    const panel =
+        document.getElementById(
+            "supportChatBotPanel"
+        );
+
+    if (!panel) {
+        return;
+    }
+
+
+    /*
+     * If this request already contains BOT messages,
+     * don't create a duplicate greeting.
+     */
+
+    const hasBotMessage =
+        Array.isArray(messages) &&
+        messages.some(
+            message =>
+                String(
+                    message?.sender_type || ""
+                ).toUpperCase() === "BOT"
+        );
+
+
+    if (
+        hasBotMessage
+    ) {
+
+        renderSupportBotPanel(
+            panel,
+            {
+                message:
+                    "How can I help you with this support issue?",
+
+                options: [
+
+                    {
+                        id:
+                            "START",
+
+                        label:
+                            "Troubleshoot Problem"
+                    },
+
+                    {
+                        id:
+                            "CREATE_SUPPORT_REQUEST",
+
+                        label:
+                            "Create New Support Request"
+                    }
+
+                ],
+
+                next_action:
+                    "START"
+            },
+
+            request
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * First Bot greeting.
+     */
+
+    try {
+
+        renderSupportBotLoading(
+            panel
+        );
+
+
+        const response =
+            await api(
+                "support_bot",
+                {
+                    support_request_id:
+                        request.id,
+
+                    action:
+                        "START"
+                }
+            );
+
+
+        const bot =
+            response?.bot;
+
+
+        if (!bot) {
+
+            throw new Error(
+                "Invalid Bot response."
+            );
+
+        }
+
+
+        /*
+         * Save first Bot message
+         * into support_messages.
+         */
+
+        const saved =
+            await saveSupportBotMessage(
+                request.id,
+                bot.message
+            );
+
+
+        if (
+            saved
+        ) {
+
+            /*
+             * Use realtime-safe append.
+             */
+
+            appendSupportChatMessageIfNew(
+                saved
+            );
+
+        }
+
+
+        renderSupportBotPanel(
+            panel,
+            bot,
+            request
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Support Bot initialization failed:",
+            error
+        );
+
+
+        renderSupportBotPanel(
+            panel,
+            {
+                message:
+                    "Unable to start the Support Bot. Please try again.",
+
+                options: [
+
+                    {
+                        id:
+                            "RETRY",
+
+                        label:
+                            "Try Again"
+                    }
+
+                ],
+
+                next_action:
+                    "START"
+            },
+
+            request
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   BOT LOADING
+   ========================================================= */
+
+function renderSupportBotLoading(
+    panel
+) {
+
+    panel.innerHTML = `
+
+        <div class="tech-support-bot-header">
+
+            <div class="tech-support-bot-avatar">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+
+            <div>
+
+                <strong>
+                    Click &amp; Fix Bot
+                </strong>
+
+                <span>
+                    Checking support options...
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="tech-support-bot-loading">
+
+            <i class="fa-solid fa-spinner fa-spin"></i>
+
+            <span>
+                Please wait...
+            </span>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   BOT PANEL
+   ========================================================= */
+
+function renderSupportBotPanel(
+    panel,
+    bot,
+    request
+) {
+
+    if (!panel) {
+        return;
+    }
+
+
+    const message =
+        String(
+            bot?.message ||
+            "How can I help you?"
+        );
+
+
+    const options =
+        Array.isArray(
+            bot?.options
+        )
+            ? bot.options
+            : [];
+
+
+    panel.innerHTML = `
+
+        <div class="tech-support-bot-header">
+
+            <div class="tech-support-bot-avatar">
+
+                <i class="fa-solid fa-robot"></i>
+
+            </div>
+
+            <div>
+
+                <strong>
+                    Click &amp; Fix Bot
+                </strong>
+
+                <span>
+                    Rule-based troubleshooting assistant
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="tech-support-bot-message">
+
+            ${escapeHtml(
+                message
+            ).replace(
+                /\n/g,
+                "<br>"
+            )}
+
+        </div>
+
+
+        ${
+            options.length
+                ? `
+                    <div class="tech-support-bot-options">
+
+                        ${options
+                            .map(
+                                option => `
+
+                                    <button
+                                        type="button"
+                                        class="tech-support-bot-option"
+                                        data-bot-action="${escapeHtml(
+                                            option?.id || ""
+                                        )}"
+                                    >
+
+                                        ${escapeHtml(
+                                            option?.label ||
+                                            "Continue"
+                                        )}
+
+                                    </button>
+
+                                `
+                            )
+                            .join("")}
+
+                    </div>
+                `
+                : ""
+        }
+
+    `;
+
+
+    panel
+        .querySelectorAll(
+            "[data-bot-action]"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        const action =
+                            button.getAttribute(
+                                "data-bot-action"
+                            );
+
+                        if (!action) {
+                            return;
+                        }
+
+
+                        await handleSupportBotAction(
+                            action,
+                            request
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   BOT ACTION HANDLER
+   ========================================================= */
+
+async function handleSupportBotAction(
+    selectedAction,
+    request
+) {
+
+    const panel =
+        document.getElementById(
+            "supportChatBotPanel"
+        );
+
+    if (!panel) {
+        return;
+    }
+
+
+    /*
+     * New Support Request.
+     */
+
+    if (
+        selectedAction ===
+        "CREATE_SUPPORT_REQUEST"
+    ) {
+
+        openRaiseSupportRequestModal();
+
+        return;
+
+    }
+
+
+    /*
+     * Start / Retry.
+     */
+
+    if (
+        selectedAction === "START" ||
+        selectedAction === "RETRY"
+    ) {
+
+        await requestSupportBotStep(
+            request,
+            {
+                action:
+                    "START"
+            }
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Category selection.
+     */
+
+    const categoryActions = [
+
+        "TECHNICAL_PROBLEM",
+        "APPOINTMENT_JOB",
+        "CCTV_PROBLEM",
+        "COMPUTER_LAPTOP",
+        "JOB_ID_BILLING",
+        "TECHNICIAN_SUPPORT",
+        "OTHER"
+
+    ];
+
+
+    if (
+        categoryActions.includes(
+            selectedAction
+        )
+    ) {
+
+        await requestSupportBotStep(
+            request,
+            {
+                action:
+                    "SELECT_CATEGORY",
+
+                category:
+                    selectedAction
+            }
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * CCTV subcategory.
+     */
+
+    const cctvActions = [
+
+        "CAMERA_OFFLINE",
+        "NO_DISPLAY",
+        "RECORDING_PROBLEM",
+        "NETWORK_PROBLEM",
+        "REMOTE_VIEWING"
+
+    ];
+
+
+    if (
+        cctvActions.includes(
+            selectedAction
+        )
+    ) {
+
+        await requestSupportBotStep(
+            request,
+            {
+                action:
+                    "SELECT_SUBCATEGORY",
+
+                category:
+                    "CCTV_PROBLEM",
+
+                subcategory:
+                    selectedAction
+            }
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Resolution YES / NO.
+     */
+
+    if (
+        selectedAction === "YES" ||
+        selectedAction === "NO"
+    ) {
+
+        await requestSupportBotStep(
+            request,
+            {
+                action:
+                    "CHECK_RESOLUTION",
+
+                subcategory:
+                    selectedAction
+            }
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Anything else.
+     */
+
+    console.warn(
+        "Unknown Support Bot action:",
+        selectedAction
+    );
+
+}
+
+
+/* =========================================================
+   REQUEST BOT STEP
+   ========================================================= */
+
+async function requestSupportBotStep(
+    request,
+    payload
+) {
+
+    const panel =
+        document.getElementById(
+            "supportChatBotPanel"
+        );
+
+    if (
+        !panel ||
+        !request?.id
+    ) {
+        return;
+    }
+
+
+    /*
+     * Disable buttons while processing.
+     */
+
+    panel
+        .querySelectorAll(
+            "[data-bot-action]"
+        )
+        .forEach(
+            button => {
+
+                button.disabled =
+                    true;
+
+            }
+        );
+
+
+    renderSupportBotLoading(
+        panel
+    );
+
+
+    try {
+
+        const response =
+            await api(
+                "support_bot",
+                {
+                    support_request_id:
+                        request.id,
+
+                    ...payload
+                }
+            );
+
+
+        const bot =
+            response?.bot;
+
+
+        if (!bot) {
+
+            throw new Error(
+                "Invalid Bot response."
+            );
+
+        }
+
+
+        /*
+         * Save Bot response.
+         */
+
+        const saved =
+            await saveSupportBotMessage(
+                request.id,
+                bot.message
+            );
+
+
+        if (
+            saved
+        ) {
+
+            appendSupportChatMessageIfNew(
+                saved
+            );
+
+        }
+
+
+        renderSupportBotPanel(
+            panel,
+            bot,
+            request
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Support Bot step failed:",
+            error
+        );
+
+
+        renderSupportBotPanel(
+            panel,
+            {
+                message:
+                    error?.message ||
+                    "Unable to process your request.",
+
+                options: [
+
+                    {
+                        id:
+                            "START",
+
+                        label:
+                            "Start Again"
+                    },
+
+                    {
+                        id:
+                            "CREATE_SUPPORT_REQUEST",
+
+                        label:
+                            "Create Support Request"
+                    }
+
+                ],
+
+                next_action:
+                    "START"
+            },
+
+            request
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SAVE BOT MESSAGE
+   ========================================================= */
+
+async function saveSupportBotMessage(
+    requestId,
+    message
+) {
+
+    const cleanMessage =
+        String(
+            message || ""
+        ).trim();
+
+
+    if (
+        !requestId ||
+        !cleanMessage
+    ) {
+        return null;
+    }
+
+
+    try {
+
+        const response =
+            await api(
+                "support_bot_message",
+                {
+                    support_request_id:
+                        requestId,
+
+                    message:
+                        cleanMessage
+                }
+            );
+
+
+        return (
+            response?.message ||
+            null
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Support Bot message save failed:",
+            error
+        );
+
+        return null;
+
+    }
 
 }
 
@@ -8667,6 +9521,396 @@ function showSupportChatEmpty() {
     bindSupportChatClose(
         modal
     );
+
+}
+
+/* =========================================================
+   SUPPORT BOT
+   STANDALONE MODE
+   NO SUPPORT REQUEST YET
+   ========================================================= */
+
+function showSupportBotStandalone() {
+
+    removeSupportChatModal();
+
+    const modal =
+        document.createElement("div");
+
+    modal.id =
+        "techSupportChatModal";
+
+    modal.className =
+        "tech-support-chat-modal";
+
+
+    modal.innerHTML = `
+
+        <div
+            class="tech-support-chat-modal-backdrop"
+            data-close-support-chat="true"
+        ></div>
+
+
+        <div
+            class="tech-support-chat-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Click and Fix Support Bot"
+        >
+
+            <div class="tech-support-chat-header">
+
+                <div>
+
+                    <span class="tech-support-chat-eyebrow">
+                        TECHNICIAN SUPPORT
+                    </span>
+
+                    <h3>
+                        Support Assistant
+                    </h3>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="tech-support-chat-close"
+                    data-close-support-chat="true"
+                    aria-label="Close"
+                >
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </div>
+
+
+            <div
+                class="tech-support-chat-messages"
+                id="supportChatMessages"
+            >
+
+                <div
+                    class="tech-support-chat-empty"
+                >
+
+                    <div
+                        class="tech-support-chat-empty-icon"
+                    >
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+
+                    <h4>
+                        Click &amp; Fix Support Bot
+                    </h4>
+
+                    <p>
+                        I can help troubleshoot common problems
+                        before you create a Support Request.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="tech-support-bot-panel"
+                id="supportChatBotPanel"
+            >
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    bindSupportChatClose(
+        modal
+    );
+
+
+    const panel =
+        modal.querySelector(
+            "#supportChatBotPanel"
+        );
+
+
+    /*
+     * Standalone Bot does not have a
+     * support_request_id yet.
+     *
+     * Therefore we only call support_bot
+     * and do NOT save the greeting.
+     */
+
+    requestStandaloneSupportBot(
+        panel
+    );
+
+}
+
+
+/* =========================================================
+   STANDALONE BOT REQUEST
+   ========================================================= */
+
+async function requestStandaloneSupportBot(
+    panel
+) {
+
+    if (!panel) {
+        return;
+    }
+
+
+    renderSupportBotLoading(
+        panel
+    );
+
+
+    try {
+
+        const response =
+            await api(
+                "support_bot",
+                {
+                    action:
+                        "START"
+                }
+            );
+
+
+        const bot =
+            response?.bot;
+
+
+        if (!bot) {
+
+            throw new Error(
+                "Invalid Bot response."
+            );
+
+        }
+
+
+        renderStandaloneSupportBotPanel(
+            panel,
+            bot
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Standalone Support Bot failed:",
+            error
+        );
+
+
+        panel.innerHTML = `
+
+            <div class="tech-support-bot-message">
+
+                Unable to start the Support Bot.
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   STANDALONE BOT PANEL
+   ========================================================= */
+
+function renderStandaloneSupportBotPanel(
+    panel,
+    bot
+) {
+
+    if (!panel) {
+        return;
+    }
+
+
+    const options =
+        Array.isArray(
+            bot?.options
+        )
+            ? bot.options
+            : [];
+
+
+    panel.innerHTML = `
+
+        <div class="tech-support-bot-header">
+
+            <div class="tech-support-bot-avatar">
+
+                <i class="fa-solid fa-robot"></i>
+
+            </div>
+
+            <div>
+
+                <strong>
+                    Click &amp; Fix Bot
+                </strong>
+
+                <span>
+                    Support Assistant
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="tech-support-bot-message">
+
+            ${escapeHtml(
+                bot?.message ||
+                "How can I help you?"
+            )}
+
+        </div>
+
+
+        <div class="tech-support-bot-options">
+
+            ${options
+                .map(
+                    option => `
+
+                        <button
+                            type="button"
+                            class="tech-support-bot-option"
+                            data-standalone-bot-action="${escapeHtml(
+                                option?.id || ""
+                            )}"
+                        >
+
+                            ${escapeHtml(
+                                option?.label ||
+                                "Continue"
+                            )}
+
+                        </button>
+
+                    `
+                )
+                .join("")}
+
+        </div>
+
+    `;
+
+
+    panel
+        .querySelectorAll(
+            "[data-standalone-bot-action]"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        const action =
+                            button.getAttribute(
+                                "data-standalone-bot-action"
+                            );
+
+
+                        if (
+                            action ===
+                            "CREATE_SUPPORT_REQUEST"
+                        ) {
+
+                            openRaiseSupportRequestModal();
+
+                            return;
+
+                        }
+
+
+                        /*
+                         * Category selected.
+                         *
+                         * There is no support request yet,
+                         * so we cannot save Bot messages.
+                         * Continue using the Bot engine.
+                         */
+
+                        if (
+                            [
+                                "TECHNICAL_PROBLEM",
+                                "APPOINTMENT_JOB",
+                                "CCTV_PROBLEM",
+                                "COMPUTER_LAPTOP",
+                                "JOB_ID_BILLING",
+                                "TECHNICIAN_SUPPORT",
+                                "OTHER"
+                            ].includes(
+                                action
+                            )
+                        ) {
+
+                            panel.innerHTML = `
+                                <div class="tech-support-bot-message">
+                                    To troubleshoot this issue,
+                                    please create a Support Request
+                                    so the conversation can be linked
+                                    to your service job.
+                                </div>
+
+                                <div class="tech-support-bot-options">
+
+                                    <button
+                                        type="button"
+                                        class="tech-support-bot-option"
+                                        id="standaloneCreateSupportRequest"
+                                    >
+                                        Create Support Request
+                                    </button>
+
+                                </div>
+                            `;
+
+
+                            panel
+                                .querySelector(
+                                    "#standaloneCreateSupportRequest"
+                                )
+                                ?.addEventListener(
+                                    "click",
+                                    () => {
+
+                                        openRaiseSupportRequestModal();
+
+                                    }
+                                );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
 
 }
 

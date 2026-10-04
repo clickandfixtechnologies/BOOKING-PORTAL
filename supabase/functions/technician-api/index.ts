@@ -2504,7 +2504,7 @@ function getSupportBotResponse(
 
 
       /* ===============================================
-         OTHER CATEGORIES
+         TECHNICAL PROBLEM
          =============================================== */
 
       case "TECHNICAL_PROBLEM":
@@ -2532,6 +2532,10 @@ function getSupportBotResponse(
         };
 
 
+      /* ===============================================
+         APPOINTMENT / JOB
+         =============================================== */
+
       case "APPOINTMENT_JOB":
 
         return {
@@ -2543,19 +2547,63 @@ function getSupportBotResponse(
 
             {
               id:
-                "CREATE_SUPPORT_REQUEST",
+                "APPOINTMENT_STATUS",
 
               label:
-                "Create Support Request"
+                "Appointment Status"
+            },
+
+            {
+              id:
+                "TECHNICIAN_VISIT",
+
+              label:
+                "Technician / Visit"
+            },
+
+            {
+              id:
+                "JOB_RESCHEDULE",
+
+              label:
+                "Job Reschedule"
+            },
+
+            {
+              id:
+                "JOB_CANCEL",
+
+              label:
+                "Job Cancel"
+            },
+
+            {
+              id:
+                "JOB_DETAILS",
+
+              label:
+                "Job Details"
+            },
+
+            {
+              id:
+                "OTHER_JOB_ISSUE",
+
+              label:
+                "Other Job Issue"
             }
 
           ],
 
           next_action:
-            "APPOINTMENT_JOB"
+            "SELECT_SUBCATEGORY"
 
         };
 
+
+      /* ===============================================
+         COMPUTER / LAPTOP
+         =============================================== */
 
       case "COMPUTER_LAPTOP":
 
@@ -2582,6 +2630,10 @@ function getSupportBotResponse(
         };
 
 
+      /* ===============================================
+         JOB ID / BILLING
+         =============================================== */
+
       case "JOB_ID_BILLING":
 
         return {
@@ -2607,6 +2659,10 @@ function getSupportBotResponse(
         };
 
 
+      /* ===============================================
+         TECHNICIAN SUPPORT
+         =============================================== */
+
       case "TECHNICIAN_SUPPORT":
 
         return {
@@ -2631,6 +2687,10 @@ function getSupportBotResponse(
 
         };
 
+
+      /* ===============================================
+         OTHER
+         =============================================== */
 
       case "OTHER":
 
@@ -2944,6 +3004,247 @@ function getSupportBotResponse(
 
 
   /* =====================================================
+     APPOINTMENT / JOB SUBCATEGORY
+     ===================================================== */
+
+  if (
+    action === "SELECT_SUBCATEGORY" &&
+    category === "APPOINTMENT_JOB"
+  ) {
+
+    switch (
+      subcategory
+    ) {
+
+
+      /* ===============================================
+         APPOINTMENT STATUS
+         =============================================== */
+
+      case "APPOINTMENT_STATUS":
+
+        return {
+
+          message:
+            "Please check your appointment details and current status in the booking portal. If the appointment status is not updating or appears incorrect, please create a Support Request.",
+
+          options: [
+
+            {
+              id:
+                "YES",
+
+              label:
+                "Issue Resolved"
+            },
+
+            {
+              id:
+                "NO",
+
+              label:
+                "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action:
+            "CHECK_RESOLUTION"
+
+        };
+
+
+      /* ===============================================
+         TECHNICIAN / VISIT
+         =============================================== */
+
+      case "TECHNICIAN_VISIT":
+
+        return {
+
+          message:
+            "Please check whether a technician has been assigned to the job and whether the appointment date and visit details are correct. If the technician has not arrived within the expected time, please create a Support Request.",
+
+          options: [
+
+            {
+              id:
+                "YES",
+
+              label:
+                "Issue Resolved"
+            },
+
+            {
+              id:
+                "NO",
+
+              label:
+                "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action:
+            "CHECK_RESOLUTION"
+
+        };
+
+
+      /* ===============================================
+         JOB RESCHEDULE
+         =============================================== */
+
+      case "JOB_RESCHEDULE":
+
+        return {
+
+          message:
+            "If you need to change the appointment date or time, please create a Support Request so the Click & Fix team can review the rescheduling request.",
+
+          options: [
+
+            {
+              id:
+                "CREATE_SUPPORT_REQUEST",
+
+              label:
+                "Create Support Request"
+            }
+
+          ],
+
+          next_action:
+            "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      /* ===============================================
+         JOB CANCEL
+         =============================================== */
+
+      case "JOB_CANCEL":
+
+        return {
+
+          message:
+            "If you want to cancel an existing appointment or job, please create a Support Request so the Click & Fix team can process the cancellation.",
+
+          options: [
+
+            {
+              id:
+                "CREATE_SUPPORT_REQUEST",
+
+              label:
+                "Create Support Request"
+            }
+
+          ],
+
+          next_action:
+            "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      /* ===============================================
+         JOB DETAILS
+         =============================================== */
+
+      case "JOB_DETAILS":
+
+        return {
+
+          message:
+            "Please check the appointment tracking page for your job details, appointment status and technician information. If any information is missing or incorrect, please create a Support Request.",
+
+          options: [
+
+            {
+              id:
+                "YES",
+
+              label:
+                "Issue Resolved"
+            },
+
+            {
+              id:
+                "NO",
+
+              label:
+                "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action:
+            "CHECK_RESOLUTION"
+
+        };
+
+
+      /* ===============================================
+         OTHER JOB ISSUE
+         =============================================== */
+
+      case "OTHER_JOB_ISSUE":
+
+        return {
+
+          message:
+            "This appointment or job issue may require direct assistance from the Click & Fix team. Would you like to create a Support Request?",
+
+          options: [
+
+            {
+              id:
+                "CREATE_SUPPORT_REQUEST",
+
+              label:
+                "Create Support Request"
+            }
+
+          ],
+
+          next_action:
+            "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      default:
+
+        return {
+
+          message:
+            "Please select a valid appointment or job issue.",
+
+          options: [
+
+            {
+              id:
+                "SELECT_CATEGORY",
+
+              label:
+                "Back"
+            }
+
+          ],
+
+          next_action:
+            "SELECT_CATEGORY"
+
+        };
+
+    }
+
+  }
+
+
+  /* =====================================================
      RESOLUTION CHECK
      ===================================================== */
 
@@ -3114,8 +3415,6 @@ function getSupportBotResponse(
   };
 
 }
-
-
 /* =========================================================
    SUPPORT BOT MESSAGE
    SAVE BOT MESSAGE TO SUPPORT CHAT

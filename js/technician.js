@@ -8511,16 +8511,16 @@ async function initializeSupportBot(
 
 
         const response =
-            await api(
-                "support_bot",
-                {
-                    support_request_id:
-                        request.id,
+    await api(
+        "support_bot",
+        {
+            support_request_id:
+                request.id,
 
-                    action:
-                        "START"
-                }
-            );
+            bot_action:
+                "START"
+        }
+    );
 
 
         const bot =

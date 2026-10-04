@@ -2340,14 +2340,11 @@ function getSupportBotResponse(
   subcategory: string
 ) {
 
-
   /* =====================================================
      START
      ===================================================== */
 
-  if (
-    action === "START"
-  ) {
+  if (action === "START") {
 
     return {
 
@@ -2357,65 +2354,43 @@ function getSupportBotResponse(
       options: [
 
         {
-          id:
-            "TECHNICAL_PROBLEM",
-
-          label:
-            "Technical Problem"
+          id: "TECHNICAL_PROBLEM",
+          label: "Technical Problem"
         },
 
         {
-          id:
-            "APPOINTMENT_JOB",
-
-          label:
-            "Appointment / Job"
+          id: "APPOINTMENT_JOB",
+          label: "Appointment / Job"
         },
 
         {
-          id:
-            "CCTV_PROBLEM",
-
-          label:
-            "CCTV Problem"
+          id: "CCTV_PROBLEM",
+          label: "CCTV Problem"
         },
 
         {
-          id:
-            "COMPUTER_LAPTOP",
-
-          label:
-            "Computer / Laptop"
+          id: "COMPUTER_LAPTOP",
+          label: "Computer / Laptop"
         },
 
         {
-          id:
-            "JOB_ID_BILLING",
-
-          label:
-            "Job ID / Billing"
+          id: "JOB_ID_BILLING",
+          label: "Job ID / Billing"
         },
 
         {
-          id:
-            "TECHNICIAN_SUPPORT",
-
-          label:
-            "Technician Support"
+          id: "TECHNICIAN_SUPPORT",
+          label: "Technician Support"
         },
 
         {
-          id:
-            "OTHER",
-
-          label:
-            "Other"
+          id: "OTHER",
+          label: "Other"
         }
 
       ],
 
-      next_action:
-        "SELECT_CATEGORY"
+      next_action: "SELECT_CATEGORY"
 
     };
 
@@ -2423,84 +2398,12 @@ function getSupportBotResponse(
 
 
   /* =====================================================
-     CATEGORY
+     CATEGORY SELECTION
      ===================================================== */
 
-  if (
-    action === "SELECT_CATEGORY"
-  ) {
+  if (action === "SELECT_CATEGORY") {
 
-    switch (
-      category
-    ) {
-
-      /* ===============================================
-         CCTV
-         =============================================== */
-
-      case "CCTV_PROBLEM":
-
-        return {
-
-          message:
-            "Please select the CCTV problem you are facing.",
-
-          options: [
-
-            {
-              id:
-                "CAMERA_OFFLINE",
-
-              label:
-                "Camera Offline"
-            },
-
-            {
-              id:
-                "NO_DISPLAY",
-
-              label:
-                "No Display"
-            },
-
-            {
-              id:
-                "RECORDING_PROBLEM",
-
-              label:
-                "Recording Problem"
-            },
-
-            {
-              id:
-                "NETWORK_PROBLEM",
-
-              label:
-                "Network Problem"
-            },
-
-            {
-              id:
-                "REMOTE_VIEWING",
-
-              label:
-                "Remote Viewing"
-            },
-
-            {
-              id:
-                "OTHER",
-
-              label:
-                "Other"
-            }
-
-          ],
-
-          next_action:
-            "SELECT_SUBCATEGORY"
-
-        };
+    switch (category) {
 
 
       /* ===============================================
@@ -2512,22 +2415,43 @@ function getSupportBotResponse(
         return {
 
           message:
-            "Please describe the technical problem you are facing. I’ll help you identify the next step.",
+            "Please select the type of technical problem you are facing.",
 
           options: [
 
             {
-              id:
-                "CREATE_SUPPORT_REQUEST",
+              id: "WEBSITE_PORTAL",
+              label: "Website / Portal Problem"
+            },
 
-              label:
-                "Create Support Request"
+            {
+              id: "LOGIN_PROBLEM",
+              label: "Login Problem"
+            },
+
+            {
+              id: "APP_BROWSER",
+              label: "App / Browser Problem"
+            },
+
+            {
+              id: "NETWORK_INTERNET",
+              label: "Network / Internet"
+            },
+
+            {
+              id: "ERROR_MESSAGE",
+              label: "Error Message"
+            },
+
+            {
+              id: "TECHNICAL_OTHER",
+              label: "Other Technical Issue"
             }
 
           ],
 
-          next_action:
-            "TECHNICAL_PROBLEM"
+          next_action: "SELECT_SUBCATEGORY"
 
         };
 
@@ -2546,57 +2470,88 @@ function getSupportBotResponse(
           options: [
 
             {
-              id:
-                "APPOINTMENT_STATUS",
-
-              label:
-                "Appointment Status"
+              id: "APPOINTMENT_STATUS",
+              label: "Appointment Status"
             },
 
             {
-              id:
-                "TECHNICIAN_VISIT",
-
-              label:
-                "Technician / Visit"
+              id: "TECHNICIAN_VISIT",
+              label: "Technician / Visit"
             },
 
             {
-              id:
-                "JOB_RESCHEDULE",
-
-              label:
-                "Job Reschedule"
+              id: "JOB_RESCHEDULE",
+              label: "Job Reschedule"
             },
 
             {
-              id:
-                "JOB_CANCEL",
-
-              label:
-                "Job Cancel"
+              id: "JOB_CANCEL",
+              label: "Job Cancel"
             },
 
             {
-              id:
-                "JOB_DETAILS",
-
-              label:
-                "Job Details"
+              id: "JOB_DETAILS",
+              label: "Job Details"
             },
 
             {
-              id:
-                "OTHER_JOB_ISSUE",
-
-              label:
-                "Other Job Issue"
+              id: "OTHER_JOB_ISSUE",
+              label: "Other Job Issue"
             }
 
           ],
 
-          next_action:
-            "SELECT_SUBCATEGORY"
+          next_action: "SELECT_SUBCATEGORY"
+
+        };
+
+
+      /* ===============================================
+         CCTV PROBLEM
+         =============================================== */
+
+      case "CCTV_PROBLEM":
+
+        return {
+
+          message:
+            "Please select the CCTV problem you are facing.",
+
+          options: [
+
+            {
+              id: "CAMERA_OFFLINE",
+              label: "Camera Offline"
+            },
+
+            {
+              id: "NO_DISPLAY",
+              label: "No Display"
+            },
+
+            {
+              id: "RECORDING_PROBLEM",
+              label: "Recording Problem"
+            },
+
+            {
+              id: "NETWORK_PROBLEM",
+              label: "Network Problem"
+            },
+
+            {
+              id: "REMOTE_VIEWING",
+              label: "Remote Viewing"
+            },
+
+            {
+              id: "CCTV_OTHER",
+              label: "Other CCTV Issue"
+            }
+
+          ],
+
+          next_action: "SELECT_SUBCATEGORY"
 
         };
 
@@ -2610,22 +2565,48 @@ function getSupportBotResponse(
         return {
 
           message:
-            "Please select how you would like to proceed with your Computer / Laptop problem.",
+            "Please select the type of Computer / Laptop problem you are facing.",
 
           options: [
 
             {
-              id:
-                "CREATE_SUPPORT_REQUEST",
+              id: "COMPUTER_NOT_STARTING",
+              label: "Computer Not Starting"
+            },
 
-              label:
-                "Create Support Request"
+            {
+              id: "COMPUTER_SLOW",
+              label: "Computer Running Slow"
+            },
+
+            {
+              id: "WINDOWS_PROBLEM",
+              label: "Windows Problem"
+            },
+
+            {
+              id: "SOFTWARE_PROBLEM",
+              label: "Software Problem"
+            },
+
+            {
+              id: "COMPUTER_NETWORK",
+              label: "Internet / Wi-Fi"
+            },
+
+            {
+              id: "HARDWARE_PROBLEM",
+              label: "Hardware Problem"
+            },
+
+            {
+              id: "COMPUTER_OTHER",
+              label: "Other Computer Issue"
             }
 
           ],
 
-          next_action:
-            "COMPUTER_LAPTOP"
+          next_action: "SELECT_SUBCATEGORY"
 
         };
 
@@ -2639,22 +2620,43 @@ function getSupportBotResponse(
         return {
 
           message:
-            "Please select how you would like to proceed with your Job ID or Billing issue.",
+            "Please select the type of Job ID or Billing issue you are facing.",
 
           options: [
 
             {
-              id:
-                "CREATE_SUPPORT_REQUEST",
+              id: "JOB_ID_NOT_RECEIVED",
+              label: "Job ID Not Received"
+            },
 
-              label:
-                "Create Support Request"
+            {
+              id: "JOB_ID_PROBLEM",
+              label: "Job ID Problem"
+            },
+
+            {
+              id: "INVOICE_BILL",
+              label: "Invoice / Bill"
+            },
+
+            {
+              id: "PAYMENT_PROBLEM",
+              label: "Payment Problem"
+            },
+
+            {
+              id: "PAYMENT_CONFIRMATION",
+              label: "Payment Confirmation"
+            },
+
+            {
+              id: "BILLING_OTHER",
+              label: "Other Billing Issue"
             }
 
           ],
 
-          next_action:
-            "JOB_ID_BILLING"
+          next_action: "SELECT_SUBCATEGORY"
 
         };
 
@@ -2668,22 +2670,43 @@ function getSupportBotResponse(
         return {
 
           message:
-            "Please select how you would like to proceed with Technician Support.",
+            "Please select the type of Technician Support you need.",
 
           options: [
 
             {
-              id:
-                "CREATE_SUPPORT_REQUEST",
+              id: "TECHNICIAN_NOT_ASSIGNED",
+              label: "Technician Not Assigned"
+            },
 
-              label:
-                "Create Support Request"
+            {
+              id: "TECHNICIAN_NOT_CONTACTING",
+              label: "Technician Not Contacting"
+            },
+
+            {
+              id: "TECHNICIAN_VISIT_DELAY",
+              label: "Technician Visit Delay"
+            },
+
+            {
+              id: "TECHNICIAN_BEHAVIOUR",
+              label: "Technician Behaviour"
+            },
+
+            {
+              id: "TECHNICIAN_JOB_ISSUE",
+              label: "Job / Work Related Issue"
+            },
+
+            {
+              id: "TECHNICIAN_OTHER",
+              label: "Other Technician Issue"
             }
 
           ],
 
-          next_action:
-            "TECHNICIAN_SUPPORT"
+          next_action: "SELECT_SUBCATEGORY"
 
         };
 
@@ -2702,20 +2725,20 @@ function getSupportBotResponse(
           options: [
 
             {
-              id:
-                "CREATE_SUPPORT_REQUEST",
-
-              label:
-                "Create Support Request"
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
             }
 
           ],
 
-          next_action:
-            "OTHER"
+          next_action: "CREATE_SUPPORT_REQUEST"
 
         };
 
+
+      /* ===============================================
+         INVALID CATEGORY
+         =============================================== */
 
       default:
 
@@ -2727,17 +2750,13 @@ function getSupportBotResponse(
           options: [
 
             {
-              id:
-                "START",
-
-              label:
-                "Start Again"
+              id: "START",
+              label: "Start Again"
             }
 
           ],
 
-          next_action:
-            "START"
+          next_action: "START"
 
         };
 
@@ -2747,229 +2766,163 @@ function getSupportBotResponse(
 
 
   /* =====================================================
-     CCTV SUBCATEGORY
+     TECHNICAL PROBLEM SUBCATEGORY
      ===================================================== */
 
   if (
     action === "SELECT_SUBCATEGORY" &&
-    category === "CCTV_PROBLEM"
+    category === "TECHNICAL_PROBLEM"
   ) {
 
-    switch (
-      subcategory
-    ) {
+    switch (subcategory) {
 
-
-      /* ===============================================
-         CAMERA OFFLINE
-         =============================================== */
-
-      case "CAMERA_OFFLINE":
+      case "WEBSITE_PORTAL":
 
         return {
 
           message:
-            "Please check whether the camera has power and whether its network cable is firmly connected. If it is an IP camera, also check the PoE port or network switch connection.",
+            "Please refresh the page and try again. If the problem continues, clear the browser cache or try another browser. If the issue still persists, create a Support Request.",
 
           options: [
 
             {
-              id:
-                "YES",
-
-              label:
-                "Issue Resolved"
+              id: "YES",
+              label: "Issue Resolved"
             },
 
             {
-              id:
-                "NO",
-
-              label:
-                "Issue Not Resolved"
+              id: "NO",
+              label: "Issue Not Resolved"
             }
 
           ],
 
-          next_action:
-            "CHECK_RESOLUTION"
+          next_action: "CHECK_RESOLUTION"
 
         };
 
 
-      /* ===============================================
-         NO DISPLAY
-         =============================================== */
-
-      case "NO_DISPLAY":
+      case "LOGIN_PROBLEM":
 
         return {
 
           message:
-            "Please check the HDMI/VGA cable between the NVR/DVR and monitor, make sure the monitor is on the correct input source, and restart the display device if necessary.",
+            "Please verify that you are using the correct login details and try again. If the login problem continues, please create a Support Request.",
 
           options: [
 
             {
-              id:
-                "YES",
-
-              label:
-                "Issue Resolved"
+              id: "YES",
+              label: "Issue Resolved"
             },
 
             {
-              id:
-                "NO",
-
-              label:
-                "Issue Not Resolved"
+              id: "NO",
+              label: "Issue Not Resolved"
             }
 
           ],
 
-          next_action:
-            "CHECK_RESOLUTION"
+          next_action: "CHECK_RESOLUTION"
 
         };
 
 
-      /* ===============================================
-         RECORDING PROBLEM
-         =============================================== */
-
-      case "RECORDING_PROBLEM":
+      case "APP_BROWSER":
 
         return {
 
           message:
-            "Please check whether the NVR/DVR shows a hard-disk warning and whether the recording schedule is enabled. If the storage status shows an error, the recording problem may require technical inspection.",
+            "Please close and reopen the browser or application. Make sure it is updated to the latest available version and try again.",
 
           options: [
 
             {
-              id:
-                "YES",
-
-              label:
-                "Issue Resolved"
+              id: "YES",
+              label: "Issue Resolved"
             },
 
             {
-              id:
-                "NO",
-
-              label:
-                "Issue Not Resolved"
+              id: "NO",
+              label: "Issue Not Resolved"
             }
 
           ],
 
-          next_action:
-            "CHECK_RESOLUTION"
+          next_action: "CHECK_RESOLUTION"
 
         };
 
 
-      /* ===============================================
-         NETWORK PROBLEM
-         =============================================== */
-
-      case "NETWORK_PROBLEM":
+      case "NETWORK_INTERNET":
 
         return {
 
           message:
-            "Please check the LAN cable, router/switch connection and network indicator lights. If the CCTV system is connected through a network switch, make sure the switch is powered on.",
+            "Please check whether the router or network device is powered on. Also check the LAN/Wi-Fi connection and try reconnecting to the network.",
 
           options: [
 
             {
-              id:
-                "YES",
-
-              label:
-                "Issue Resolved"
+              id: "YES",
+              label: "Issue Resolved"
             },
 
             {
-              id:
-                "NO",
-
-              label:
-                "Issue Not Resolved"
+              id: "NO",
+              label: "Issue Not Resolved"
             }
 
           ],
 
-          next_action:
-            "CHECK_RESOLUTION"
+          next_action: "CHECK_RESOLUTION"
 
         };
 
 
-      /* ===============================================
-         REMOTE VIEWING
-         =============================================== */
-
-      case "REMOTE_VIEWING":
+      case "ERROR_MESSAGE":
 
         return {
 
           message:
-            "Please check whether the NVR/DVR has an active network connection and whether the device shows an online status. Also check whether the mobile application is connected to the correct device.",
+            "Please note the exact error message and try refreshing or reopening the affected page or application. If the same error appears again, create a Support Request.",
 
           options: [
 
             {
-              id:
-                "YES",
-
-              label:
-                "Issue Resolved"
+              id: "YES",
+              label: "Issue Resolved"
             },
 
             {
-              id:
-                "NO",
-
-              label:
-                "Issue Not Resolved"
+              id: "NO",
+              label: "Issue Not Resolved"
             }
 
           ],
 
-          next_action:
-            "CHECK_RESOLUTION"
+          next_action: "CHECK_RESOLUTION"
 
         };
 
 
-      /* ===============================================
-         CCTV OTHER
-         =============================================== */
-
-      case "OTHER":
+      case "TECHNICAL_OTHER":
 
         return {
 
           message:
-            "This CCTV issue may require technical inspection. Would you like to create a Support Request?",
+            "This technical issue may require direct assistance from the Click & Fix team. Would you like to create a Support Request?",
 
           options: [
 
             {
-              id:
-                "CREATE_SUPPORT_REQUEST",
-
-              label:
-                "Create Support Request"
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
             }
 
           ],
 
-          next_action:
-            "CREATE_SUPPORT_REQUEST"
+          next_action: "CREATE_SUPPORT_REQUEST"
 
         };
 
@@ -2979,22 +2932,18 @@ function getSupportBotResponse(
         return {
 
           message:
-            "Please select a valid CCTV problem.",
+            "Please select a valid technical problem.",
 
           options: [
 
             {
-              id:
-                "SELECT_CATEGORY",
-
-              label:
-                "Back"
+              id: "TECHNICAL_PROBLEM",
+              label: "Back"
             }
 
           ],
 
-          next_action:
-            "SELECT_CATEGORY"
+          next_action: "SELECT_CATEGORY"
 
         };
 
@@ -3012,117 +2961,80 @@ function getSupportBotResponse(
     category === "APPOINTMENT_JOB"
   ) {
 
-    switch (
-      subcategory
-    ) {
-
-
-      /* ===============================================
-         APPOINTMENT STATUS
-         =============================================== */
+    switch (subcategory) {
 
       case "APPOINTMENT_STATUS":
 
         return {
 
           message:
-            "Please check your appointment details and current status in the booking portal. If the appointment status is not updating or appears incorrect, please create a Support Request.",
+            "Please check your appointment details and current status in the booking portal. If the status is not updating or appears incorrect, please create a Support Request.",
 
           options: [
 
             {
-              id:
-                "YES",
-
-              label:
-                "Issue Resolved"
+              id: "YES",
+              label: "Issue Resolved"
             },
 
             {
-              id:
-                "NO",
-
-              label:
-                "Issue Not Resolved"
+              id: "NO",
+              label: "Issue Not Resolved"
             }
 
           ],
 
-          next_action:
-            "CHECK_RESOLUTION"
+          next_action: "CHECK_RESOLUTION"
 
         };
 
-
-      /* ===============================================
-         TECHNICIAN / VISIT
-         =============================================== */
 
       case "TECHNICIAN_VISIT":
 
         return {
 
           message:
-            "Please check whether a technician has been assigned to the job and whether the appointment date and visit details are correct. If the technician has not arrived within the expected time, please create a Support Request.",
+            "Please check whether a technician has been assigned and whether the appointment date and visit details are correct. If the technician has not arrived within the expected time, create a Support Request.",
 
           options: [
 
             {
-              id:
-                "YES",
-
-              label:
-                "Issue Resolved"
+              id: "YES",
+              label: "Issue Resolved"
             },
 
             {
-              id:
-                "NO",
-
-              label:
-                "Issue Not Resolved"
+              id: "NO",
+              label: "Issue Not Resolved"
             }
 
           ],
 
-          next_action:
-            "CHECK_RESOLUTION"
+          next_action: "CHECK_RESOLUTION"
 
         };
 
-
-      /* ===============================================
-         JOB RESCHEDULE
-         =============================================== */
 
       case "JOB_RESCHEDULE":
 
         return {
 
           message:
-            "If you need to change the appointment date or time, please create a Support Request so the Click & Fix team can review the rescheduling request.",
+            "If you need to change the appointment date or time, please create a Support Request so the Click & Fix team can review your rescheduling request.",
 
           options: [
 
             {
-              id:
-                "CREATE_SUPPORT_REQUEST",
-
-              label:
-                "Create Support Request"
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
             }
 
           ],
 
-          next_action:
-            "CREATE_SUPPORT_REQUEST"
+          next_action: "CREATE_SUPPORT_REQUEST"
 
         };
 
-
-      /* ===============================================
-         JOB CANCEL
-         =============================================== */
 
       case "JOB_CANCEL":
 
@@ -3134,24 +3046,16 @@ function getSupportBotResponse(
           options: [
 
             {
-              id:
-                "CREATE_SUPPORT_REQUEST",
-
-              label:
-                "Create Support Request"
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
             }
 
           ],
 
-          next_action:
-            "CREATE_SUPPORT_REQUEST"
+          next_action: "CREATE_SUPPORT_REQUEST"
 
         };
 
-
-      /* ===============================================
-         JOB DETAILS
-         =============================================== */
 
       case "JOB_DETAILS":
 
@@ -3163,54 +3067,39 @@ function getSupportBotResponse(
           options: [
 
             {
-              id:
-                "YES",
-
-              label:
-                "Issue Resolved"
+              id: "YES",
+              label: "Issue Resolved"
             },
 
             {
-              id:
-                "NO",
-
-              label:
-                "Issue Not Resolved"
+              id: "NO",
+              label: "Issue Not Resolved"
             }
 
           ],
 
-          next_action:
-            "CHECK_RESOLUTION"
+          next_action: "CHECK_RESOLUTION"
 
         };
 
-
-      /* ===============================================
-         OTHER JOB ISSUE
-         =============================================== */
 
       case "OTHER_JOB_ISSUE":
 
         return {
 
           message:
-            "This appointment or job issue may require direct assistance from the Click & Fix team. Would you like to create a Support Request?",
+            "This appointment or job issue may require direct assistance from the Click & Fix team.",
 
           options: [
 
             {
-              id:
-                "CREATE_SUPPORT_REQUEST",
-
-              label:
-                "Create Support Request"
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
             }
 
           ],
 
-          next_action:
-            "CREATE_SUPPORT_REQUEST"
+          next_action: "CREATE_SUPPORT_REQUEST"
 
         };
 
@@ -3225,17 +3114,742 @@ function getSupportBotResponse(
           options: [
 
             {
-              id:
-                "SELECT_CATEGORY",
-
-              label:
-                "Back"
+              id: "APPOINTMENT_JOB",
+              label: "Back"
             }
 
           ],
 
-          next_action:
-            "SELECT_CATEGORY"
+          next_action: "SELECT_CATEGORY"
+
+        };
+
+    }
+
+  }
+
+
+  /* =====================================================
+     CCTV SUBCATEGORY
+     ===================================================== */
+
+  if (
+    action === "SELECT_SUBCATEGORY" &&
+    category === "CCTV_PROBLEM"
+  ) {
+
+    switch (subcategory) {
+
+      case "CAMERA_OFFLINE":
+
+        return {
+
+          message:
+            "Please check whether the camera has power and whether its network cable is firmly connected. If it is an IP camera, also check the PoE port or network switch connection.",
+
+          options: [
+
+            {
+              id: "YES",
+              label: "Issue Resolved"
+            },
+
+            {
+              id: "NO",
+              label: "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action: "CHECK_RESOLUTION"
+
+        };
+
+
+      case "NO_DISPLAY":
+
+        return {
+
+          message:
+            "Please check the HDMI/VGA cable between the NVR/DVR and monitor, make sure the monitor is on the correct input source, and restart the display device if necessary.",
+
+          options: [
+
+            {
+              id: "YES",
+              label: "Issue Resolved"
+            },
+
+            {
+              id: "NO",
+              label: "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action: "CHECK_RESOLUTION"
+
+        };
+
+
+      case "RECORDING_PROBLEM":
+
+        return {
+
+          message:
+            "Please check whether the NVR/DVR shows a hard-disk warning and whether the recording schedule is enabled. If the storage status shows an error, the recording problem may require technical inspection.",
+
+          options: [
+
+            {
+              id: "YES",
+              label: "Issue Resolved"
+            },
+
+            {
+              id: "NO",
+              label: "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action: "CHECK_RESOLUTION"
+
+        };
+
+
+      case "NETWORK_PROBLEM":
+
+        return {
+
+          message:
+            "Please check the LAN cable, router/switch connection and network indicator lights. If the CCTV system is connected through a network switch, make sure the switch is powered on.",
+
+          options: [
+
+            {
+              id: "YES",
+              label: "Issue Resolved"
+            },
+
+            {
+              id: "NO",
+              label: "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action: "CHECK_RESOLUTION"
+
+        };
+
+
+      case "REMOTE_VIEWING":
+
+        return {
+
+          message:
+            "Please check whether the NVR/DVR has an active network connection and whether the device shows an online status. Also check whether the mobile application is connected to the correct device.",
+
+          options: [
+
+            {
+              id: "YES",
+              label: "Issue Resolved"
+            },
+
+            {
+              id: "NO",
+              label: "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action: "CHECK_RESOLUTION"
+
+        };
+
+
+      case "CCTV_OTHER":
+
+        return {
+
+          message:
+            "This CCTV issue may require technical inspection. Please create a Support Request so the Click & Fix team can assist you.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      default:
+
+        return {
+
+          message:
+            "Please select a valid CCTV problem.",
+
+          options: [
+
+            {
+              id: "CCTV_PROBLEM",
+              label: "Back"
+            }
+
+          ],
+
+          next_action: "SELECT_CATEGORY"
+
+        };
+
+    }
+
+  }
+
+
+  /* =====================================================
+     COMPUTER / LAPTOP SUBCATEGORY
+     ===================================================== */
+
+  if (
+    action === "SELECT_SUBCATEGORY" &&
+    category === "COMPUTER_LAPTOP"
+  ) {
+
+    switch (subcategory) {
+
+      case "COMPUTER_NOT_STARTING":
+
+        return {
+
+          message:
+            "Please check the power connection and make sure the charger or power cable is properly connected. For a laptop, also check whether the charging indicator is working. Try restarting the device once.",
+
+          options: [
+
+            {
+              id: "YES",
+              label: "Issue Resolved"
+            },
+
+            {
+              id: "NO",
+              label: "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action: "CHECK_RESOLUTION"
+
+        };
+
+
+      case "COMPUTER_SLOW":
+
+        return {
+
+          message:
+            "Please restart the computer and close unnecessary applications. Check whether the system is running low on storage or memory. If the computer remains very slow, create a Support Request.",
+
+          options: [
+
+            {
+              id: "YES",
+              label: "Issue Resolved"
+            },
+
+            {
+              id: "NO",
+              label: "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action: "CHECK_RESOLUTION"
+
+        };
+
+
+      case "WINDOWS_PROBLEM":
+
+        return {
+
+          message:
+            "Please restart the computer and check whether Windows completes any pending updates or repair operations. If the Windows problem continues, create a Support Request.",
+
+          options: [
+
+            {
+              id: "YES",
+              label: "Issue Resolved"
+            },
+
+            {
+              id: "NO",
+              label: "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action: "CHECK_RESOLUTION"
+
+        };
+
+
+      case "SOFTWARE_PROBLEM":
+
+        return {
+
+          message:
+            "Please close and reopen the affected software. If available, check for updates and restart the computer. If the software still does not work, create a Support Request.",
+
+          options: [
+
+            {
+              id: "YES",
+              label: "Issue Resolved"
+            },
+
+            {
+              id: "NO",
+              label: "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action: "CHECK_RESOLUTION"
+
+        };
+
+
+      case "COMPUTER_NETWORK":
+
+        return {
+
+          message:
+            "Please check the LAN cable or Wi-Fi connection. Restart the router if necessary and reconnect the computer to the network.",
+
+          options: [
+
+            {
+              id: "YES",
+              label: "Issue Resolved"
+            },
+
+            {
+              id: "NO",
+              label: "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action: "CHECK_RESOLUTION"
+
+        };
+
+
+      case "HARDWARE_PROBLEM":
+
+        return {
+
+          message:
+            "Please check whether all external cables and connected devices are properly connected. If there is unusual noise, overheating, physical damage or a hardware warning, the device may require technical inspection.",
+
+          options: [
+
+            {
+              id: "YES",
+              label: "Issue Resolved"
+            },
+
+            {
+              id: "NO",
+              label: "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action: "CHECK_RESOLUTION"
+
+        };
+
+
+      case "COMPUTER_OTHER":
+
+        return {
+
+          message:
+            "This Computer / Laptop issue may require technical assistance. Please create a Support Request so the Click & Fix team can assist you.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      default:
+
+        return {
+
+          message:
+            "Please select a valid Computer / Laptop problem.",
+
+          options: [
+
+            {
+              id: "COMPUTER_LAPTOP",
+              label: "Back"
+            }
+
+          ],
+
+          next_action: "SELECT_CATEGORY"
+
+        };
+
+    }
+
+  }
+
+
+  /* =====================================================
+     JOB ID / BILLING SUBCATEGORY
+     ===================================================== */
+
+  if (
+    action === "SELECT_SUBCATEGORY" &&
+    category === "JOB_ID_BILLING"
+  ) {
+
+    switch (subcategory) {
+
+      case "JOB_ID_NOT_RECEIVED":
+
+        return {
+
+          message:
+            "Please check your appointment or tracking details first. If the Job ID has not been generated or received, please create a Support Request.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      case "JOB_ID_PROBLEM":
+
+        return {
+
+          message:
+            "Please verify that you are using the correct Job ID associated with your appointment. If the Job ID is invalid or not working, please create a Support Request.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      case "INVOICE_BILL":
+
+        return {
+
+          message:
+            "Please check whether the invoice or bill details are available in your service records. If any amount, service or billing information is incorrect, please create a Support Request.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      case "PAYMENT_PROBLEM":
+
+        return {
+
+          message:
+            "Please verify that the payment was made using the correct payment method and check whether the transaction was successful. If the payment problem continues, create a Support Request.",
+
+          options: [
+
+            {
+              id: "YES",
+              label: "Issue Resolved"
+            },
+
+            {
+              id: "NO",
+              label: "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action: "CHECK_RESOLUTION"
+
+        };
+
+
+      case "PAYMENT_CONFIRMATION":
+
+        return {
+
+          message:
+            "Please check your payment transaction status and keep the transaction reference available. If the payment was successful but confirmation is missing, please create a Support Request.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      case "BILLING_OTHER":
+
+        return {
+
+          message:
+            "This billing issue may require direct assistance from the Click & Fix team.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      default:
+
+        return {
+
+          message:
+            "Please select a valid Job ID or Billing issue.",
+
+          options: [
+
+            {
+              id: "JOB_ID_BILLING",
+              label: "Back"
+            }
+
+          ],
+
+          next_action: "SELECT_CATEGORY"
+
+        };
+
+    }
+
+  }
+
+
+  /* =====================================================
+     TECHNICIAN SUPPORT SUBCATEGORY
+     ===================================================== */
+
+  if (
+    action === "SELECT_SUBCATEGORY" &&
+    category === "TECHNICIAN_SUPPORT"
+  ) {
+
+    switch (subcategory) {
+
+      case "TECHNICIAN_NOT_ASSIGNED":
+
+        return {
+
+          message:
+            "Please check the appointment or tracking page to see whether a technician has been assigned. If no technician is assigned within the expected time, please create a Support Request.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      case "TECHNICIAN_NOT_CONTACTING":
+
+        return {
+
+          message:
+            "Please check the technician information available in your appointment or tracking details. If the technician cannot be contacted, please create a Support Request.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      case "TECHNICIAN_VISIT_DELAY":
+
+        return {
+
+          message:
+            "Please check the scheduled visit time and current job status. If the technician visit is delayed beyond the expected time, please create a Support Request.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      case "TECHNICIAN_BEHAVIOUR":
+
+        return {
+
+          message:
+            "If you have a concern regarding technician behaviour or conduct, please create a Support Request so the Click & Fix team can review the matter.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      case "TECHNICIAN_JOB_ISSUE":
+
+        return {
+
+          message:
+            "If you have a problem related to the technician's work or service, please create a Support Request with the relevant job details.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      case "TECHNICIAN_OTHER":
+
+        return {
+
+          message:
+            "This technician-related issue may require direct assistance from the Click & Fix team.",
+
+          options: [
+
+            {
+              id: "CREATE_SUPPORT_REQUEST",
+              label: "Create Support Request"
+            }
+
+          ],
+
+          next_action: "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      default:
+
+        return {
+
+          message:
+            "Please select a valid Technician Support issue.",
+
+          options: [
+
+            {
+              id: "TECHNICIAN_SUPPORT",
+              label: "Back"
+            }
+
+          ],
+
+          next_action: "SELECT_CATEGORY"
 
         };
 
@@ -3248,13 +3862,9 @@ function getSupportBotResponse(
      RESOLUTION CHECK
      ===================================================== */
 
-  if (
-    action === "CHECK_RESOLUTION"
-  ) {
+  if (action === "CHECK_RESOLUTION") {
 
-    if (
-      subcategory === "YES"
-    ) {
+    if (subcategory === "YES") {
 
       return {
 
@@ -3264,34 +3874,25 @@ function getSupportBotResponse(
         options: [
 
           {
-            id:
-              "YES",
-
-            label:
-              "Yes, Close"
+            id: "YES",
+            label: "Yes, Close"
           },
 
           {
-            id:
-              "NO",
-
-            label:
-              "No"
+            id: "NO",
+            label: "No"
           }
 
         ],
 
-        next_action:
-          "CLOSE_FLOW"
+        next_action: "CLOSE_FLOW"
 
       };
 
     }
 
 
-    if (
-      subcategory === "NO"
-    ) {
+    if (subcategory === "NO") {
 
       return {
 
@@ -3301,17 +3902,13 @@ function getSupportBotResponse(
         options: [
 
           {
-            id:
-              "CREATE_SUPPORT_REQUEST",
-
-            label:
-              "Create Support Request"
+            id: "CREATE_SUPPORT_REQUEST",
+            label: "Create Support Request"
           }
 
         ],
 
-        next_action:
-          "CREATE_SUPPORT_REQUEST"
+        next_action: "CREATE_SUPPORT_REQUEST"
 
       };
 
@@ -3324,13 +3921,9 @@ function getSupportBotResponse(
      CLOSE FLOW
      ===================================================== */
 
-  if (
-    action === "CLOSE_FLOW"
-  ) {
+  if (action === "CLOSE_FLOW") {
 
-    if (
-      subcategory === "YES"
-    ) {
+    if (subcategory === "YES") {
 
       return {
 
@@ -3340,26 +3933,20 @@ function getSupportBotResponse(
         options: [
 
           {
-            id:
-              "START",
-
-            label:
-              "Start Again"
+            id: "START",
+            label: "Start Again"
           }
 
         ],
 
-        next_action:
-          "END"
+        next_action: "END"
 
       };
 
     }
 
 
-    if (
-      subcategory === "NO"
-    ) {
+    if (subcategory === "NO") {
 
       return {
 
@@ -3369,17 +3956,13 @@ function getSupportBotResponse(
         options: [
 
           {
-            id:
-              "START",
-
-            label:
-              "Back to Support"
+            id: "START",
+            label: "Back to Support"
           }
 
         ],
 
-        next_action:
-          "START"
+        next_action: "START"
 
       };
 
@@ -3400,17 +3983,13 @@ function getSupportBotResponse(
     options: [
 
       {
-        id:
-          "START",
-
-        label:
-          "Start Again"
+        id: "START",
+        label: "Start Again"
       }
 
     ],
 
-    next_action:
-      "START"
+    next_action: "START"
 
   };
 

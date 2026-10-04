@@ -8790,7 +8790,6 @@ function renderSupportBotPanel(
 
 }
 
-
 /* =========================================================
    BOT ACTION HANDLER
    ========================================================= */
@@ -8897,7 +8896,8 @@ async function handleSupportBotAction(
         "NO_DISPLAY",
         "RECORDING_PROBLEM",
         "NETWORK_PROBLEM",
-        "REMOTE_VIEWING"
+        "REMOTE_VIEWING",
+        "OTHER"
 
     ];
 
@@ -8916,6 +8916,47 @@ async function handleSupportBotAction(
 
                 category:
                     "CCTV_PROBLEM",
+
+                subcategory:
+                    selectedAction
+            }
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Appointment / Job subcategory.
+     */
+
+    const appointmentJobActions = [
+
+        "APPOINTMENT_STATUS",
+        "TECHNICIAN_VISIT",
+        "JOB_RESCHEDULE",
+        "JOB_CANCEL",
+        "JOB_DETAILS",
+        "OTHER_JOB_ISSUE"
+
+    ];
+
+
+    if (
+        appointmentJobActions.includes(
+            selectedAction
+        )
+    ) {
+
+        await requestSupportBotStep(
+            request,
+            {
+                action:
+                    "SELECT_SUBCATEGORY",
+
+                category:
+                    "APPOINTMENT_JOB",
 
                 subcategory:
                     selectedAction

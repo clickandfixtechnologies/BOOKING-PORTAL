@@ -8755,6 +8755,27 @@ function renderSupportBotPanel(
 
     `;
 
+    const botHeader =
+    panel.querySelector(
+        ".tech-support-bot-header"
+    );
+
+
+if (botHeader) {
+
+    botHeader.addEventListener(
+        "click",
+        () => {
+
+            panel.classList.toggle(
+                "bot-open"
+            );
+
+        }
+    );
+
+}
+
 
     panel
         .querySelectorAll(
@@ -9186,7 +9207,7 @@ async function handleSupportBotAction(
      return;
 
  }
- 
+
 
 
     /*

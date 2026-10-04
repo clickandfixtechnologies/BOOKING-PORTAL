@@ -8887,23 +8887,23 @@ async function handleSupportBotAction(
 
 
     /*
-     * CCTV subcategory.
+     * Technical Problem subcategory.
      */
 
-    const cctvActions = [
+    const technicalActions = [
 
-        "CAMERA_OFFLINE",
-        "NO_DISPLAY",
-        "RECORDING_PROBLEM",
-        "NETWORK_PROBLEM",
-        "REMOTE_VIEWING",
-        "OTHER"
+        "WEBSITE_PORTAL",
+        "LOGIN_PROBLEM",
+        "APP_BROWSER",
+        "NETWORK_INTERNET",
+        "ERROR_MESSAGE",
+        "TECHNICAL_OTHER"
 
     ];
 
 
     if (
-        cctvActions.includes(
+        technicalActions.includes(
             selectedAction
         )
     ) {
@@ -8915,7 +8915,7 @@ async function handleSupportBotAction(
                     "SELECT_SUBCATEGORY",
 
                 category:
-                    "CCTV_PROBLEM",
+                    "TECHNICAL_PROBLEM",
 
                 subcategory:
                     selectedAction
@@ -8957,6 +8957,171 @@ async function handleSupportBotAction(
 
                 category:
                     "APPOINTMENT_JOB",
+
+                subcategory:
+                    selectedAction
+            }
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * CCTV subcategory.
+     */
+
+    const cctvActions = [
+
+        "CAMERA_OFFLINE",
+        "NO_DISPLAY",
+        "RECORDING_PROBLEM",
+        "NETWORK_PROBLEM",
+        "REMOTE_VIEWING",
+        "CCTV_OTHER"
+
+    ];
+
+
+    if (
+        cctvActions.includes(
+            selectedAction
+        )
+    ) {
+
+        await requestSupportBotStep(
+            request,
+            {
+                action:
+                    "SELECT_SUBCATEGORY",
+
+                category:
+                    "CCTV_PROBLEM",
+
+                subcategory:
+                    selectedAction
+            }
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Computer / Laptop subcategory.
+     */
+
+    const computerActions = [
+
+        "COMPUTER_NOT_STARTING",
+        "COMPUTER_SLOW",
+        "WINDOWS_PROBLEM",
+        "SOFTWARE_PROBLEM",
+        "COMPUTER_NETWORK",
+        "HARDWARE_PROBLEM",
+        "COMPUTER_OTHER"
+
+    ];
+
+
+    if (
+        computerActions.includes(
+            selectedAction
+        )
+    ) {
+
+        await requestSupportBotStep(
+            request,
+            {
+                action:
+                    "SELECT_SUBCATEGORY",
+
+                category:
+                    "COMPUTER_LAPTOP",
+
+                subcategory:
+                    selectedAction
+            }
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Job ID / Billing subcategory.
+     */
+
+    const billingActions = [
+
+        "JOB_ID_NOT_RECEIVED",
+        "JOB_ID_PROBLEM",
+        "INVOICE_BILL",
+        "PAYMENT_PROBLEM",
+        "PAYMENT_CONFIRMATION",
+        "BILLING_OTHER"
+
+    ];
+
+
+    if (
+        billingActions.includes(
+            selectedAction
+        )
+    ) {
+
+        await requestSupportBotStep(
+            request,
+            {
+                action:
+                    "SELECT_SUBCATEGORY",
+
+                category:
+                    "JOB_ID_BILLING",
+
+                subcategory:
+                    selectedAction
+            }
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Technician Support subcategory.
+     */
+
+    const technicianActions = [
+
+        "TECHNICIAN_NOT_ASSIGNED",
+        "TECHNICIAN_NOT_CONTACTING",
+        "TECHNICIAN_VISIT_DELAY",
+        "TECHNICIAN_BEHAVIOUR",
+        "TECHNICIAN_JOB_ISSUE",
+        "TECHNICIAN_OTHER"
+
+    ];
+
+
+    if (
+        technicianActions.includes(
+            selectedAction
+        )
+    ) {
+
+        await requestSupportBotStep(
+            request,
+            {
+                action:
+                    "SELECT_SUBCATEGORY",
+
+                category:
+                    "TECHNICIAN_SUPPORT",
 
                 subcategory:
                     selectedAction

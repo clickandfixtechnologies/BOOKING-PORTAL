@@ -3306,11 +3306,19 @@ async function supportBotMessage(
     );
 
 
-    throw new Error(
-      "SUPPORT_BOT_MESSAGE_SAVE_FAILED"
+    if (error) {
+    console.error(
+        "SUPPORT_BOT_MESSAGE_SAVE_FAILED:",
+        error
     );
 
-  }
+    throw new Error(
+        `SUPPORT_BOT_MESSAGE_SAVE_FAILED: ${
+            error.message ||
+            "Database insert failed."
+        }`
+    );
+}
 
 
   return {

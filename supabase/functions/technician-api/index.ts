@@ -206,20 +206,6 @@ case "support_message_send":
     body
   );
 
-  case "support_bot":
-  return supportBot(
-    db,
-    technician.id,
-    body
-  );
-
-case "support_bot_message":
-  return supportBotMessage(
-    db,
-    technician.id,
-    body
-  );
-
     default:
       throw new Error(
         "Unknown technician action."

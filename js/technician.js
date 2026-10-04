@@ -7086,6 +7086,14 @@ async function startSupportUnreadRealtime() {
                             ""
                         ).toUpperCase();
 
+                        if (
+                    senderType === "ADMIN"
+                    ) {
+
+                    playSupportMessageSound();
+
+                    }
+
                     if (
                         senderType !== "ADMIN"
                     ) {
@@ -9713,6 +9721,21 @@ function appendSupportChatMessage(
                 container.scrollHeight;
 
         }
+    );
+
+}
+
+function playSupportMessageSound() {
+
+    const audio =
+        new Audio(
+            "/assets/sounds/new-message.mp3"
+        );
+
+    audio.volume = 0.6;
+
+    audio.play().catch(
+        () => {}
     );
 
 }

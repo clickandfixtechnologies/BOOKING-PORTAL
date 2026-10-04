@@ -2176,7 +2176,1165 @@ async function sendSupportMessage(
 
 }
 
+/* =========================================================
+   SUPPORT BOT
+   PHASE 5
+   RULE-BASED SUPPORT TROUBLESHOOTING
+   ========================================================= */
 
+async function supportBot(
+  db: any,
+  technicianId: string,
+  body: any
+) {
+
+  if (
+    !isUuid(technicianId)
+  ) {
+    throw new Error(
+      "Invalid technician."
+    );
+  }
+
+
+  const requestId =
+    String(
+      body?.support_request_id ||
+      ""
+    ).trim();
+
+
+  /*
+   * support_request_id is optional when
+   * the bot is being opened before a
+   * support request exists.
+   */
+
+  if (
+    requestId &&
+    !isUuid(requestId)
+  ) {
+    throw new Error(
+      "Invalid support request."
+    );
+  }
+
+
+  const action =
+    String(
+      body?.action ||
+      "START"
+    )
+      .trim()
+      .toUpperCase();
+
+
+  const category =
+    String(
+      body?.category ||
+      ""
+    )
+      .trim()
+      .toUpperCase();
+
+
+  const subcategory =
+    String(
+      body?.subcategory ||
+      ""
+    )
+      .trim()
+      .toUpperCase();
+
+
+  /*
+   * If a support request is supplied,
+   * verify that it belongs to the
+   * logged-in technician.
+   */
+
+  if (requestId) {
+
+    const {
+      data: supportRequest,
+      error: supportRequestError
+    } = await db
+      .from("support_requests")
+      .select(`
+        id,
+        support_token,
+        technician_id,
+        status
+      `)
+      .eq(
+        "id",
+        requestId
+      )
+      .eq(
+        "technician_id",
+        technicianId
+      )
+      .maybeSingle();
+
+
+    if (
+      supportRequestError
+    ) {
+
+      console.error(
+        "SUPPORT BOT REQUEST VERIFY ERROR:",
+        supportRequestError.message
+      );
+
+      throw new Error(
+        "SUPPORT_REQUEST_VERIFY_FAILED"
+      );
+    }
+
+
+    if (
+      !supportRequest
+    ) {
+
+      throw new Error(
+        "SUPPORT_REQUEST_NOT_FOUND"
+      );
+    }
+  }
+
+
+  /*
+   * Rule-based response.
+   */
+
+  const response =
+    getSupportBotResponse(
+      action,
+      category,
+      subcategory
+    );
+
+
+  return {
+
+    bot: {
+
+      action:
+        action,
+
+      category:
+        category || null,
+
+      subcategory:
+        subcategory || null,
+
+      message:
+        response.message,
+
+      options:
+        response.options || [],
+
+      next_action:
+        response.next_action || null
+
+    }
+
+  };
+
+}
+
+
+/* =========================================================
+   SUPPORT BOT RESPONSE ENGINE
+   ========================================================= */
+
+function getSupportBotResponse(
+  action: string,
+  category: string,
+  subcategory: string
+) {
+
+
+  /* =====================================================
+     START
+     ===================================================== */
+
+  if (
+    action === "START"
+  ) {
+
+    return {
+
+      message:
+        "Hello! I’m the Click & Fix Support Bot. Please select the type of problem you need help with.",
+
+      options: [
+
+        {
+          id:
+            "TECHNICAL_PROBLEM",
+
+          label:
+            "Technical Problem"
+        },
+
+        {
+          id:
+            "APPOINTMENT_JOB",
+
+          label:
+            "Appointment / Job"
+        },
+
+        {
+          id:
+            "CCTV_PROBLEM",
+
+          label:
+            "CCTV Problem"
+        },
+
+        {
+          id:
+            "COMPUTER_LAPTOP",
+
+          label:
+            "Computer / Laptop"
+        },
+
+        {
+          id:
+            "JOB_ID_BILLING",
+
+          label:
+            "Job ID / Billing"
+        },
+
+        {
+          id:
+            "TECHNICIAN_SUPPORT",
+
+          label:
+            "Technician Support"
+        },
+
+        {
+          id:
+            "OTHER",
+
+          label:
+            "Other"
+        }
+
+      ],
+
+      next_action:
+        "SELECT_CATEGORY"
+
+    };
+
+  }
+
+
+  /* =====================================================
+     CATEGORY
+     ===================================================== */
+
+  if (
+    action === "SELECT_CATEGORY"
+  ) {
+
+    switch (
+      category
+    ) {
+
+      /* ===============================================
+         CCTV
+         =============================================== */
+
+      case "CCTV_PROBLEM":
+
+        return {
+
+          message:
+            "Please select the CCTV problem you are facing.",
+
+          options: [
+
+            {
+              id:
+                "CAMERA_OFFLINE",
+
+              label:
+                "Camera Offline"
+            },
+
+            {
+              id:
+                "NO_DISPLAY",
+
+              label:
+                "No Display"
+            },
+
+            {
+              id:
+                "RECORDING_PROBLEM",
+
+              label:
+                "Recording Problem"
+            },
+
+            {
+              id:
+                "NETWORK_PROBLEM",
+
+              label:
+                "Network Problem"
+            },
+
+            {
+              id:
+                "REMOTE_VIEWING",
+
+              label:
+                "Remote Viewing"
+            },
+
+            {
+              id:
+                "OTHER",
+
+              label:
+                "Other"
+            }
+
+          ],
+
+          next_action:
+            "SELECT_SUBCATEGORY"
+
+        };
+
+
+      /* ===============================================
+         OTHER CATEGORIES
+         =============================================== */
+
+      case "TECHNICAL_PROBLEM":
+
+        return {
+
+          message:
+            "Please describe the technical problem you are facing. I’ll help you identify the next step.",
+
+          options: [
+
+            {
+              id:
+                "CREATE_SUPPORT_REQUEST",
+
+              label:
+                "Create Support Request"
+            }
+
+          ],
+
+          next_action:
+            "TECHNICAL_PROBLEM"
+
+        };
+
+
+      case "APPOINTMENT_JOB":
+
+        return {
+
+          message:
+            "What do you need help with regarding your appointment or job?",
+
+          options: [
+
+            {
+              id:
+                "CREATE_SUPPORT_REQUEST",
+
+              label:
+                "Create Support Request"
+            }
+
+          ],
+
+          next_action:
+            "APPOINTMENT_JOB"
+
+        };
+
+
+      case "COMPUTER_LAPTOP":
+
+        return {
+
+          message:
+            "Please select how you would like to proceed with your Computer / Laptop problem.",
+
+          options: [
+
+            {
+              id:
+                "CREATE_SUPPORT_REQUEST",
+
+              label:
+                "Create Support Request"
+            }
+
+          ],
+
+          next_action:
+            "COMPUTER_LAPTOP"
+
+        };
+
+
+      case "JOB_ID_BILLING":
+
+        return {
+
+          message:
+            "Please select how you would like to proceed with your Job ID or Billing issue.",
+
+          options: [
+
+            {
+              id:
+                "CREATE_SUPPORT_REQUEST",
+
+              label:
+                "Create Support Request"
+            }
+
+          ],
+
+          next_action:
+            "JOB_ID_BILLING"
+
+        };
+
+
+      case "TECHNICIAN_SUPPORT":
+
+        return {
+
+          message:
+            "Please select how you would like to proceed with Technician Support.",
+
+          options: [
+
+            {
+              id:
+                "CREATE_SUPPORT_REQUEST",
+
+              label:
+                "Create Support Request"
+            }
+
+          ],
+
+          next_action:
+            "TECHNICIAN_SUPPORT"
+
+        };
+
+
+      case "OTHER":
+
+        return {
+
+          message:
+            "This issue may require direct support from the Click & Fix team.",
+
+          options: [
+
+            {
+              id:
+                "CREATE_SUPPORT_REQUEST",
+
+              label:
+                "Create Support Request"
+            }
+
+          ],
+
+          next_action:
+            "OTHER"
+
+        };
+
+
+      default:
+
+        return {
+
+          message:
+            "Please select a valid support category.",
+
+          options: [
+
+            {
+              id:
+                "START",
+
+              label:
+                "Start Again"
+            }
+
+          ],
+
+          next_action:
+            "START"
+
+        };
+
+    }
+
+  }
+
+
+  /* =====================================================
+     CCTV SUBCATEGORY
+     ===================================================== */
+
+  if (
+    action === "SELECT_SUBCATEGORY" &&
+    category === "CCTV_PROBLEM"
+  ) {
+
+    switch (
+      subcategory
+    ) {
+
+
+      /* ===============================================
+         CAMERA OFFLINE
+         =============================================== */
+
+      case "CAMERA_OFFLINE":
+
+        return {
+
+          message:
+            "Please check whether the camera has power and whether its network cable is firmly connected. If it is an IP camera, also check the PoE port or network switch connection.",
+
+          options: [
+
+            {
+              id:
+                "YES",
+
+              label:
+                "Issue Resolved"
+            },
+
+            {
+              id:
+                "NO",
+
+              label:
+                "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action:
+            "CHECK_RESOLUTION"
+
+        };
+
+
+      /* ===============================================
+         NO DISPLAY
+         =============================================== */
+
+      case "NO_DISPLAY":
+
+        return {
+
+          message:
+            "Please check the HDMI/VGA cable between the NVR/DVR and monitor, make sure the monitor is on the correct input source, and restart the display device if necessary.",
+
+          options: [
+
+            {
+              id:
+                "YES",
+
+              label:
+                "Issue Resolved"
+            },
+
+            {
+              id:
+                "NO",
+
+              label:
+                "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action:
+            "CHECK_RESOLUTION"
+
+        };
+
+
+      /* ===============================================
+         RECORDING PROBLEM
+         =============================================== */
+
+      case "RECORDING_PROBLEM":
+
+        return {
+
+          message:
+            "Please check whether the NVR/DVR shows a hard-disk warning and whether the recording schedule is enabled. If the storage status shows an error, the recording problem may require technical inspection.",
+
+          options: [
+
+            {
+              id:
+                "YES",
+
+              label:
+                "Issue Resolved"
+            },
+
+            {
+              id:
+                "NO",
+
+              label:
+                "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action:
+            "CHECK_RESOLUTION"
+
+        };
+
+
+      /* ===============================================
+         NETWORK PROBLEM
+         =============================================== */
+
+      case "NETWORK_PROBLEM":
+
+        return {
+
+          message:
+            "Please check the LAN cable, router/switch connection and network indicator lights. If the CCTV system is connected through a network switch, make sure the switch is powered on.",
+
+          options: [
+
+            {
+              id:
+                "YES",
+
+              label:
+                "Issue Resolved"
+            },
+
+            {
+              id:
+                "NO",
+
+              label:
+                "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action:
+            "CHECK_RESOLUTION"
+
+        };
+
+
+      /* ===============================================
+         REMOTE VIEWING
+         =============================================== */
+
+      case "REMOTE_VIEWING":
+
+        return {
+
+          message:
+            "Please check whether the NVR/DVR has an active network connection and whether the device shows an online status. Also check whether the mobile application is connected to the correct device.",
+
+          options: [
+
+            {
+              id:
+                "YES",
+
+              label:
+                "Issue Resolved"
+            },
+
+            {
+              id:
+                "NO",
+
+              label:
+                "Issue Not Resolved"
+            }
+
+          ],
+
+          next_action:
+            "CHECK_RESOLUTION"
+
+        };
+
+
+      /* ===============================================
+         CCTV OTHER
+         =============================================== */
+
+      case "OTHER":
+
+        return {
+
+          message:
+            "This CCTV issue may require technical inspection. Would you like to create a Support Request?",
+
+          options: [
+
+            {
+              id:
+                "CREATE_SUPPORT_REQUEST",
+
+              label:
+                "Create Support Request"
+            }
+
+          ],
+
+          next_action:
+            "CREATE_SUPPORT_REQUEST"
+
+        };
+
+
+      default:
+
+        return {
+
+          message:
+            "Please select a valid CCTV problem.",
+
+          options: [
+
+            {
+              id:
+                "SELECT_CATEGORY",
+
+              label:
+                "Back"
+            }
+
+          ],
+
+          next_action:
+            "SELECT_CATEGORY"
+
+        };
+
+    }
+
+  }
+
+
+  /* =====================================================
+     RESOLUTION CHECK
+     ===================================================== */
+
+  if (
+    action === "CHECK_RESOLUTION"
+  ) {
+
+    if (
+      subcategory === "YES"
+    ) {
+
+      return {
+
+        message:
+          "Great! The issue appears to be resolved. Would you like to close this support flow?",
+
+        options: [
+
+          {
+            id:
+              "YES",
+
+            label:
+              "Yes, Close"
+          },
+
+          {
+            id:
+              "NO",
+
+            label:
+              "No"
+          }
+
+        ],
+
+        next_action:
+          "CLOSE_FLOW"
+
+      };
+
+    }
+
+
+    if (
+      subcategory === "NO"
+    ) {
+
+      return {
+
+        message:
+          "The issue could not be resolved using the basic troubleshooting steps. Please create a Support Request so the Click & Fix team can assist you.",
+
+        options: [
+
+          {
+            id:
+              "CREATE_SUPPORT_REQUEST",
+
+            label:
+              "Create Support Request"
+          }
+
+        ],
+
+        next_action:
+          "CREATE_SUPPORT_REQUEST"
+
+      };
+
+    }
+
+  }
+
+
+  /* =====================================================
+     CLOSE FLOW
+     ===================================================== */
+
+  if (
+    action === "CLOSE_FLOW"
+  ) {
+
+    if (
+      subcategory === "YES"
+    ) {
+
+      return {
+
+        message:
+          "Great! Your issue has been resolved. You can start a new Support Request anytime if another problem occurs.",
+
+        options: [
+
+          {
+            id:
+              "START",
+
+            label:
+              "Start Again"
+          }
+
+        ],
+
+        next_action:
+          "END"
+
+      };
+
+    }
+
+
+    if (
+      subcategory === "NO"
+    ) {
+
+      return {
+
+        message:
+          "No problem. You can continue troubleshooting or create a Support Request if you need assistance.",
+
+        options: [
+
+          {
+            id:
+              "START",
+
+            label:
+              "Back to Support"
+          }
+
+        ],
+
+        next_action:
+          "START"
+
+      };
+
+    }
+
+  }
+
+
+  /* =====================================================
+     FALLBACK
+     ===================================================== */
+
+  return {
+
+    message:
+      "I could not determine the next step. Please start the support flow again.",
+
+    options: [
+
+      {
+        id:
+          "START",
+
+        label:
+          "Start Again"
+      }
+
+    ],
+
+    next_action:
+      "START"
+
+  };
+
+}
+
+
+/* =========================================================
+   SUPPORT BOT MESSAGE
+   SAVE BOT MESSAGE TO SUPPORT CHAT
+   ========================================================= */
+
+async function supportBotMessage(
+  db: any,
+  technicianId: string,
+  body: any
+) {
+
+  if (
+    !isUuid(technicianId)
+  ) {
+
+    throw new Error(
+      "Invalid technician."
+    );
+
+  }
+
+
+  const requestId =
+    String(
+      body?.support_request_id ||
+      ""
+    ).trim();
+
+
+  const message =
+    String(
+      body?.message ||
+      ""
+    ).trim();
+
+
+  if (
+    !requestId ||
+    !isUuid(requestId)
+  ) {
+
+    throw new Error(
+      "Invalid support request."
+    );
+
+  }
+
+
+  if (!message) {
+
+    throw new Error(
+      "Bot message is required."
+    );
+
+  }
+
+
+  if (
+    message.length > 2000
+  ) {
+
+    throw new Error(
+      "Bot message cannot exceed 2000 characters."
+    );
+
+  }
+
+
+  /*
+   * Verify ownership.
+   */
+
+  const {
+    data: supportRequest,
+    error: supportRequestError
+  } = await db
+    .from("support_requests")
+    .select(`
+      id,
+      technician_id,
+      status
+    `)
+    .eq(
+      "id",
+      requestId
+    )
+    .eq(
+      "technician_id",
+      technicianId
+    )
+    .maybeSingle();
+
+
+  if (
+    supportRequestError
+  ) {
+
+    console.error(
+      "BOT MESSAGE REQUEST VERIFY ERROR:",
+      supportRequestError.message
+    );
+
+    throw new Error(
+      "SUPPORT_REQUEST_VERIFY_FAILED"
+    );
+
+  }
+
+
+  if (
+    !supportRequest
+  ) {
+
+    throw new Error(
+      "SUPPORT_REQUEST_NOT_FOUND"
+    );
+
+  }
+
+
+  /*
+   * BOT is allowed to remain available
+   * even when the human composer is disabled.
+   *
+   * Therefore CLOSED requests are NOT blocked here.
+   *
+   * CANCELLED requests are also kept
+   * read-only for human chat.
+   */
+
+
+  /*
+   * IMPORTANT:
+   * sender_type is NEVER accepted
+   * from the frontend.
+   *
+   * It is always forced to BOT.
+   */
+
+  const {
+    data,
+    error
+  } = await db
+    .from("support_messages")
+    .insert({
+
+      support_request_id:
+        requestId,
+
+      sender_type:
+        "BOT",
+
+      sender_user_id:
+        null,
+
+      message:
+        message
+
+    })
+    .select(`
+      id,
+      support_request_id,
+      sender_type,
+      sender_user_id,
+      message,
+      created_at
+    `)
+    .single();
+
+
+  if (error) {
+
+    console.error(
+      "SUPPORT BOT MESSAGE INSERT ERROR:",
+      {
+        message:
+          error.message,
+
+        details:
+          error.details,
+
+        hint:
+          error.hint,
+
+        code:
+          error.code
+      }
+    );
+
+
+    throw new Error(
+      "SUPPORT_BOT_MESSAGE_SAVE_FAILED"
+    );
+
+  }
+
+
+  return {
+
+    message:
+      data
+
+  };
+
+}
 
 /* =========================================================
    SUPPORT TOKEN GENERATOR

@@ -91,6 +91,19 @@ async function route(
         body
       );
 
+      case "support_bot":
+  return supportBot(
+    db,
+    technician.id,
+    body
+  );
+
+case "support_bot_message":
+  return supportBotMessage(
+    db,
+    technician.id,
+    body
+  );
 
     /* =====================================================
        COMPLETION OTP
@@ -188,6 +201,20 @@ async function route(
 
 case "support_message_send":
   return sendSupportMessage(
+    db,
+    technician.id,
+    body
+  );
+
+  case "support_bot":
+  return supportBot(
+    db,
+    technician.id,
+    body
+  );
+
+case "support_bot_message":
+  return supportBotMessage(
     db,
     technician.id,
     body

@@ -7361,6 +7361,27 @@ async function openSupportChat() {
                 ? response.requests
                 : [];
 
+                        /*
+         * Only support requests that are
+         * still relevant for conversation.
+         */
+        const activeRequests =
+            requests.filter(
+                request => {
+
+                    const status =
+                        String(
+                            request?.status || ""
+                        ).toUpperCase();
+
+                    return (
+                        status !== "CLOSED" &&
+                        status !== "CANCELLED"
+                    );
+
+                }
+            );
+
 /* =====================================================
    UPDATE FLOATING SUPPORT UNREAD BADGE
    ===================================================== */

@@ -7926,33 +7926,50 @@ i[class*="fa-"]{
 /* =========================================================
    CLICK & FIX SUPPORT BOT
    PHASE 5
-   COMPACT CHAT-FRIENDLY UI
+   COLLAPSIBLE CHAT-FRIENDLY UI
    ========================================================= */
 
 .tech-support-bot-panel {
     margin: 8px 12px;
-    padding: 10px;
-    border: 1px solid rgba(109, 93, 252, 0.16);
+    padding: 8px 10px;
+
+    border:
+        1px solid
+        rgba(109, 93, 252, 0.16);
+
     border-radius: 14px;
-    background: rgba(109, 93, 252, 0.045);
+
+    background:
+        rgba(109, 93, 252, 0.045);
 
     /*
-     * Keep Bot panel compact so that
-     * support chat messages remain visible.
+     * Compact by default.
      */
+    max-height: 48px;
+
+    overflow: hidden;
+
+    flex-shrink: 0;
+
+    transition:
+        max-height 0.25s ease,
+        padding 0.25s ease,
+        margin 0.25s ease;
+}
+
+
+/* =========================================================
+   BOT OPEN STATE
+   ========================================================= */
+
+.tech-support-bot-panel.bot-open {
     max-height: 210px;
+
     overflow-y: auto;
 
-    /*
-     * Smooth scrolling inside Bot panel.
-     */
     scroll-behavior: smooth;
 
-    /*
-     * Prevent the panel from becoming
-     * too large on smaller screens.
-     */
-    flex-shrink: 0;
+    padding: 10px;
 }
 
 
@@ -7962,17 +7979,31 @@ i[class*="fa-"]{
 
 .tech-support-bot-header {
     display: flex;
+
     align-items: center;
+
     gap: 8px;
-    margin-bottom: 8px;
+
+    margin: 0;
+
+    cursor: pointer;
+
+    user-select: none;
 }
+
+
+/* =========================================================
+   BOT AVATAR
+   ========================================================= */
 
 .tech-support-bot-avatar {
     width: 32px;
     height: 32px;
+
     min-width: 32px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -7984,10 +8015,16 @@ i[class*="fa-"]{
     font-size: 14px;
 }
 
+
+/* =========================================================
+   BOT HEADER TEXT
+   ========================================================= */
+
 .tech-support-bot-header strong {
     display: block;
 
     font-size: 12px;
+
     font-weight: 700;
 }
 
@@ -8007,6 +8044,8 @@ i[class*="fa-"]{
    ========================================================= */
 
 .tech-support-bot-message {
+    margin-top: 8px;
+
     padding: 9px 11px;
 
     border-radius: 10px;
@@ -8018,13 +8057,11 @@ i[class*="fa-"]{
         rgba(0, 0, 0, 0.06);
 
     font-size: 12px;
+
     line-height: 1.45;
 
-    /*
-     * Prevent very long Bot messages
-     * from consuming the entire panel.
-     */
     max-height: 80px;
+
     overflow-y: auto;
 }
 
@@ -8036,9 +8073,6 @@ i[class*="fa-"]{
 .tech-support-bot-options {
     display: grid;
 
-    /*
-     * Two columns saves a lot of vertical space.
-     */
     grid-template-columns:
         repeat(2, minmax(0, 1fr));
 
@@ -8046,6 +8080,7 @@ i[class*="fa-"]{
 
     margin-top: 8px;
 }
+
 
 .tech-support-bot-option {
     width: 100%;
@@ -8067,6 +8102,7 @@ i[class*="fa-"]{
     cursor: pointer;
 
     font: inherit;
+
     font-size: 11px;
 
     transition:
@@ -8074,6 +8110,7 @@ i[class*="fa-"]{
         border-color 0.18s ease,
         background 0.18s ease;
 }
+
 
 .tech-support-bot-option:hover {
     transform: translateY(-1px);
@@ -8084,6 +8121,7 @@ i[class*="fa-"]{
     background:
         rgba(109, 93, 252, 0.06);
 }
+
 
 .tech-support-bot-option:disabled {
     opacity: 0.55;
@@ -8114,6 +8152,19 @@ i[class*="fa-"]{
 
 
 /* =========================================================
+   BOT CLOSED STATE
+   ========================================================= */
+
+.tech-support-bot-panel:not(.bot-open)
+.tech-support-bot-message,
+
+.tech-support-bot-panel:not(.bot-open)
+.tech-support-bot-options {
+    display: none;
+}
+
+
+/* =========================================================
    MOBILE
    ========================================================= */
 
@@ -8121,25 +8172,31 @@ i[class*="fa-"]{
 
     .tech-support-bot-panel {
         margin: 7px 9px;
-        padding: 9px;
+
+        padding: 7px 9px;
 
         border-radius: 12px;
 
-        /*
-         * Smaller maximum height on mobile.
-         */
+        max-height: 44px;
+    }
+
+
+    .tech-support-bot-panel.bot-open {
         max-height: 170px;
+
+        padding: 9px;
     }
 
 
     .tech-support-bot-header {
-        margin-bottom: 7px;
+        gap: 7px;
     }
 
 
     .tech-support-bot-avatar {
         width: 30px;
         height: 30px;
+
         min-width: 30px;
 
         border-radius: 9px;
@@ -8159,6 +8216,8 @@ i[class*="fa-"]{
 
 
     .tech-support-bot-message {
+        margin-top: 7px;
+
         padding: 8px 9px;
 
         font-size: 11px;
@@ -8168,9 +8227,6 @@ i[class*="fa-"]{
 
 
     .tech-support-bot-options {
-        /*
-         * Keep two columns on mobile too.
-         */
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
 

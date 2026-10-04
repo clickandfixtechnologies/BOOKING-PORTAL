@@ -8700,7 +8700,7 @@ function renderSupportBotPanel(
                 </strong>
 
                 <span>
-                    Rule-based troubleshooting assistant
+                    Troubleshooting Assistant
                 </span>
 
             </div>

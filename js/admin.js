@@ -2467,6 +2467,7 @@ function renderAdminSupportMessages(
     ).join("");
 }
 
+
 /* =========================================================
    SEND ADMIN MESSAGE
    ========================================================= */
@@ -2568,42 +2569,10 @@ function bindAdminSupportMessageComposer(
 
                 button.textContent =
                     "Send Message";
-
-                input.focus();
-
             }
 
         }
     );
-
-
-    /* =====================================================
-       ENTER = SEND
-       SHIFT + ENTER = NEW LINE
-    ===================================================== */
-
-    input.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter" &&
-                !event.shiftKey
-            ) {
-
-                event.preventDefault();
-
-                if (!button.disabled) {
-
-                    form.requestSubmit();
-
-                }
-
-            }
-
-        }
-    );
-
 }
 
 /* =========================================================

@@ -3869,138 +3869,6 @@ async function loadSupport() {
 
             </div>
 
-
-
-            <!-- =================================================
-                 QUICK SUPPORT OPTIONS
-                 ================================================= -->
-
-            <div class="tech-support-info-grid">
-
-
-                <!-- QUICK HELP -->
-
-                <button
-                    type="button"
-                    class="tech-support-info-card"
-                    id="openQuickHelp"
-                >
-
-                    <div class="tech-support-info-icon">
-                        <i class="fa-solid fa-bolt"></i>
-                    </div>
-
-                    <div>
-
-                        <strong>
-                            Quick Help
-                        </strong>
-
-                        <span>
-                            Find answers to common issues.
-                        </span>
-
-                    </div>
-
-                    <i class="fa-solid fa-chevron-right tech-support-info-arrow"></i>
-
-                </button>
-
-
-
-                <!-- SPEAK TO US -->
-
-                <button
-                    type="button"
-                    class="tech-support-info-card"
-                    id="openSpeakToUs"
-                >
-
-                    <div class="tech-support-info-icon">
-                        <i class="fa-solid fa-microphone"></i>
-                    </div>
-
-                    <div>
-
-                        <strong>
-                            Speak to Us
-                        </strong>
-
-                        <span>
-                            Need immediate assistance?
-                        </span>
-
-                    </div>
-
-                    <i class="fa-solid fa-chevron-right tech-support-info-arrow"></i>
-
-                </button>
-
-
-
-                <!-- JOB SUPPORT -->
-
-                <button
-                    type="button"
-                    class="tech-support-info-card"
-                    id="openJobSupport"
-                >
-
-                    <div class="tech-support-info-icon">
-                        <i class="fa-solid fa-briefcase"></i>
-                    </div>
-
-                    <div>
-
-                        <strong>
-                            Job Support
-                        </strong>
-
-                        <span>
-                            Track your assigned jobs.
-                        </span>
-
-                    </div>
-
-                    <i class="fa-solid fa-chevron-right tech-support-info-arrow"></i>
-
-                </button>
-
-
-
-                <!-- LIVE CHAT -->
-
-                <button
-                    type="button"
-                    class="tech-support-info-card"
-                    id="openLiveChat"
-                >
-
-                    <div class="tech-support-info-icon">
-                        <i class="fa-regular fa-message"></i>
-                    </div>
-
-                    <div>
-
-                        <strong>
-                            Live Chat
-                        </strong>
-
-                        <span>
-                            Get real-time support.
-                        </span>
-
-                    </div>
-
-                    <i class="fa-solid fa-chevron-right tech-support-info-arrow"></i>
-
-                </button>
-
-
-            </div>
-
-
-
             <!-- =================================================
                  COMPANY CONTACT
                  ================================================= -->
@@ -4195,125 +4063,56 @@ async function loadSupport() {
             }
         );
 
-
-
     /* =========================================================
-       SPEAK TO US
-       ========================================================= */
+   REVEAL SUPPORT PHONE
+   ========================================================= */
 
-    document
-        .getElementById("openSpeakToUs")
-        ?.addEventListener(
-            "click",
-            () => {
+document
+    .getElementById("revealSupportPhone")
+    ?.addEventListener(
+        "click",
+        () => {
 
-                document
-                    .getElementById("supportContactPanel")
-                    ?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "center"
-                    });
+            const phone =
+                document.getElementById(
+                    "supportPhoneRevealed"
+                );
+
+            const button =
+                document.getElementById(
+                    "revealSupportPhone"
+                );
+
+
+            if (!phone || !button) {
+
+                return;
 
             }
-        );
 
 
+            /* -----------------------------------------
+               CHECK CURRENT STATE
+               ----------------------------------------- */
 
-    /* =========================================================
-       LIVE CHAT
-       ========================================================= */
-
-    document
-        .getElementById("openLiveChat")
-        ?.addEventListener(
-            "click",
-            async () => {
-
-                await openSupportChat();
-
-            }
-        );
+            const isHidden =
+                phone.classList.contains(
+                    "is-hidden"
+                );
 
 
+            /* -----------------------------------------
+               SHOW PHONE
+               ----------------------------------------- */
 
-    /* =========================================================
-       JOB SUPPORT
-       ========================================================= */
-
-    document
-        .getElementById("openJobSupport")
-        ?.addEventListener(
-            "click",
-            () => {
-
-                document
-                    .getElementById("openMySupportRequests")
-                    ?.click();
-
-            }
-        );
-
-
-
-    /* =========================================================
-       QUICK HELP
-       ========================================================= */
-
-    document
-        .getElementById("openQuickHelp")
-        ?.addEventListener(
-            "click",
-            () => {
-
-                document
-                    .getElementById("raiseSupportRequest")
-                    ?.click();
-
-            }
-        );
-
-
-
-    /* =========================================================
-       REVEAL SUPPORT PHONE
-       ========================================================= */
-
-    document
-        .getElementById("revealSupportPhone")
-        ?.addEventListener(
-            "click",
-            () => {
-
-                const phone =
-                    document.getElementById(
-                        "supportPhoneRevealed"
-                    );
-
-                const button =
-                    document.getElementById(
-                        "revealSupportPhone"
-                    );
-
-
-                if (!phone || !button) {
-
-                    return;
-
-                }
-
-
-                /* -----------------------------------------
-                   SHOW PHONE
-                   ----------------------------------------- */
+            if (isHidden) {
 
                 phone.classList.remove(
                     "is-hidden"
                 );
 
 
-                /* -----------------------------------------
-                   CHANGE BUTTON STATE
-                   ----------------------------------------- */
+                /* CHANGE BUTTON COLOR */
 
                 button.classList.add(
                     "is-revealed"
@@ -4324,23 +4123,56 @@ async function loadSupport() {
 
                     <i class="fa-solid fa-phone"></i>
 
-                    +91 70988 89990
+                    Hide Number
 
                 `;
 
 
-                /* -----------------------------------------
-                   OPTIONAL PHONE ACTION
-                   ----------------------------------------- */
+                button.setAttribute(
+                    "aria-label",
+                    "Hide Click and Fix Support Number"
+                );
+
+
+            }
+
+
+            /* -----------------------------------------
+               HIDE PHONE
+               ----------------------------------------- */
+
+            else {
+
+                phone.classList.add(
+                    "is-hidden"
+                );
+
+
+                /* RESTORE BUTTON COLOR */
+
+                button.classList.remove(
+                    "is-revealed"
+                );
+
+
+                button.innerHTML = `
+
+                    <i class="fa-solid fa-phone"></i>
+
+                    Speak to Click &amp; Fix
+
+                `;
+
 
                 button.setAttribute(
                     "aria-label",
-                    "Call Click and Fix Support"
+                    "Reveal Click and Fix Support Number"
                 );
 
             }
-        );
 
+        }
+    );
 }
 
 /* =========================================================

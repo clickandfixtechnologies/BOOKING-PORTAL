@@ -8247,3 +8247,16 @@ i[class*="fa-"]{
     }
 
 }
+
+/* =========================================================
+   SUPPORT PHONE REVEAL
+   ========================================================= */
+
+.tech-support-phone-revealed.is-hidden {
+    display: none !important;
+}
+
+.tech-support-phone-revealed:not(.is-hidden) {
+    display: flex;
+}
+

@@ -3655,14 +3655,16 @@ async function loadHistory() {
 
 /* =========================================================
    TECHNICIAN SUPPORT CENTER
-   PHASE 2B
-   INTERACTIVE SUPPORT REQUEST UI
+   PHASE 2B + PHASE 5
+   SUPPORT CENTER UI
    ========================================================= */
 
 async function loadSupport() {
 
     jobs.innerHTML = `
+
         <section class="tech-support-center">
+
 
             <!-- =================================================
                  HERO
@@ -3674,10 +3676,11 @@ async function loadSupport() {
                     <i class="fa-solid fa-headset"></i>
                 </div>
 
+
                 <div class="tech-support-hero-content">
 
                     <p class="tech-support-eyebrow">
-                        TECHNICIAN SUPPORT
+                        TECHNICAL SUPPORT
                     </p>
 
                     <h2>
@@ -3685,23 +3688,29 @@ async function loadSupport() {
                     </h2>
 
                     <p>
-                        Get assistance from Click &amp; Fix Technologies
-                        whenever you need support during a job.
+                        Get quick assistance from Click &amp; Fix Technologies.
                     </p>
+
+                    <span>
+                        We’re here whenever you need support — during or after your job.
+                    </span>
 
                 </div>
 
             </div>
 
 
+
             <!-- =================================================
-                 SUPPORT ACTIONS
+                 MAIN SUPPORT ACTIONS
                  ================================================= -->
 
             <div class="tech-support-grid">
 
 
-                <!-- Raise Support Request -->
+                <!-- =================================================
+                     RAISE A REQUEST
+                     ================================================= -->
 
                 <button
                     type="button"
@@ -3710,23 +3719,27 @@ async function loadSupport() {
                 >
 
                     <div class="tech-support-card-icon">
-                        <i class="fa-solid fa-life-ring"></i>
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
                     </div>
+
 
                     <div class="tech-support-card-content">
 
                         <h3>
-                            Raise Support Request
+                            Raise a Request
                         </h3>
 
                         <p>
-                            Report a technical problem or get help
-                            with your assigned service.
+                            Report an issue or get technical help
+                            for your service.
                         </p>
 
                         <span class="tech-support-card-link">
+
                             Create Request
+
                             <i class="fa-solid fa-arrow-right"></i>
+
                         </span>
 
                     </div>
@@ -3734,7 +3747,10 @@ async function loadSupport() {
                 </button>
 
 
-                <!-- Support Chat -->
+
+                <!-- =================================================
+                     SUPPORT CHAT
+                     ================================================= -->
 
                 <button
                     type="button"
@@ -3746,6 +3762,7 @@ async function loadSupport() {
                         <i class="fa-solid fa-comments"></i>
                     </div>
 
+
                     <div class="tech-support-card-content">
 
                         <h3>
@@ -3753,13 +3770,16 @@ async function loadSupport() {
                         </h3>
 
                         <p>
-                            Chat with Click &amp; Fix support regarding
-                            your current service.
+                            Chat with our team instantly
+                            for quick assistance.
                         </p>
 
                         <span class="tech-support-card-link">
-                            Open Chat
+
+                            Start Chat
+
                             <i class="fa-solid fa-arrow-right"></i>
+
                         </span>
 
                     </div>
@@ -3767,7 +3787,10 @@ async function loadSupport() {
                 </button>
 
 
-                <!-- My Support Requests -->
+
+                <!-- =================================================
+                     MY REQUESTS
+                     ================================================= -->
 
                 <button
                     type="button"
@@ -3776,23 +3799,27 @@ async function loadSupport() {
                 >
 
                     <div class="tech-support-card-icon">
-                        <i class="fa-solid fa-clipboard-list"></i>
+                        <i class="fa-solid fa-file-lines"></i>
                     </div>
+
 
                     <div class="tech-support-card-content">
 
                         <h3>
-                            My Support Requests
+                            My Requests
                         </h3>
 
                         <p>
-                            View your previous support requests,
-                            status and conversations.
+                            View your past requests, status
+                            and conversations.
                         </p>
 
                         <span class="tech-support-card-link">
+
                             View Requests
+
                             <i class="fa-solid fa-arrow-right"></i>
+
                         </span>
 
                     </div>
@@ -3800,7 +3827,10 @@ async function loadSupport() {
                 </button>
 
 
-                <!-- Speak to Click & Fix -->
+
+                <!-- =================================================
+                     CONTACT SUPPORT
+                     ================================================= -->
 
                 <button
                     type="button"
@@ -3812,36 +3842,49 @@ async function loadSupport() {
                         <i class="fa-solid fa-phone-volume"></i>
                     </div>
 
+
                     <div class="tech-support-card-content">
 
                         <h3>
-                            Speak to Click &amp; Fix
+                            Contact Support
                         </h3>
 
                         <p>
-                            Need immediate assistance?
-                            Contact Click &amp; Fix support directly.
+                            Get help directly from
+                            our team.
                         </p>
 
                         <span class="tech-support-card-link">
-                            Contact Support
+
+                            Get in Touch
+
                             <i class="fa-solid fa-arrow-right"></i>
+
                         </span>
 
                     </div>
 
                 </button>
 
+
             </div>
 
 
+
             <!-- =================================================
-                 SUPPORT INFORMATION
+                 QUICK SUPPORT OPTIONS
                  ================================================= -->
 
             <div class="tech-support-info-grid">
 
-                <div class="tech-support-info-card">
+
+                <!-- QUICK HELP -->
+
+                <button
+                    type="button"
+                    class="tech-support-info-card"
+                    id="openQuickHelp"
+                >
 
                     <div class="tech-support-info-icon">
                         <i class="fa-solid fa-bolt"></i>
@@ -3850,63 +3893,112 @@ async function loadSupport() {
                     <div>
 
                         <strong>
-                            Fast Assistance
+                            Quick Help
                         </strong>
 
                         <span>
-                            Support requests are handled by
-                            Click &amp; Fix support.
+                            Find answers to common issues.
                         </span>
 
                     </div>
 
-                </div>
+                    <i class="fa-solid fa-chevron-right tech-support-info-arrow"></i>
+
+                </button>
 
 
-                <div class="tech-support-info-card">
+
+                <!-- SPEAK TO US -->
+
+                <button
+                    type="button"
+                    class="tech-support-info-card"
+                    id="openSpeakToUs"
+                >
 
                     <div class="tech-support-info-icon">
-                        <i class="fa-solid fa-location-crosshairs"></i>
+                        <i class="fa-solid fa-microphone"></i>
                     </div>
 
                     <div>
 
                         <strong>
-                            Job-Based Support
+                            Speak to Us
                         </strong>
 
                         <span>
-                            Support can be linked directly
-                            to your assigned service.
+                            Need immediate assistance?
                         </span>
 
                     </div>
 
-                </div>
+                    <i class="fa-solid fa-chevron-right tech-support-info-arrow"></i>
+
+                </button>
 
 
-                <div class="tech-support-info-card">
+
+                <!-- JOB SUPPORT -->
+
+                <button
+                    type="button"
+                    class="tech-support-info-card"
+                    id="openJobSupport"
+                >
 
                     <div class="tech-support-info-icon">
-                        <i class="fa-solid fa-message"></i>
+                        <i class="fa-solid fa-briefcase"></i>
                     </div>
 
                     <div>
 
                         <strong>
-                            Live Conversation
+                            Job Support
                         </strong>
 
                         <span>
-                            Continue your support conversation
-                            from the portal.
+                            Track your assigned jobs.
                         </span>
 
                     </div>
 
-                </div>
+                    <i class="fa-solid fa-chevron-right tech-support-info-arrow"></i>
+
+                </button>
+
+
+
+                <!-- LIVE CHAT -->
+
+                <button
+                    type="button"
+                    class="tech-support-info-card"
+                    id="openLiveChat"
+                >
+
+                    <div class="tech-support-info-icon">
+                        <i class="fa-regular fa-message"></i>
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Live Chat
+                        </strong>
+
+                        <span>
+                            Get real-time support.
+                        </span>
+
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right tech-support-info-arrow"></i>
+
+                </button>
+
 
             </div>
+
 
 
             <!-- =================================================
@@ -3918,33 +4010,45 @@ async function loadSupport() {
                 id="supportContactPanel"
             >
 
+
                 <div class="tech-support-contact-main">
 
+
                     <div class="tech-support-contact-icon">
+
                         <i class="fa-solid fa-headset"></i>
+
                     </div>
+
 
                     <div>
 
                         <p>
-                            Need immediate help?
+                            STILL NEED HELP?
                         </p>
 
                         <h3>
-                            Speak to Click &amp; Fix Technologies
+                            Talk to Click &amp; Fix
                         </h3>
 
                         <span>
-                            Your support contact number is hidden
+                            Your support number is hidden
                             until you choose to reveal it.
                         </span>
 
                     </div>
 
+
                 </div>
 
 
+
                 <div class="tech-support-contact-actions">
+
+
+                    <!-- =================================================
+                         REVEAL PHONE
+                         ================================================= -->
 
                     <button
                         type="button"
@@ -3959,10 +4063,15 @@ async function loadSupport() {
                     </button>
 
 
+
+                    <!-- =================================================
+                         WHATSAPP
+                         ================================================= -->
+
                     <a
                         href="https://wa.me/917098889990"
                         target="_blank"
-                        rel="noopener"
+                        rel="noopener noreferrer"
                         class="tech-support-whatsapp-button"
                     >
 
@@ -3972,47 +4081,64 @@ async function loadSupport() {
 
                     </a>
 
+
                 </div>
 
+
+
+                <!-- =================================================
+                     HIDDEN PHONE
+                     IMPORTANT:
+                     Do NOT use hidden attribute.
+                     CSS class controls visibility.
+                     ================================================= -->
 
                 <div
-                    class="tech-support-phone-revealed"
+                    class="tech-support-phone-revealed is-hidden"
                     id="supportPhoneRevealed"
-                    hidden
                 >
 
-                    <span>
-                        Click &amp; Fix Support
-                    </span>
+                    <div>
 
-                    <a href="tel:+917098889990">
-                        +91 70988 89990
-                    </a>
+                        <span>
+                            Contact Number
+                        </span>
+
+                        <a href="tel:+917098889990">
+                            +91 70988 89990
+                        </a>
+
+                    </div>
 
                 </div>
+
 
             </div>
 
+
         </section>
+
     `;
 
+
+
     /* =========================================================
-   SUPPORT CHAT
-   PHASE 5B
-   ========================================================= */
+       SUPPORT CHAT
+       PHASE 5B
+       ========================================================= */
 
-document
-    .getElementById("openSupportChat")
-    ?.addEventListener(
-        "click",
-        async () => {
+    document
+        .getElementById("openSupportChat")
+        ?.addEventListener(
+            "click",
+            async () => {
 
-            await openSupportChat();
+                await openSupportChat();
 
-        }
-    );
+            }
+        );
 
-    
+
 
     /* =========================================================
        RAISE SUPPORT REQUEST
@@ -4030,24 +4156,27 @@ document
         );
 
 
-    /* =========================================================
-   MY SUPPORT REQUESTS
-   PHASE 4B
-   ========================================================= */
-
-document
-    .getElementById("openMySupportRequests")
-    ?.addEventListener(
-        "click",
-        async () => {
-
-            await loadMySupportRequests();
-
-        }
-    );
 
     /* =========================================================
-       SPEAK TO CLICK & FIX
+       MY SUPPORT REQUESTS
+       PHASE 4B
+       ========================================================= */
+
+    document
+        .getElementById("openMySupportRequests")
+        ?.addEventListener(
+            "click",
+            async () => {
+
+                await loadMySupportRequests();
+
+            }
+        );
+
+
+
+    /* =========================================================
+       CONTACT SUPPORT
        ========================================================= */
 
     document
@@ -4067,8 +4196,86 @@ document
         );
 
 
+
     /* =========================================================
-       REVEAL PHONE
+       SPEAK TO US
+       ========================================================= */
+
+    document
+        .getElementById("openSpeakToUs")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                document
+                    .getElementById("supportContactPanel")
+                    ?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+
+            }
+        );
+
+
+
+    /* =========================================================
+       LIVE CHAT
+       ========================================================= */
+
+    document
+        .getElementById("openLiveChat")
+        ?.addEventListener(
+            "click",
+            async () => {
+
+                await openSupportChat();
+
+            }
+        );
+
+
+
+    /* =========================================================
+       JOB SUPPORT
+       ========================================================= */
+
+    document
+        .getElementById("openJobSupport")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                document
+                    .getElementById("openMySupportRequests")
+                    ?.click();
+
+            }
+        );
+
+
+
+    /* =========================================================
+       QUICK HELP
+       ========================================================= */
+
+    document
+        .getElementById("openQuickHelp")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                document
+                    .getElementById("raiseSupportRequest")
+                    ?.click();
+
+            }
+        );
+
+
+
+    /* =========================================================
+       REVEAL SUPPORT PHONE
        ========================================================= */
 
     document
@@ -4087,14 +4294,48 @@ document
                         "revealSupportPhone"
                     );
 
+
                 if (!phone || !button) {
+
                     return;
+
                 }
 
-                phone.hidden = false;
+
+                /* -----------------------------------------
+                   SHOW PHONE
+                   ----------------------------------------- */
+
+                phone.classList.remove(
+                    "is-hidden"
+                );
+
+
+                /* -----------------------------------------
+                   CHANGE BUTTON STATE
+                   ----------------------------------------- */
 
                 button.classList.add(
                     "is-revealed"
+                );
+
+
+                button.innerHTML = `
+
+                    <i class="fa-solid fa-phone"></i>
+
+                    +91 70988 89990
+
+                `;
+
+
+                /* -----------------------------------------
+                   OPTIONAL PHONE ACTION
+                   ----------------------------------------- */
+
+                button.setAttribute(
+                    "aria-label",
+                    "Call Click and Fix Support"
                 );
 
             }

@@ -7514,21 +7514,37 @@ if (floatingSupportBadge) {
    PHASE 5 - INCLUDE CLOSED REQUESTS
    ===================================================== */
 
-const supportRequests =
-    requests;
+const supportRequests = requests;
 
 if (!supportRequests.length) {
 
-    /*
-     * No previous support request.
-     * Open Bot directly.
-     */
-
-    showSupportBotStandalone();
+    await openDirectSupportChat();
 
     return;
-
 }
+
+
+/*
+ * Only one request.
+ */
+if (
+    supportRequests.length === 1
+) {
+
+    await openSupportRequestChat(
+        supportRequests[0].id
+    );
+
+    return;
+}
+
+
+/*
+ * Multiple requests.
+ */
+showSupportChatRequestPicker(
+    supportRequests
+);
 
 
 /*

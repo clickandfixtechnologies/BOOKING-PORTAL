@@ -179,6 +179,28 @@ async function route(
         body
       );
 
+      /* =====================================================
+   DIRECT SUPPORT CHAT
+   ===================================================== */
+
+case "direct_support_conversations":
+  return directSupportConversations(
+    db
+  );
+
+case "direct_support_messages":
+  return directSupportMessages(
+    db,
+    body
+  );
+
+case "direct_support_message_send":
+  return sendDirectSupportMessage(
+    db,
+    userId,
+    body
+  );
+
     case "support_status_update":
       return updateSupportStatus(
         db,
@@ -2209,6 +2231,649 @@ async function sendSupportMessage(
     message: data
   };
 }
+
+/* =========================================================
+   ADMIN DIRECT SUPPORT
+   CONVERSATION LIST
+   ========================================================= */
+
+async function directSupportConversations(
+  db: any
+) {
+
+  const {
+    data: technicians,
+    error: technicianError
+  } = await db
+    .from("technicians")
+    .select(`
+      id,
+      technician_code,
+      full_name,
+      mobile,
+      username,
+      is_active
+    `)
+    .order(
+      "full_name",
+      {
+        ascending: true
+      }
+    );
+
+
+  if (
+    technicianError
+  ) {
+
+    console.error(
+      "DIRECT SUPPORT TECHNICIANS QUERY ERROR:",
+      technicianError.message
+    );
+
+    throw new Error(
+      "DIRECT_SUPPORT_CONVERSATIONS_QUERY_FAILED"
+    );
+
+  }
+
+
+  const technicianIds =
+    (technicians || [])
+      .map(
+        (technician: any) =>
+          technician.id
+      )
+      .filter(
+        (id: any) =>
+          isUuid(id)
+      );
+
+
+  if (
+    technicianIds.length === 0
+  ) {
+
+    return {
+      conversations: []
+    };
+
+  }
+
+
+  const {
+    data: messages,
+    error: messageError
+  } = await db
+    .from(
+      "technician_direct_messages"
+    )
+    .select(`
+      id,
+      technician_id,
+      sender_type,
+      sender_user_id,
+      message,
+      read_at_admin,
+      created_at
+    `)
+    .in(
+      "technician_id",
+      technicianIds
+    )
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
+
+
+  if (
+    messageError
+  ) {
+
+    console.error(
+      "DIRECT SUPPORT CONVERSATION QUERY ERROR:",
+      messageError.message
+    );
+
+    throw new Error(
+      "DIRECT_SUPPORT_CONVERSATIONS_QUERY_FAILED"
+    );
+
+  }
+
+
+  const latestMessages =
+    new Map<string, any>();
+
+  const unreadCounts =
+    new Map<string, number>();
+
+
+  for (
+    const message of
+      messages || []
+  ) {
+
+    const technicianId =
+      message.technician_id;
+
+
+    if (
+      !latestMessages.has(
+        technicianId
+      )
+    ) {
+
+      latestMessages.set(
+        technicianId,
+        message
+      );
+
+    }
+
+
+    if (
+      message.sender_type ===
+        "TECHNICIAN" &&
+      !message.read_at_admin
+    ) {
+
+      unreadCounts.set(
+        technicianId,
+
+        (
+          unreadCounts.get(
+            technicianId
+          ) || 0
+        ) + 1
+
+      );
+
+    }
+
+  }
+
+
+  const conversations =
+    (technicians || [])
+      .filter(
+        (technician: any) =>
+          latestMessages.has(
+            technician.id
+          )
+      )
+      .map(
+        (technician: any) => {
+
+          const latest =
+            latestMessages.get(
+              technician.id
+            );
+
+
+          return {
+
+            technician_id:
+              technician.id,
+
+            technician_code:
+              technician.technician_code,
+
+            full_name:
+              technician.full_name,
+
+            mobile:
+              technician.mobile,
+
+            username:
+              technician.username,
+
+            is_active:
+              technician.is_active,
+
+            unread_count:
+              unreadCounts.get(
+                technician.id
+              ) || 0,
+
+            last_message:
+              latest?.message ||
+              null,
+
+            last_message_sender:
+              latest?.sender_type ||
+              null,
+
+            last_message_at:
+              latest?.created_at ||
+              null
+
+          };
+
+        }
+      )
+      .sort(
+        (
+          a: any,
+          b: any
+        ) =>
+          new Date(
+            b.last_message_at
+          ).getTime() -
+          new Date(
+            a.last_message_at
+          ).getTime()
+      );
+
+
+  return {
+    conversations
+  };
+
+}
+
+/* =========================================================
+   ADMIN DIRECT SUPPORT
+   LOAD MESSAGES
+   ========================================================= */
+
+async function directSupportMessages(
+  db: any,
+  body: any
+) {
+
+  const technicianId =
+    String(
+      body?.technician_id ||
+      ""
+    ).trim();
+
+
+  if (
+    !technicianId ||
+    !isUuid(technicianId)
+  ) {
+
+    throw new Error(
+      "Invalid technician."
+    );
+
+  }
+
+
+  /*
+   * Verify technician.
+   */
+
+  const {
+    data: technician,
+    error: technicianError
+  } = await db
+    .from("technicians")
+    .select(`
+      id,
+      technician_code,
+      full_name,
+      mobile,
+      username,
+      is_active
+    `)
+    .eq(
+      "id",
+      technicianId
+    )
+    .maybeSingle();
+
+
+  if (
+    technicianError
+  ) {
+
+    throw new Error(
+      "TECHNICIAN_LOOKUP_FAILED"
+    );
+
+  }
+
+
+  if (
+    !technician
+  ) {
+
+    throw new Error(
+      "TECHNICIAN_NOT_FOUND"
+    );
+
+  }
+
+
+  /*
+   * Mark technician messages as read.
+   */
+
+  const {
+    error: readError
+  } = await db
+    .from(
+      "technician_direct_messages"
+    )
+    .update({
+      read_at_admin:
+        new Date().toISOString()
+    })
+    .eq(
+      "technician_id",
+      technicianId
+    )
+    .eq(
+      "sender_type",
+      "TECHNICIAN"
+    )
+    .is(
+      "read_at_admin",
+      null
+    );
+
+
+  if (
+    readError
+  ) {
+
+    console.error(
+      "ADMIN DIRECT SUPPORT MARK READ ERROR:",
+      readError.message
+    );
+
+    throw new Error(
+      "DIRECT_MESSAGES_ADMIN_MARK_READ_FAILED"
+    );
+
+  }
+
+
+  /*
+   * Load messages.
+   */
+
+  const {
+    data,
+    error
+  } = await db
+    .from(
+      "technician_direct_messages"
+    )
+    .select(`
+      id,
+      technician_id,
+      sender_type,
+      sender_user_id,
+      message,
+      created_at
+    `)
+    .eq(
+      "technician_id",
+      technicianId
+    )
+    .order(
+      "created_at",
+      {
+        ascending: true
+      }
+    );
+
+
+  if (
+    error
+  ) {
+
+    throw new Error(
+      "DIRECT_SUPPORT_MESSAGES_QUERY_FAILED"
+    );
+
+  }
+
+
+  return {
+
+    technician,
+
+    messages:
+      data || []
+
+  };
+
+}
+
+/* =========================================================
+   ADMIN DIRECT SUPPORT
+   SEND MESSAGE
+   ========================================================= */
+
+async function sendDirectSupportMessage(
+  db: any,
+  adminUserId: string,
+  body: any
+) {
+
+  if (
+    !isUuid(adminUserId)
+  ) {
+
+    throw new Error(
+      "Invalid administrator."
+    );
+
+  }
+
+
+  const technicianId =
+    String(
+      body?.technician_id ||
+      ""
+    ).trim();
+
+
+  const message =
+    String(
+      body?.message ||
+      ""
+    ).trim();
+
+
+  if (
+    !technicianId ||
+    !isUuid(technicianId)
+  ) {
+
+    throw new Error(
+      "Invalid technician."
+    );
+
+  }
+
+
+  if (!message) {
+
+    throw new Error(
+      "Message is required."
+    );
+
+  }
+
+
+  if (
+    message.length > 2000
+  ) {
+
+    throw new Error(
+      "Message cannot exceed 2000 characters."
+    );
+
+  }
+
+
+  /*
+   * Verify admin.
+   */
+
+  const {
+    data: admin,
+    error: adminError
+  } =
+    await db
+      .from("admin_users")
+      .select(
+        "user_id"
+      )
+      .eq(
+        "user_id",
+        adminUserId
+      )
+      .maybeSingle();
+
+
+  if (
+    adminError
+  ) {
+
+    throw new Error(
+      "ADMIN_LOOKUP_FAILED"
+    );
+
+  }
+
+
+  if (!admin) {
+
+    throw new Error(
+      "ADMIN_REQUIRED"
+    );
+
+  }
+
+
+  /*
+   * Verify technician.
+   */
+
+  const {
+    data: technician,
+    error: technicianError
+  } = await db
+    .from("technicians")
+    .select(`
+      id,
+      auth_user_id,
+      is_active
+    `)
+    .eq(
+      "id",
+      technicianId
+    )
+    .maybeSingle();
+
+
+  if (
+    technicianError
+  ) {
+
+    throw new Error(
+      "TECHNICIAN_LOOKUP_FAILED"
+    );
+
+  }
+
+
+  if (!technician) {
+
+    throw new Error(
+      "TECHNICIAN_NOT_FOUND"
+    );
+
+  }
+
+
+  /*
+   * Admin can reply even if technician
+   * has no support request.
+   *
+   * Direct chat has no request status.
+   */
+
+
+  const {
+    data,
+    error
+  } = await db
+    .from(
+      "technician_direct_messages"
+    )
+    .insert({
+
+      technician_id:
+        technicianId,
+
+      sender_type:
+        "ADMIN",
+
+      sender_user_id:
+        adminUserId,
+
+      message:
+        message
+
+    })
+    .select(`
+      id,
+      technician_id,
+      sender_type,
+      sender_user_id,
+      message,
+      created_at
+    `)
+    .single();
+
+
+  if (
+    error
+  ) {
+
+    console.error(
+      "ADMIN DIRECT SUPPORT MESSAGE INSERT ERROR:",
+      {
+        message:
+          error.message,
+
+        details:
+          error.details,
+
+        hint:
+          error.hint,
+
+        code:
+          error.code
+      }
+    );
+
+    throw new Error(
+      "DIRECT_SUPPORT_MESSAGE_SEND_FAILED"
+    );
+
+  }
+
+
+  return {
+
+    message:
+      data
+
+  };
+
+}
+
 
 
 /* =========================================================

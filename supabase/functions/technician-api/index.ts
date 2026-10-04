@@ -206,6 +206,23 @@ case "support_message_send":
     body
   );
 
+  /* =====================================================
+   DIRECT SUPPORT CHAT
+   ===================================================== */
+
+case "direct_support_messages":
+  return directSupportMessages(
+    db,
+    technician.id
+  );
+
+case "direct_support_message_send":
+  return sendDirectSupportMessage(
+    db,
+    technician.id,
+    body
+  );
+
     default:
       throw new Error(
         "Unknown technician action."
@@ -1369,6 +1386,72 @@ async function supportMyRequests(
     }
   }
 
+/* =====================================================
+   DIRECT SUPPORT UNREAD
+   ===================================================== */
+
+const {
+  count: directUnreadCount,
+  error: directUnreadError
+} = await db
+  .from(
+    "technician_direct_messages"
+  )
+  .select(
+    "id",
+    {
+      count: "exact",
+      head: true
+    }
+  )
+  .eq(
+    "technician_id",
+    technicianId
+  )
+  .eq(
+    "sender_type",
+    "ADMIN"
+  )
+  .is(
+    "read_at_technician",
+    null
+  );
+
+
+if (
+  directUnreadError
+) {
+
+  console.error(
+    "DIRECT SUPPORT UNREAD COUNT ERROR:",
+    directUnreadError.message
+  );
+
+  throw new Error(
+    "DIRECT_SUPPORT_UNREAD_COUNT_FAILED"
+  );
+
+}
+
+
+const totalRequestUnreadCount =
+  Array.from(
+    unreadCounts.values()
+  ).reduce(
+    (total, count) =>
+      total + count,
+    0
+  );
+
+
+const totalUnreadCount =
+  totalRequestUnreadCount +
+  (
+    Number(
+      directUnreadCount
+    ) || 0
+  );
+
   const totalUnreadCount =
     Array.from(
       unreadCounts.values()
@@ -2161,6 +2244,329 @@ async function sendSupportMessage(
   };
 
 }
+
+/* =========================================================
+   DIRECT SUPPORT CHAT
+   LOAD MESSAGES
+   ========================================================= */
+
+async function directSupportMessages(
+  db: any,
+  technicianId: string
+) {
+
+  if (
+    !isUuid(technicianId)
+  ) {
+
+    throw new Error(
+      "Invalid technician."
+    );
+
+  }
+
+
+  /*
+   * Mark ADMIN messages as read
+   * before loading the conversation.
+   */
+
+  const {
+    error: readError
+  } = await db
+    .from(
+      "technician_direct_messages"
+    )
+    .update({
+      read_at_technician:
+        new Date().toISOString()
+    })
+    .eq(
+      "technician_id",
+      technicianId
+    )
+    .eq(
+      "sender_type",
+      "ADMIN"
+    )
+    .is(
+      "read_at_technician",
+      null
+    );
+
+
+  if (
+    readError
+  ) {
+
+    console.error(
+      "DIRECT SUPPORT TECHNICIAN MARK READ ERROR:",
+      readError.message
+    );
+
+    throw new Error(
+      "DIRECT_MESSAGES_MARK_READ_FAILED"
+    );
+
+  }
+
+
+  /*
+   * Load conversation.
+   */
+
+  const {
+    data,
+    error
+  } = await db
+    .from(
+      "technician_direct_messages"
+    )
+    .select(`
+      id,
+      technician_id,
+      sender_type,
+      sender_user_id,
+      message,
+      created_at
+    `)
+    .eq(
+      "technician_id",
+      technicianId
+    )
+    .order(
+      "created_at",
+      {
+        ascending: true
+      }
+    );
+
+
+  if (
+    error
+  ) {
+
+    console.error(
+      "DIRECT SUPPORT MESSAGES QUERY ERROR:",
+      {
+        message:
+          error.message,
+
+        details:
+          error.details,
+
+        hint:
+          error.hint,
+
+        code:
+          error.code
+      }
+    );
+
+    throw new Error(
+      "DIRECT_SUPPORT_MESSAGES_QUERY_FAILED"
+    );
+
+  }
+
+
+  return {
+
+    technician_id:
+      technicianId,
+
+    messages:
+      data || []
+
+  };
+
+}
+
+/* =========================================================
+   DIRECT SUPPORT CHAT
+   SEND MESSAGE
+   ========================================================= */
+
+async function sendDirectSupportMessage(
+  db: any,
+  technicianId: string,
+  body: any
+) {
+
+  if (
+    !isUuid(technicianId)
+  ) {
+
+    throw new Error(
+      "Invalid technician."
+    );
+
+  }
+
+
+  const message =
+    String(
+      body?.message ||
+      ""
+    ).trim();
+
+
+  if (!message) {
+
+    throw new Error(
+      "Message is required."
+    );
+
+  }
+
+
+  if (
+    message.length > 2000
+  ) {
+
+    throw new Error(
+      "Message cannot exceed 2000 characters."
+    );
+
+  }
+
+
+  /*
+   * Verify technician exists and is active.
+   */
+
+  const {
+    data: technician,
+    error: technicianError
+  } = await db
+    .from("technicians")
+    .select(`
+      id,
+      auth_user_id,
+      is_active
+    `)
+    .eq(
+      "id",
+      technicianId
+    )
+    .maybeSingle();
+
+
+  if (
+    technicianError
+  ) {
+
+    console.error(
+      "DIRECT SUPPORT TECHNICIAN VERIFY ERROR:",
+      technicianError.message
+    );
+
+    throw new Error(
+      "TECHNICIAN_LOOKUP_FAILED"
+    );
+
+  }
+
+
+  if (
+    !technician
+  ) {
+
+    throw new Error(
+      "TECHNICIAN_NOT_FOUND"
+    );
+
+  }
+
+
+  if (
+    technician.is_active === false
+  ) {
+
+    throw new Error(
+      "TECHNICIAN_INACTIVE"
+    );
+
+  }
+
+
+  /*
+   * Insert message.
+   *
+   * IMPORTANT:
+   * sender_type is NEVER accepted from frontend.
+   */
+
+  const {
+    data,
+    error
+  } = await db
+    .from(
+      "technician_direct_messages"
+    )
+    .insert({
+
+      technician_id:
+        technicianId,
+
+      sender_type:
+        "TECHNICIAN",
+
+      sender_user_id:
+        technicianId,
+
+      message:
+        message
+
+    })
+    .select(`
+      id,
+      technician_id,
+      sender_type,
+      sender_user_id,
+      message,
+      created_at
+    `)
+    .single();
+
+
+  if (
+    error
+  ) {
+
+    console.error(
+      "DIRECT SUPPORT MESSAGE INSERT ERROR:",
+      {
+        message:
+          error.message,
+
+        details:
+          error.details,
+
+        hint:
+          error.hint,
+
+        code:
+          error.code
+      }
+    );
+
+    throw new Error(
+      "DIRECT_SUPPORT_MESSAGE_SEND_FAILED"
+    );
+
+  }
+
+
+  return {
+
+    message:
+      data
+
+  };
+
+}
+
 
 /* =========================================================
    SUPPORT BOT

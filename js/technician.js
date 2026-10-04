@@ -8763,27 +8763,28 @@ function renderSupportBotPanel(
         .forEach(
             button => {
 
-                button.addEventListener(
-                    "click",
-                    async () => {
+               button.addEventListener(
+    "click",
+    async () => {
 
-                        const action =
-                            button.getAttribute(
-                                "data-bot-action"
-                            );
+        const action =
+            button.getAttribute(
+                "data-bot-action"
+            );
 
-                        if (!action) {
-                            return;
-                        }
+        if (!action) {
+            return;
+        }
 
 
-                        await handleSupportBotAction(
-                            action,
-                            request
-                        );
+        await handleSupportBotAction(
+            action,
+            request,
+            bot?.next_action || null
+        );
 
-                    }
-                );
+    }
+);
 
             }
         );
@@ -8796,7 +8797,8 @@ function renderSupportBotPanel(
 
 async function handleSupportBotAction(
     selectedAction,
-    request
+    request,
+    nextAction = null
 ) {
 
     const panel =
@@ -9133,29 +9135,58 @@ async function handleSupportBotAction(
     }
 
 
-    /*
-     * Resolution YES / NO.
-     */
+     /*
+  * Resolution / Close Flow YES / NO.
+  */
 
-    if (
-        selectedAction === "YES" ||
-        selectedAction === "NO"
-    ) {
+ if (
+     selectedAction === "YES" ||
+     selectedAction === "NO"
+ ) {
 
-        await requestSupportBotStep(
-            request,
-            {
-                action:
-                    "CHECK_RESOLUTION",
+     /*
+      * Close confirmation flow.
+      */
 
-                subcategory:
-                    selectedAction
-            }
-        );
+     if (
+         nextAction === "CLOSE_FLOW"
+     ) {
 
-        return;
+         await requestSupportBotStep(
+             request,
+             {
+                 action:
+                     "CLOSE_FLOW",
 
-    }
+                 subcategory:
+                     selectedAction
+             }
+         );
+
+         return;
+
+     }
+
+
+     /*
+      * Normal resolution check.
+      */
+
+     await requestSupportBotStep(
+         request,
+         {
+             action:
+                 "CHECK_RESOLUTION",
+
+             subcategory:
+                 selectedAction
+         }
+     );
+
+     return;
+
+ }
+ 
 
 
     /*

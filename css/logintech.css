@@ -8,7 +8,7 @@
 body.tech-portal {
     width: 100vw;
     height: 100vh;
-    /* Background Image Link */
+    /* Background Image Path */
     background: url('../assets/images/bg.jpg') no-repeat center center;
     background-size: cover;
     display: flex;
@@ -25,19 +25,19 @@ body.tech-portal {
     padding: 20px;
 }
 
-/* Completely new unique card styling with soft gradient border and sleek shadow */
+/* Premium translucent glassmorphism card with rich blur and subtle border */
 .tech-login-card {
     width: 440px;
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    background: rgba(10, 15, 25, 0.45);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
     border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     padding: 35px;
 }
 
@@ -50,8 +50,8 @@ body.tech-portal {
 }
 
 .tech-login-logo {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     color: #fff;
     font-weight: 800;
@@ -59,27 +59,26 @@ body.tech-portal {
     align-items: center;
     justify-content: center;
     border-radius: 14px;
-    font-size: 1.3rem;
-    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+    font-size: 1.25rem;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
 }
 
 .tech-login-title {
-    color: #fff;
-    font-size: 1.35rem;
+    color: #ffffff;
+    font-size: 1.3rem;
     font-weight: 700;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.3px;
 }
 
 .tech-login-subtitle {
-    color: #94a3b8;
+    color: rgba(255, 255, 255, 0.75);
     font-size: 0.85rem;
 }
 
 .tech-login-heading {
-    color: #fff;
+    color: #ffffff;
     font-size: 1.5rem;
     font-weight: 600;
-    text-transform: none; /* Changed from uppercase for a modern feel */
     margin-bottom: 20px;
     width: 100%;
     text-align: left;
@@ -89,7 +88,6 @@ body.tech-portal {
     width: 100%;
 }
 
-/* Modern Rounded Input Box Style (Instead of bottom line border) */
 .tech-form-group {
     position: relative;
     width: 100%;
@@ -104,42 +102,41 @@ body.tech-portal {
     align-items: center;
 }
 
+/* Glass inputs that blend seamlessly with the background */
 .tech-input {
     width: 100%;
     height: 50px;
     padding: 0 45px 0 16px;
     font-size: 1rem;
-    background-color: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
     outline: none;
-    color: #fff;
+    color: #ffffff;
     transition: all 0.3s ease;
 }
 
 .tech-input::placeholder {
-    color: #94a3b8; /* Visible placeholder for a cleaner modern look */
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .tech-input:focus {
-    border-color: #3b82f6;
-    background-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    border-color: #60a5fa;
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
 }
 
-/* Hiding floating label animation to use modern placeholder style */
 .tech-form-group label,
 .tech-password-group label {
     display: none; 
 }
 
-/* Icons & Toggle button inside inputs */
 .tech-form-group i {
     position: absolute;
     top: 50%;
     right: 16px;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: rgba(255, 255, 255, 0.7);
     font-size: 1rem;
 }
 
@@ -150,22 +147,21 @@ body.tech-portal {
     transform: translateY(-50%);
     background: transparent;
     border: none;
-    color: #94a3b8;
+    color: rgba(255, 255, 255, 0.7);
     font-size: 1rem;
     cursor: pointer;
     outline: none;
 }
 
 .tech-password-toggle:hover {
-    color: #fff;
+    color: #ffffff;
 }
 
-/* Remember me & Forgot Password Row */
 .tech-login-options {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #cbd5e1;
+    color: rgba(255, 255, 255, 0.85);
     font-size: 0.85rem;
     margin: 8px 0 20px 0;
 }
@@ -185,7 +181,7 @@ body.tech-portal {
 }
 
 .tech-login-options a {
-    color: #60a5fa;
+    color: #93c5fd;
     text-decoration: none;
     font-weight: 500;
 }
@@ -194,7 +190,6 @@ body.tech-portal {
     text-decoration: underline;
 }
 
-/* Submit Button */
 .tech-login-button {
     width: 100%;
     height: 50px;
@@ -207,13 +202,13 @@ body.tech-portal {
     cursor: pointer;
     transition: all 0.3s ease;
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
 }
 
 .tech-login-button:hover {
     background: linear-gradient(135deg, #1d4ed8, #1e40af);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.6);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
     transform: translateY(-1px);
 }
 
@@ -224,16 +219,15 @@ body.tech-portal {
     margin-top: 10px;
 }
 
-/* Register Link Footer */
 .tech-register-redirect {
     text-align: center;
-    color: #cbd5e1;
+    color: rgba(255, 255, 255, 0.85);
     font-size: 0.9rem;
     margin-top: 20px;
 }
 
 .tech-register-redirect a {
-    color: #60a5fa;
+    color: #93c5fd;
     text-decoration: none;
     font-weight: 600;
 }

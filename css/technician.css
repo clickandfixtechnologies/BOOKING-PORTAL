@@ -8236,6 +8236,279 @@ strong {
 }
 
 /* =========================================================
+   SUPPORT CENTER
+   DIRECT CHAT ENTRY
+   PHASE 5
+   ========================================================= */
+
+.tech-support-chat-picker-subtitle {
+    margin: 4px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+    opacity: 0.72;
+}
+
+
+.tech-support-chat-picker-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+}
+
+
+.tech-direct-support-entry {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 14px 15px;
+
+    border: 1px solid rgba(
+        255,
+        255,
+        255,
+        0.10
+    );
+
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.08),
+            rgba(255,255,255,0.035)
+        );
+
+    color: inherit;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+
+.tech-direct-support-entry:hover {
+    transform: translateY(-1px);
+
+    border-color:
+        rgba(
+            255,
+            255,
+            255,
+            0.20
+        );
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+
+    box-shadow:
+        0 10px 28px
+        rgba(
+            0,
+            0,
+            0,
+            0.12
+        );
+}
+
+
+.tech-direct-support-entry-icon {
+    width: 42px;
+    height: 42px;
+
+    flex: 0 0 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.10
+        );
+
+    font-size: 18px;
+}
+
+
+.tech-direct-support-entry-content {
+    min-width: 0;
+
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.tech-direct-support-entry-content strong {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+
+.tech-direct-support-entry-content span {
+    font-size: 11px;
+    line-height: 1.45;
+    opacity: 0.68;
+}
+
+
+.tech-direct-support-entry-arrow {
+    flex: 0 0 auto;
+
+    font-size: 13px;
+
+    opacity: 0.55;
+}
+
+
+/* =========================================================
+   SUPPORT REQUEST SECTION
+   ========================================================= */
+
+.tech-support-chat-picker-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+.tech-support-chat-picker-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    opacity: 0.78;
+}
+
+
+.tech-support-chat-picker-section-title span:last-child {
+    min-width: 22px;
+    height: 22px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+
+    font-size: 10px;
+}
+
+
+.tech-support-chat-request-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+
+.tech-support-chat-request {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 12px;
+
+    border: 1px solid rgba(
+        255,
+        255,
+        255,
+        0.08
+    );
+
+    border-radius: 13px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.035
+        );
+
+    color: inherit;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease,
+        border-color 0.18s ease;
+}
+
+
+.tech-support-chat-request:hover {
+    transform: translateY(-1px);
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.065
+        );
+
+    border-color:
+        rgba(
+            255,
+            255,
+            255,
+            0.16
+        );
+}
+
+
+@media (max-width: 600px) {
+
+    .tech-support-chat-picker-body {
+        padding: 13px;
+    }
+
+    .tech-direct-support-entry {
+        padding: 13px;
+    }
+
+}
+
+/* =========================================================
    TECHNICIAN FLOATING SUPPORT
    GLOBAL — VISIBLE ON ALL PAGES
    ========================================================= */

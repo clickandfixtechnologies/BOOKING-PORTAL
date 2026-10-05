@@ -7691,7 +7691,9 @@ function updateDirectSupportMessageSeenState(
    PHASE 5
    ========================================================= */
 
-async function openDirectSupportChat() {
+async function openDirectSupportChat(
+    returnToSupportCenter = false
+) {
 
     removeSupportChatModal();
 
@@ -7818,21 +7820,46 @@ async function openDirectSupportChat() {
     `;
 
     document.body.appendChild(
-        modal
+    modal
+);
+
+document
+    .getElementById(
+        "closeDirectSupportChat"
+    )
+    ?.addEventListener(
+        "click",
+        async () => {
+
+            await closeDirectSupportChat();
+
+            if (
+                returnToSupportCenter
+            ) {
+                await openSupportChat();
+            }
+
+        }
     );
 
-    document
-        .getElementById(
-            "closeDirectSupportChat"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
+modal
+    .querySelector(
+        "[data-close-direct-support-chat]"
+    )
+    ?.addEventListener(
+        "click",
+        async () => {
 
-                closeDirectSupportChat();
+            await closeDirectSupportChat();
 
+            if (
+                returnToSupportCenter
+            ) {
+                await openSupportChat();
             }
-        );
+
+        }
+    );
 
     modal
         .querySelector(
@@ -8108,15 +8135,22 @@ function updateDirectSupportChatHeader() {
 
 }
 
-
-
 /* =========================================================
    TECHNICIAN DIRECT SUPPORT CHAT
-   CLOSE DIRECT CHAT
-   PHASE 5
+   STOP REALTIME
    ========================================================= */
 
-async function closeDirectSupportChat() {
+async function stopDirectSupportRealtime() {
+
+    directSupportRealtimeReady =
+        false;
+
+    directSupportRealtimePending =
+        [];
+
+    directSupportRealtimeTechnicianId =
+        null;
+
 
     if (
         directSupportRealtimeChannel
@@ -8139,16 +8173,20 @@ async function closeDirectSupportChat() {
 
         directSupportRealtimeChannel =
             null;
+
     }
 
-    directSupportRealtimeReady =
-        false;
+}
 
-    directSupportRealtimePending =
-        [];
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   CLOSE CHAT
+   ========================================================= */
 
-    directSupportRealtimeTechnicianId =
-        null;
+async function closeDirectSupportChat() {
+
+    await stopDirectSupportRealtime();
+
 
     directSupportTechnicianId =
         null;
@@ -8162,13 +8200,17 @@ async function closeDirectSupportChat() {
     directSupportSeenMessageIds =
         new Set();
 
+
     const modal =
         document.getElementById(
             "techDirectSupportChatModal"
         );
 
+
     if (modal) {
+
         modal.remove();
+
     }
 
 }
@@ -8541,6 +8583,50 @@ async function loadDirectSupportMessages(
     };
 
 }
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   RENDER CHAT
+   PHASE 5
+   ========================================================= */
+
+function renderDirectSupportChat(
+    technician,
+    messages
+) {
+
+    /*
+     * Update technician state
+     */
+    if (technician) {
+
+        directSupportTechnician =
+            technician;
+
+    }
+
+    if (Array.isArray(messages)) {
+
+        directSupportMessages =
+            messages;
+
+    }
+
+    /*
+     * Update header
+     */
+    updateDirectSupportChatHeader();
+
+    /*
+     * Render messages
+     */
+    renderDirectSupportMessages(
+        directSupportMessages
+    );
+
+}
+
+
 
 /* =========================================================
    TECHNICIAN DIRECT SUPPORT CHAT
@@ -8953,7 +9039,7 @@ function incrementTechnicianSupportUnreadBadge() {
 /* =========================================================
    SUPPORT CHAT
    OPEN CHAT
-   PHASE 5B
+   PHASE 5 - REQUEST + DIRECT CHAT
    ========================================================= */
 
 async function openSupportChat() {
@@ -8962,288 +9048,83 @@ async function openSupportChat() {
 
     try {
 
-        const response = await api(
-            "support_my_requests"
-        );
+        const response =
+            await api(
+                "support_my_requests"
+            );
 
         const requests =
-            Array.isArray(response?.requests)
+            Array.isArray(
+                response?.requests
+            )
                 ? response.requests
                 : [];
 
-                        /*
-         * Only support requests that are
-         * still relevant for conversation.
-         */
-        const activeRequests =
-            requests.filter(
-                request => {
-
-                    const status =
-                        String(
-                            request?.status || ""
-                        ).toUpperCase();
-
-                    return (
-                        status !== "CLOSED" &&
-                        status !== "CANCELLED"
-                    );
-
-                }
-            );
-
-/* =====================================================
-   UPDATE FLOATING SUPPORT UNREAD BADGE
-   ===================================================== */
-
-const floatingSupportBadge =
-    document.getElementById(
-        "technicianFloatingSupportBadge"
-    );
-
-const totalUnreadCount =
-    Math.max(
-        0,
-        Number(
-            response?.total_unread_count
-        ) || 0
-    );
-
-if (floatingSupportBadge) {
-
-    if (totalUnreadCount > 0) {
-
-        floatingSupportBadge.textContent =
-            totalUnreadCount > 99
-                ? "99+"
-                : String(totalUnreadCount);
-
-        floatingSupportBadge.hidden =
-            false;
-
-    } else {
-
-        floatingSupportBadge.textContent =
-            "0";
-
-        floatingSupportBadge.hidden =
-            true;
-
-    }
-
-}
-
-        /*
-         * Only support requests that are
-         * still relevant for conversation.
-         */
 
         /* =====================================================
-   SUPPORT REQUESTS
-   PHASE 5 - INCLUDE CLOSED REQUESTS
-   ===================================================== */
+           UPDATE REQUEST UNREAD BADGE
+           ===================================================== */
 
-const supportRequests = requests;
-
-if (!supportRequests.length) {
-
-    await openDirectSupportChat();
-
-    return;
-}
-
-
-/*
- * Only one request.
- */
-if (
-    supportRequests.length === 1
-) {
-
-    await openSupportRequestChat(
-        supportRequests[0].id
-    );
-
-    return;
-}
-
-
-/*
- * Multiple requests.
- */
-showSupportChatRequestPicker(
-    supportRequests
-);
-
-
-/*
- * If only one support request exists,
- * open it directly.
- */
-
-if (
-    supportRequests.length === 1
-) {
-
-    await openSupportRequestChat(
-        supportRequests[0].id
-    );
-
-    /* =====================================================
-       REFRESH FLOATING SUPPORT UNREAD BADGE
-       AFTER MESSAGE READ
-       ===================================================== */
-
-    try {
-
-        const updatedResponse =
-            await api(
-                "support_my_requests"
-            );
-
-        const updatedUnreadCount =
-            Math.max(
-                0,
-                Number(
-                    updatedResponse?.total_unread_count
-                ) || 0
-            );
-
-        const updatedFloatingBadge =
+        const floatingSupportBadge =
             document.getElementById(
                 "technicianFloatingSupportBadge"
             );
 
-        if (updatedFloatingBadge) {
+        const totalUnreadCount =
+            Math.max(
+                0,
+                Number(
+                    response?.total_unread_count
+                ) || 0
+            );
 
-            if (updatedUnreadCount > 0) {
+        if (floatingSupportBadge) {
 
-                updatedFloatingBadge.textContent =
-                    updatedUnreadCount > 99
+            if (totalUnreadCount > 0) {
+
+                floatingSupportBadge.textContent =
+                    totalUnreadCount > 99
                         ? "99+"
-                        : String(updatedUnreadCount);
+                        : String(
+                            totalUnreadCount
+                        );
 
-                updatedFloatingBadge.hidden =
+                floatingSupportBadge.hidden =
                     false;
 
             } else {
 
-                updatedFloatingBadge.textContent =
+                floatingSupportBadge.textContent =
                     "0";
 
-                updatedFloatingBadge.hidden =
+                floatingSupportBadge.hidden =
                     true;
 
             }
 
         }
 
-    } catch (error) {
 
-        console.warn(
-            "Support unread badge refresh after chat open failed:",
-            error
-        );
+        /* =====================================================
+           NO REQUEST
+           DIRECT SUPPORT CHAT
+           ===================================================== */
 
-    }
+        if (!requests.length) {
 
-    return;
+            await openDirectSupportChat();
 
-}
-
-
-/*
- * Multiple requests.
- * Include OPEN + CLOSED + CANCELLED
- * so previous conversations remain accessible.
- */
-
-showSupportChatRequestPicker(
-    supportRequests
-);
-
-        /*
-         * If only one active support request exists,
-         * open it directly.
-         */
-
-        if (
-    activeRequests.length === 1
-) {
-
-    await openSupportRequestChat(
-        activeRequests[0].id
-    );
-
-    /* =====================================================
-       REFRESH FLOATING SUPPORT UNREAD BADGE
-       AFTER MESSAGE READ
-       ===================================================== */
-
-    try {
-
-        const updatedResponse =
-            await api(
-                "support_my_requests"
-            );
-
-        const updatedUnreadCount =
-            Math.max(
-                0,
-                Number(
-                    updatedResponse?.total_unread_count
-                ) || 0
-            );
-
-        const updatedFloatingBadge =
-            document.getElementById(
-                "technicianFloatingSupportBadge"
-            );
-
-        if (updatedFloatingBadge) {
-
-            if (updatedUnreadCount > 0) {
-
-                updatedFloatingBadge.textContent =
-                    updatedUnreadCount > 99
-                        ? "99+"
-                        : String(updatedUnreadCount);
-
-                updatedFloatingBadge.hidden =
-                    false;
-
-            } else {
-
-                updatedFloatingBadge.textContent =
-                    "0";
-
-                updatedFloatingBadge.hidden =
-                    true;
-
-            }
-
+            return;
         }
 
-    } catch (error) {
 
-        console.warn(
-            "Support unread badge refresh after chat open failed:",
-            error
-        );
-
-    }
-
-    return;
-
-}
-
-        /*
-         * Multiple active requests.
-         * Let technician choose one.
-         */
+        /* =====================================================
+           REQUESTS EXIST
+           SHOW SUPPORT CENTER
+           ===================================================== */
 
         showSupportChatRequestPicker(
-            activeRequests
+            requests
         );
 
     } catch (error) {
@@ -9261,6 +9142,8 @@ showSupportChatRequestPicker(
     }
 
 }
+
+
 
 /* =========================================================
    TECHNICIAN DIRECT SUPPORT CHAT
@@ -9405,120 +9288,165 @@ function showSupportChatLoading() {
 
 /* =========================================================
    SUPPORT CHAT
-   REQUEST PICKER
+   REQUEST + DIRECT CHAT PICKER
+   PHASE 5
    ========================================================= */
 
-function showSupportChatRequestPicker(requests) {
+function showSupportChatRequestPicker(
+    requests
+) {
 
     removeSupportChatModal();
 
-    const modal = document.createElement("div");
+    const modal =
+        document.createElement(
+            "div"
+        );
 
-    modal.id = "techSupportChatModal";
-    modal.className = "tech-support-chat-modal";
+    modal.id =
+        "techSupportChatModal";
 
-    const requestCards = requests
-        .map(request => {
+    modal.className =
+        "tech-support-chat-modal";
 
-            const status = String(
-                request?.status || "OPEN"
-            ).toUpperCase();
 
-            const appointment =
-                request?.appointment_reference ||
-                request?.appointment_code ||
-                "Service Request";
+    const requestCards =
+        requests
+            .map(
+                request => {
 
-            const supportToken =
-                request?.support_token || "—";
+                    const status =
+                        String(
+                            request?.status ||
+                            "OPEN"
+                        ).toUpperCase();
 
-            // Unread message count for this request
-            const unreadCount = Math.max(
-                0,
-                Number(request?.unread_count) || 0
-            );
 
-            const supportType = formatSupportType(
-                request?.support_type
-            );
+                    const appointment =
+                        request?.appointment_reference ||
+                        request?.appointment_code ||
+                        "Service Request";
 
-            return `
 
-                <button
-                    type="button"
-                    class="tech-support-chat-request"
-                    data-support-request-id="${escapeHtml(
-                        request.id
-                    )}"
-                >
+                    const supportToken =
+                        request?.support_token ||
+                        "—";
 
-                    <div
-                        class="tech-support-chat-request-icon"
-                    >
-                        <i class="fa-solid fa-comments"></i>
-                    </div>
 
-                    <div
-                        class="tech-support-chat-request-content"
-                    >
+                    const unreadCount =
+                        Math.max(
+                            0,
+                            Number(
+                                request?.unread_count
+                            ) || 0
+                        );
 
-                        <div
-                            class="tech-support-chat-request-top"
+
+                    const supportType =
+                        formatSupportType(
+                            request?.support_type
+                        );
+
+
+                    return `
+                        <button
+                            type="button"
+                            class="tech-support-chat-request"
+                            data-support-request-id="${escapeHtml(
+                                request?.id || ""
+                            )}"
                         >
 
-                            <strong>
-                                ${escapeHtml(appointment)}
-                            </strong>
+                            <div
+                                class="tech-support-chat-request-icon"
+                            >
+                                <i
+                                    class="fa-solid fa-comments"
+                                ></i>
+                            </div>
 
-                            <div class="tech-support-chat-request-indicators">
 
-                                <span
+                            <div
+                                class="tech-support-chat-request-content"
+                            >
+
+                                <div
+                                    class="tech-support-chat-request-top"
+                                >
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            supportType
+                                        )}
+                                    </strong>
+
+                                    <span
+                                        class="
+                                            tech-support-chat-request-status
+                                            ${getSupportStatusClass(
+                                                status
+                                            )}
+                                        "
+                                    >
+                                        ${escapeHtml(
+                                            status
+                                        )}
+                                    </span>
+
+                                </div>
+
+
+                                <div
                                     class="
-                                        tech-support-chat-status
-                                        ${getSupportStatusClass(status)}
+                                        tech-support-chat-request-reference
                                     "
                                 >
-                                    ${escapeHtml(status)}
-                                </span>
+                                    ${escapeHtml(
+                                        appointment
+                                    )}
+                                </div>
 
-                                ${
-                                    unreadCount > 0
-                                        ? `
-                                            <span
-                                                class="tech-support-chat-unread-badge"
-                                                aria-label="${unreadCount} unread messages"
-                                            >
-                                                ${unreadCount}
-                                            </span>
-                                        `
-                                        : ""
-                                }
+
+                                <div
+                                    class="
+                                        tech-support-chat-request-bottom
+                                    "
+                                >
+
+                                    <span>
+                                        Support Token:
+                                        ${escapeHtml(
+                                            supportToken
+                                        )}
+                                    </span>
+
+                                    ${
+                                        unreadCount > 0
+                                            ? `
+                                                <span
+                                                    class="
+                                                        tech-support-chat-request-unread
+                                                    "
+                                                >
+                                                    ${unreadCount > 99
+                                                        ? "99+"
+                                                        : unreadCount}
+                                                </span>
+                                            `
+                                            : ""
+                                    }
+
+                                </div>
 
                             </div>
 
-                        </div>
+                        </button>
+                    `;
 
-                        <span>
-                            ${escapeHtml(supportToken)}
-                        </span>
+                }
+            )
+            .join("");
 
-                        <small>
-                            ${escapeHtml(supportType)}
-                        </small>
-
-                    </div>
-
-                    <i
-                        class="fa-solid fa-chevron-right
-                               tech-support-chat-request-arrow"
-                    ></i>
-
-                </button>
-
-            `;
-
-        })
-        .join("");
 
     modal.innerHTML = `
 
@@ -9527,26 +9455,41 @@ function showSupportChatRequestPicker(requests) {
             data-close-support-chat="true"
         ></div>
 
+
         <div
-            class="tech-support-chat-dialog"
+            class="tech-support-chat-dialog
+                   tech-support-chat-picker-dialog"
             role="dialog"
             aria-modal="true"
-            aria-label="Select Support Request"
+            aria-label="Technician Support Center"
         >
 
-            <div class="tech-support-chat-header">
+            <div
+                class="tech-support-chat-header"
+            >
 
                 <div>
 
-                    <span class="tech-support-chat-eyebrow">
+                    <span
+                        class="tech-support-chat-eyebrow"
+                    >
                         TECHNICIAN SUPPORT
                     </span>
 
                     <h3>
-                        Select Support Request
+                        Support Center
                     </h3>
 
+                    <p
+                        class="tech-support-chat-picker-subtitle"
+                    >
+                        Choose an existing support
+                        conversation or chat directly
+                        with Click &amp; Fix Support.
+                    </p>
+
                 </div>
+
 
                 <button
                     type="button"
@@ -9554,56 +9497,182 @@ function showSupportChatRequestPicker(requests) {
                     data-close-support-chat="true"
                     aria-label="Close"
                 >
-                    <i class="fa-solid fa-xmark"></i>
+                    <i
+                        class="fa-solid fa-xmark"
+                    ></i>
                 </button>
 
             </div>
 
-            <div class="tech-support-chat-picker">
 
-                <p class="tech-support-chat-picker-intro">
-                    Select the support request you want
-                    to continue the conversation for.
-                </p>
+            <div
+                class="tech-support-chat-picker-body"
+            >
 
-                <div class="tech-support-chat-request-list">
+                <!-- =================================================
+                     DIRECT SUPPORT CHAT
+                     ================================================= -->
 
-                    ${requestCards}
+                <button
+                    type="button"
+                    class="
+                        tech-direct-support-entry
+                    "
+                    id="openDirectSupportFromPicker"
+                >
+
+                    <div
+                        class="
+                            tech-direct-support-entry-icon
+                        "
+                    >
+                        <i
+                            class="fa-solid fa-headset"
+                        ></i>
+                    </div>
+
+
+                    <div
+                        class="
+                            tech-direct-support-entry-content
+                        "
+                    >
+
+                        <strong>
+                            Chat with Click &amp; Fix Support
+                        </strong>
+
+                        <span>
+                            Start a direct conversation
+                            with our support team.
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            tech-direct-support-entry-arrow
+                        "
+                    >
+                        <i
+                            class="fa-solid fa-chevron-right"
+                        ></i>
+                    </div>
+
+                </button>
+
+
+                <!-- =================================================
+                     EXISTING REQUESTS
+                     ================================================= -->
+
+                <div
+                    class="
+                        tech-support-chat-picker-section
+                    "
+                >
+
+                    <div
+                        class="
+                            tech-support-chat-picker-section-title
+                        "
+                    >
+
+                        <span>
+                            Your Support Requests
+                        </span>
+
+                        <span>
+                            ${requests.length}
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            tech-support-chat-request-list
+                        "
+                    >
+
+                        ${requestCards}
+
+                    </div>
 
                 </div>
 
             </div>
 
         </div>
+
     `;
 
-    document.body.appendChild(modal);
 
-    bindSupportChatClose(modal);
+    document.body.appendChild(
+        modal
+    );
+
+
+    bindSupportChatClose(
+        modal
+    );
+
+
+    /* =====================================================
+       DIRECT SUPPORT BUTTON
+       ===================================================== */
+
+    const directButton =
+        modal.querySelector(
+            "#openDirectSupportFromPicker"
+        );
+
+
+   directButton?.addEventListener(
+    "click",
+    async () => {
+
+        await openDirectSupportChat(
+            true
+        );
+
+    }
+);
+
+
+    /* =====================================================
+       EXISTING REQUEST BUTTONS
+       ===================================================== */
 
     modal
-        .querySelectorAll("[data-support-request-id]")
-        .forEach(button => {
+        .querySelectorAll(
+            "[data-support-request-id]"
+        )
+        .forEach(
+            button => {
 
-            button.addEventListener(
-                "click",
-                async () => {
+                button.addEventListener(
+                    "click",
+                    async () => {
 
-                    const requestId =
-                        button.getAttribute(
-                            "data-support-request-id"
+                        const requestId =
+                            button.dataset
+                                .supportRequestId;
+
+                        if (!requestId) {
+                            return;
+                        }
+
+                        await openSupportRequestChat(
+                            requestId
                         );
 
-                    if (!requestId) {
-                        return;
                     }
+                );
 
-                    await openSupportRequestChat(requestId);
-
-                }
-            );
-
-        });
+            }
+        );
 
 }
 

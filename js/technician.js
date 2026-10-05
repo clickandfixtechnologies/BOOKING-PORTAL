@@ -8705,7 +8705,7 @@ async function markDirectSupportMessagesRead() {
                     technicianId
             }
         );
-
+await refreshTechnicianSupportUnreadBadge();
 
         /*
          * Backend marks all ADMIN direct messages
@@ -8971,7 +8971,7 @@ async function startSupportUnreadRealtime() {
                      * already includes this direct unread
                      * count in total_unread_count.
                      */
-                    await refreshTechnicianSupportUnreadBadge();
+                    incrementTechnicianSupportUnreadBadge();
 
                 }
             )

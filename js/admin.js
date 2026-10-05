@@ -4610,33 +4610,30 @@ function renderAdminDirectSupportMessages(
 
 
                         ${
-                            isAdmin
-                                ? `
-                                    <span
-                                        class="
-                                            direct-message-seen
-                                            ${isSeen ? "is-seen" : ""}
-                                        "
-                                        aria-label="${
-                                            isSeen
-                                                ? "Seen"
-                                                : "Sent"
-                                        }"
-                                        title="${
-                                            isSeen
-                                                ? "Seen"
-                                                : "Sent"
-                                        }"
-                                    >
-                                        ${
-                                            isSeen
-                                                ? "✓✓"
-                                                : "✓"
-                                        }
-                                    </span>
-                                `
-                                : ""
-                        }
+    isAdmin
+        ? `
+            <span
+                class="direct-message-seen"
+                aria-label="${
+                    isSeen
+                        ? "Seen"
+                        : "Unseen"
+                }"
+                title="${
+                    isSeen
+                        ? "Seen"
+                        : "Unseen"
+                }"
+            >
+                ${
+                    isSeen
+                        ? "Seen"
+                        : "Unseen"
+                }
+            </span>
+        `
+        : ""
+}
 
                     </div>
 
@@ -5017,28 +5014,30 @@ function addAdminDirectRealtimeMessage(
 
 
                 ${
-                    isAdmin
-                        ? `
-                            <span
-                                class="
-                                    direct-message-seen
-                                    ${isSeen ? "is-seen" : ""}
-                                "
-                                aria-label="${
-                                    isSeen
-                                        ? "Seen"
-                                        : "Sent"
-                                }"
-                            >
-                                ${
-                                    isSeen
-                                        ? "✓✓"
-                                        : "✓"
-                                }
-                            </span>
-                        `
-                        : ""
+    isAdmin
+        ? `
+            <span
+                class="direct-message-seen"
+                aria-label="${
+                    isSeen
+                        ? "Seen"
+                        : "Unseen"
+                }"
+                title="${
+                    isSeen
+                        ? "Seen"
+                        : "Unseen"
+                }"
+            >
+                ${
+                    isSeen
+                        ? "Seen"
+                        : "Unseen"
                 }
+            </span>
+        `
+        : ""
+}
 
             </div>
 
@@ -5205,31 +5204,27 @@ function updateAdminDirectRealtimeMessage(
 
 
     seenElement.textContent =
-        isSeen
-            ? "✓✓"
-            : "✓";
+    isSeen
+        ? "Seen"
+        : "Unseen";
 
+seenElement.classList.remove(
+    "is-seen"
+);
 
-    seenElement.classList.toggle(
-        "is-seen",
-        isSeen
-    );
+seenElement.setAttribute(
+    "aria-label",
+    isSeen
+        ? "Seen"
+        : "Unseen"
+);
 
-
-    seenElement.setAttribute(
-        "aria-label",
-        isSeen
-            ? "Seen"
-            : "Sent"
-    );
-
-
-    seenElement.setAttribute(
-        "title",
-        isSeen
-            ? "Seen"
-            : "Sent"
-    );
+seenElement.setAttribute(
+    "title",
+    isSeen
+        ? "Seen"
+        : "Unseen"
+);
 
 }
 

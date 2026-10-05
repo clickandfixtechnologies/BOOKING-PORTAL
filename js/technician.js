@@ -7405,36 +7405,23 @@ function renderDirectSupportMessages(
                                 ${escapeHtml(time)}
                             </span>
 
-                            ${
-                                isTechnician
-                                    ? `
-                                        <span
-                                            class="
-                                                direct-message-seen
-                                                ${
-                                                    isSeen
-                                                        ? "is-seen"
-                                                        : ""
-                                                }
-                                            "
-                                            data-seen-message-id="${escapeHtml(
-                                                message?.id || ""
-                                            )}"
-                                            title="${
-                                                isSeen
-                                                    ? "Seen"
-                                                    : "Sent"
-                                            }"
-                                        >
-                                            ${
-                                                isSeen
-                                                    ? "✓✓"
-                                                    : "✓"
-                                            }
-                                        </span>
-                                    `
-                                    : ""
-                            }
+                            ${isTechnician
+    ? `
+        <span
+            class="direct-message-seen"
+            data-seen-message-id="${escapeHtml(
+                message?.id || ""
+            )}"
+        >
+            ${
+                isSeen
+                    ? "Seen"
+                    : "Unseen"
+            }
+        </span>
+    `
+    : ""
+}
 
                         </div>
 
@@ -7596,15 +7583,14 @@ function appendDirectSupportMessageIfNew(
                             title="${
                                 isSeen
                                     ? "Seen"
-                                    : "Sent"
-                            }"
-                        >
-                            ${
-                                isSeen
-                                    ? "✓✓"
-                                    : "✓"
-                            }
-                        </span>
+                                    : "Unseen"
+}">
+    ${
+        isSeen
+            ? "Seen"
+            : "Unseen"
+    }
+</span>
                     `
                     : ""
             }
@@ -7689,21 +7675,20 @@ function updateDirectSupportMessageSeenState(
     }
 
     tick.textContent =
-        seen
-            ? "✓✓"
-            : "✓";
+    seen
+        ? "Seen"
+        : "Unseen";
 
-    tick.classList.toggle(
-        "is-seen",
-        seen
-    );
+tick.classList.remove(
+    "is-seen"
+);
 
-    tick.setAttribute(
-        "title",
-        seen
-            ? "Seen"
-            : "Sent"
-    );
+tick.setAttribute(
+    "title",
+    seen
+        ? "Seen"
+        : "Unseen"
+);
 
 }
 
@@ -8722,6 +8707,16 @@ async function markDirectSupportMessagesRead() {
         );
 
 
+        /*
+         * Backend marks all ADMIN direct messages
+         * as read_at_technician.
+         *
+         * Refresh the combined floating badge
+         * immediately.
+         */
+        await refreshTechnicianSupportUnreadBadge();
+
+
     } catch (error) {
 
         console.warn(
@@ -8737,6 +8732,7 @@ async function markDirectSupportMessagesRead() {
 
 /* =========================================================
    SUPPORT UNREAD COUNT REALTIME
+   REQUEST CHAT + DIRECT CHAT
    ========================================================= */
 
 async function startSupportUnreadRealtime() {
@@ -8749,18 +8745,25 @@ async function startSupportUnreadRealtime() {
         error
     } = await sb.auth.getUser();
 
-    if (error || !data?.user?.id) {
+
+    if (
+        error ||
+        !data?.user?.id
+    ) {
         return;
     }
 
+
     const authUserId =
         data.user.id;
+
 
     /*
      * Get technician profile ID.
      *
      * support_requests.technician_id
-     * uses technicians.id, not auth user id.
+     * and technician_direct_messages.technician_id
+     * both use technicians.id.
      */
     const {
         data: technician,
@@ -8774,6 +8777,7 @@ async function startSupportUnreadRealtime() {
         )
         .maybeSingle();
 
+
     if (
         technicianError ||
         !technician?.id
@@ -8781,10 +8785,13 @@ async function startSupportUnreadRealtime() {
         return;
     }
 
+
     /*
      * Remove previous unread channel.
      */
-    if (supportUnreadRealtimeChannel) {
+    if (
+        supportUnreadRealtimeChannel
+    ) {
 
         try {
 
@@ -8793,10 +8800,12 @@ async function startSupportUnreadRealtime() {
             );
 
         } catch (error) {
+
             console.warn(
                 "Support unread realtime cleanup failed:",
                 error
             );
+
         }
 
         supportUnreadRealtimeChannel =
@@ -8804,15 +8813,25 @@ async function startSupportUnreadRealtime() {
 
     }
 
+
     const technicianId =
         technician.id;
+
 
     const channelName =
         `support-unread-${technicianId}`;
 
+
     supportUnreadRealtimeChannel =
         sb
             .channel(channelName)
+
+
+            /* =================================================
+               REQUEST CHAT
+               ADMIN -> TECHNICIAN
+               ================================================= */
+
             .on(
                 "postgres_changes",
                 {
@@ -8825,37 +8844,32 @@ async function startSupportUnreadRealtime() {
                     const message =
                         payload?.new;
 
+
                     if (!message?.id) {
                         return;
                     }
 
-                    /*
-                     * Only ADMIN messages are unread
-                     * for the technician.
-                     */
+
                     const senderType =
                         String(
                             message?.sender_type ||
                             ""
                         ).toUpperCase();
 
-                        if (
-                    senderType === "ADMIN"
-                    ) {
 
-                    playSupportMessageSound();
-
-                    }
-
+                    /*
+                     * Only ADMIN messages create
+                     * unread messages for technician.
+                     */
                     if (
                         senderType !== "ADMIN"
                     ) {
                         return;
                     }
 
+
                     /*
-                     * If the message is already marked
-                     * as read, do not increase the badge.
+                     * Already read?
                      */
                     if (
                         message?.read_at_technician
@@ -8863,11 +8877,179 @@ async function startSupportUnreadRealtime() {
                         return;
                     }
 
+
+                    if (
+                        typeof playSupportMessageSound ===
+                        "function"
+                    ) {
+
+                        playSupportMessageSound();
+
+                    }
+
+
+                    /*
+                     * IMPORTANT:
+                     *
+                     * support_my_requests already returns
+                     * BOTH request unread + direct unread.
+                     */
                     await refreshTechnicianSupportUnreadBadge();
 
                 }
             )
-            .subscribe();
+
+
+            /* =================================================
+               DIRECT CHAT
+               ADMIN -> TECHNICIAN
+               ================================================= */
+
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "technician_direct_messages",
+                    filter:
+                        `technician_id=eq.${technicianId}`
+                },
+                async (payload) => {
+
+                    const message =
+                        payload?.new;
+
+
+                    if (!message?.id) {
+                        return;
+                    }
+
+
+                    const senderType =
+                        String(
+                            message?.sender_type ||
+                            ""
+                        ).toUpperCase();
+
+
+                    /*
+                     * Only ADMIN direct messages
+                     * are unread for technician.
+                     */
+                    if (
+                        senderType !== "ADMIN"
+                    ) {
+                        return;
+                    }
+
+
+                    /*
+                     * If already read, do not refresh
+                     * unnecessarily.
+                     */
+                    if (
+                        message?.read_at_technician
+                    ) {
+                        return;
+                    }
+
+
+                    if (
+                        typeof playSupportMessageSound ===
+                        "function"
+                    ) {
+
+                        playSupportMessageSound();
+
+                    }
+
+
+                    /*
+                     * IMPORTANT:
+                     *
+                     * Backend support_my_requests()
+                     * already includes this direct unread
+                     * count in total_unread_count.
+                     */
+                    await refreshTechnicianSupportUnreadBadge();
+
+                }
+            )
+
+
+            /* =================================================
+               DIRECT CHAT READ STATUS
+               ADMIN MESSAGE BECOMES READ
+               ================================================= */
+
+            .on(
+                "postgres_changes",
+                {
+                    event: "UPDATE",
+                    schema: "public",
+                    table: "technician_direct_messages",
+                    filter:
+                        `technician_id=eq.${technicianId}`
+                },
+                async (payload) => {
+
+                    const oldMessage =
+                        payload?.old;
+
+                    const newMessage =
+                        payload?.new;
+
+
+                    if (!newMessage?.id) {
+                        return;
+                    }
+
+
+                    const senderType =
+                        String(
+                            newMessage?.sender_type ||
+                            ""
+                        ).toUpperCase();
+
+
+                    /*
+                     * Only ADMIN messages affect
+                     * technician unread count.
+                     */
+                    if (
+                        senderType !== "ADMIN"
+                    ) {
+                        return;
+                    }
+
+
+                    /*
+                     * Refresh only when read state changes.
+                     */
+                    if (
+                        oldMessage?.read_at_technician ===
+                        newMessage?.read_at_technician
+                    ) {
+                        return;
+                    }
+
+
+                    await refreshTechnicianSupportUnreadBadge();
+
+                }
+            )
+
+
+            .subscribe(
+                status => {
+
+                    console.log(
+                        "📡 TECH SUPPORT UNREAD REALTIME STATUS:",
+                        status
+                    );
+
+                }
+            );
 
 }
 
@@ -13798,3 +13980,45 @@ document
         });
 
     });
+
+    /* =========================================================
+   SUPPORT BADGE
+   MOBILE FOREGROUND / TAB RESUME SYNC
+   ========================================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    async () => {
+
+        if (
+            document.visibilityState !==
+            "visible"
+        ) {
+            return;
+        }
+
+
+        /*
+         * Browser background থেকে ফিরে এসেছে।
+         *
+         * Server থেকে latest combined unread
+         * count নিয়ে আসি।
+         */
+        await refreshTechnicianSupportUnreadBadge();
+
+    }
+);
+
+
+window.addEventListener(
+    "pageshow",
+    async () => {
+
+        /*
+         * Mobile browser page restore / bfcache
+         * থেকে ফিরে এলে latest badge sync.
+         */
+        await refreshTechnicianSupportUnreadBadge();
+
+    }
+);

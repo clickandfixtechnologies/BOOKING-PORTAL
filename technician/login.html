@@ -2,125 +2,95 @@
 <html lang="en">
 
 <head>
-
     <meta charset="utf-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
-
-    <meta
-        name="theme-color"
-        content="#2563eb"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#2563eb">
     <title>Technician Login | Click & Fix Technologies</title>
 
     <!-- Font Awesome -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
->
-
-<link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
->
-    >
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Technician Login CSS -->
-    <link
-        rel="stylesheet"
-        href="../css/technician.css"
-    >
-
-    <link
-        rel="manifest"
-        href="../manifest.webmanifest"
-    >
-
+    <link rel="stylesheet" href="../css/logintech.css">
+    <link rel="manifest" href="../manifest.webmanifest">
 </head>
-
 
 <body class="tech-portal">
 
-
     <main class="tech-login-screen">
-
         <section class="tech-login-card">
 
-
-            <!-- Brand -->
-
+            <!-- Brand Section -->
             <div class="tech-login-brand">
-
                 <div class="tech-login-logo">
                     CF
                 </div>
-
                 <div>
-
                     <h1 class="tech-login-title">
                         Technician Portal
                     </h1>
-
                     <p class="tech-login-subtitle">
                         Click &amp; Fix Technologies
                     </p>
-
                 </div>
-
             </div>
 
-
-            <!-- Login -->
-
+            <!-- Login Heading -->
             <h2 class="tech-login-heading">
-                Technician sign in
+                Sign in
             </h2>
-
 
             <form id="techLoginForm">
 
+                <!-- Email Field -->
+                <div class="tech-form-group">
+                    <input
+                        id="email"
+                        type="email"
+                        class="tech-input"
+                        placeholder="Email"
+                        autocomplete="username"
+                        required
+                    >
+                    <label for="email">Email</label>
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
 
-                <input
-                    id="email"
-                    type="email"
-                    class="tech-input"
-                    placeholder="Email"
-                    autocomplete="username"
-                    required
-                >
+                <!-- Password Field -->
+                <div class="tech-form-group tech-password-group">
+                    <input
+                        id="password"
+                        type="password"
+                        class="tech-input tech-password-input"
+                        placeholder="Password"
+                        autocomplete="current-password"
+                        required
+                    >
+                    <label for="password">Password</label>
+                    
+                    <button
+                        type="button"
+                        id="togglePassword"
+                        class="tech-password-toggle"
+                        aria-label="Show password"
+                        title="Show password"
+                    >
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
 
+                <!-- Remember Me & Forgot Password Options -->
+                <div class="tech-login-options">
+                    <label class="tech-remember-me">
+                        <input type="checkbox" id="rememberMe"> Remember me
+                    </label>
+                    <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+                </div>
 
-                <div class="tech-password-wrapper">
-
-    <input
-        id="password"
-        type="password"
-        class="tech-input tech-password-input"
-        placeholder="Password"
-        autocomplete="current-password"
-        required
-    >
-
-    <button
-        type="button"
-        id="togglePassword"
-        class="tech-password-toggle"
-        aria-label="Show password"
-        title="Show password"
-    >
-        <i class="fa-regular fa-eye"></i>
-    </button>
-
-</div>
-
-
+                <!-- Submit Button -->
                 <button
                     id="signIn"
                     type="submit"
@@ -129,33 +99,26 @@
                     Sign in
                 </button>
 
-
+                <!-- Error Message Display -->
                 <p
                     id="loginError"
                     class="tech-login-error"
                 ></p>
 
+                <!-- Register Link Option -->
+                <p class="tech-register-redirect">
+                    Don't have an account? <a href="#" id="registerLink">Register</a>
+                </p>
 
             </form>
 
         </section>
-
     </main>
 
-
-    <!-- Config -->
-
+    <!-- Config & Scripts -->
     <script src="../js/runtime-config.js"></script>
-
     <script src="../js/app-config.js"></script>
-
-    <!-- Login JS -->
-
-    <script
-        type="module"
-        src="../js/tech-login.js"
-    ></script>
-
+    <script type="module" src="../js/tech-login.js"></script>
     <script src="../js/pwa.js"></script>
 
 </body>

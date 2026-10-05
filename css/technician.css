@@ -7874,7 +7874,7 @@ strong {
     font-weight: 800;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--primary, #6d5dfc);
+    color: var(--primary, #ff7b00);
 }
 
 .tech-support-chat-header h3 {

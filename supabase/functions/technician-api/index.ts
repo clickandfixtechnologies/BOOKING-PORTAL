@@ -1452,18 +1452,11 @@ const totalUnreadCount =
     ) || 0
   );
 
-  const totalUnreadCount =
-    Array.from(
-      unreadCounts.values()
-    ).reduce(
-      (total, count) => total + count,
-      0
-    );
 
-    return {
+return {
 
-    total_unread_count:
-      totalUnreadCount,
+  total_unread_count:
+    totalUnreadCount,
 
     requests:
       requests.map(

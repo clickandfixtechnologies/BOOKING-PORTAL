@@ -5455,11 +5455,9 @@ i[class*="fa-"]{
 
     gap: 8px;
 
-    margin:
-        0 0 14px;
+    margin: 0 0 14px;
 
-    padding:
-        9px 11px;
+    padding: 9px 11px;
 
     border:
         1px solid
@@ -5480,6 +5478,25 @@ i[class*="fa-"]{
     box-shadow:
         0 3px 10px
         rgba(220, 38, 38, 0.04);
+
+    animation:
+        techSupportErrorIn
+        0.2s ease;
+}
+
+
+@keyframes techSupportErrorIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
 }
 
 

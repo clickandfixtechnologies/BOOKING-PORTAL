@@ -2925,7 +2925,7 @@ async function sendDirectSupportMessage(
     .from(
       "technician_direct_messages"
     )
-    id="3k4p6z"
+    
 .insert({
 
   technician_id:

@@ -37,6 +37,27 @@ let supportChatRealtimePending = [];
 let supportUnreadRealtimeChannel = null;
 
 /* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   PHASE 5 - DIRECT CHAT STATE
+   ========================================================= */
+
+let directSupportRealtimeChannel = null;
+
+let directSupportRealtimeTechnicianId = null;
+
+let directSupportRealtimeReady = false;
+
+let directSupportRealtimePending = [];
+
+let directSupportTechnicianId = null;
+
+let directSupportTechnician = null;
+
+let directSupportMessages = [];
+
+let directSupportSeenMessageIds = new Set();
+
+/* =========================================================
    TECHNICIAN JOB CARD CLICK HANDLER
    Event Delegation
    ========================================================= */

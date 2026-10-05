@@ -2476,176 +2476,290 @@ async function directSupportConversations(
 }
 
 /* =========================================================
-   ADMIN DIRECT SUPPORT
-   LOAD MESSAGES
+   DIRECT SUPPORT MESSAGES
+   ADMIN LOAD + MARK TECHNICIAN MESSAGES AS SEEN
    ========================================================= */
 
 async function directSupportMessages(
-  db: any,
-  body: any
+    db,
+    body
 ) {
 
-  const technicianId =
-    String(
-      body?.technician_id ||
-      ""
-    ).trim();
+    const technicianId =
+        String(
+            body?.technician_id || ""
+        ).trim();
 
 
-  if (
-    !technicianId ||
-    !isUuid(technicianId)
-  ) {
+    if (!technicianId) {
 
-    throw new Error(
-      "Invalid technician."
-    );
+        throw new Error(
+            "TECHNICIAN_ID_REQUIRED"
+        );
 
-  }
+    }
 
 
-  /*
-   * Verify technician.
-   */
+    /*
+     * Verify technician
+     */
 
-  const {
-    data: technician,
-    error: technicianError
-  } = await db
-    .from("technicians")
-    .select(`
-      id,
-      technician_code,
-      full_name,
-      mobile,
-      username,
-      is_active
-    `)
-    .eq(
-      "id",
-      technicianId
-    )
-    .maybeSingle();
-
-
-  if (
-    technicianError
-  ) {
-
-    throw new Error(
-      "TECHNICIAN_LOOKUP_FAILED"
-    );
-
-  }
+    const {
+        data: technician,
+        error: technicianError
+    } = await db
+        .from("technicians")
+        .select(`
+            id,
+            technician_code,
+            full_name,
+            mobile,
+            username,
+            is_active
+        `)
+        .eq(
+            "id",
+            technicianId
+        )
+        .maybeSingle();
 
 
-  if (
-    !technician
-  ) {
+    if (technicianError) {
 
-    throw new Error(
-      "TECHNICIAN_NOT_FOUND"
-    );
+        throw new Error(
+            "TECHNICIAN_QUERY_FAILED"
+        );
 
-  }
+    }
 
 
-  /*
-   * Mark technician messages as read.
-   */
+    if (!technician) {
 
-  const {
-    error: readError
-  } = await db
-    .from(
-      "technician_direct_messages"
-    )
-    .update({
-      read_at_admin:
-        new Date().toISOString()
-    })
-    .eq(
-      "technician_id",
-      technicianId
-    )
-    .eq(
-      "sender_type",
-      "TECHNICIAN"
-    )
-    .is(
-      "read_at_admin",
-      null
-    );
+        throw new Error(
+            "TECHNICIAN_NOT_FOUND"
+        );
+
+    }
 
 
-  if (
-    readError
-  ) {
+    /*
+     * -----------------------------------------------------
+     * MARK TECHNICIAN MESSAGES AS SEEN
+     * -----------------------------------------------------
+     */
 
-    console.error(
-      "ADMIN DIRECT SUPPORT MARK READ ERROR:",
-      readError.message
-    );
-
-    throw new Error(
-      "DIRECT_MESSAGES_ADMIN_MARK_READ_FAILED"
-    );
-
-  }
+    const seenAt =
+        new Date().toISOString();
 
 
-  /*
-   * Load messages.
-   */
-
-  const {
-    data,
-    error
-  } = await db
-    .from(
-      "technician_direct_messages"
-    )
-    .select(`
-      id,
-      technician_id,
-      sender_type,
-      sender_user_id,
-      message,
-      created_at
-    `)
-    .eq(
-      "technician_id",
-      technicianId
-    )
-    .order(
-      "created_at",
-      {
-        ascending: true
-      }
-    );
+    const {
+        error: readError
+    } = await db
+        .from("technician_direct_messages")
+        .update({
+            read_at_admin: seenAt
+        })
+        .eq(
+            "technician_id",
+            technicianId
+        )
+        .eq(
+            "sender_type",
+            "TECHNICIAN"
+        )
+        .is(
+            "read_at_admin",
+            null
+        );
 
 
-  if (
-    error
-  ) {
+    if (readError) {
 
-    throw new Error(
-      "DIRECT_SUPPORT_MESSAGES_QUERY_FAILED"
-    );
+        throw new Error(
+            "DIRECT_SUPPORT_READ_UPDATE_FAILED"
+        );
 
-  }
+    }
 
 
-  return {
+    /*
+     * -----------------------------------------------------
+     * LOAD MESSAGES
+     * -----------------------------------------------------
+     */
 
-    technician,
+    const {
+        data: messages,
+        error: messageError
+    } = await db
+        .from("technician_direct_messages")
+        .select(`
+            id,
+            technician_id,
+            sender_type,
+            sender_user_id,
+            message,
+            read_at_technician,
+            read_at_admin,
+            created_at
+        `)
+        .eq(
+            "technician_id",
+            technicianId
+        )
+        .order(
+            "created_at",
+            {
+                ascending: true
+            }
+        );
 
-    messages:
-      data || []
 
-  };
+    if (messageError) {
+
+        throw new Error(
+            "DIRECT_SUPPORT_MESSAGES_FAILED"
+        );
+
+    }
+
+
+    return {
+        technician,
+        messages:
+            Array.isArray(messages)
+                ? messages
+                : []
+    };
 
 }
+
+/* =========================================================
+   DIRECT CHAT MESSAGE HTML
+   TIME + SEEN STATUS
+   ========================================================= */
+
+function renderAdminDirectSupportMessages(
+    messages
+) {
+
+    if (!messages.length) {
+
+        return `
+            <div
+                class="admin-floating-support-no-messages"
+            >
+                No messages yet.
+            </div>
+        `;
+
+    }
+
+
+    return messages
+        .map(message => {
+
+            const sender =
+                String(
+                    message.sender_type || ""
+                ).toUpperCase();
+
+
+            const isAdmin =
+                sender === "ADMIN";
+
+
+            const isSeen =
+                isAdmin
+                    ? Boolean(
+                        message.read_at_technician
+                    )
+                    : Boolean(
+                        message.read_at_admin
+                    );
+
+
+            const time =
+                adminSupportFormatDate(
+                    message.created_at
+                );
+
+
+            return `
+
+                <div
+                    class="
+                        admin-floating-support-message
+                        ${isAdmin
+                            ? "admin"
+                            : "technician"}
+                    "
+                    data-direct-message-id="${e(
+                        message.id
+                    )}"
+                >
+
+                    <div
+                        class="
+                            admin-floating-support-message-text
+                        "
+                    >
+                        ${e(
+                            message.message || ""
+                        ).replaceAll(
+                            "\n",
+                            "<br>"
+                        )}
+                    </div>
+
+
+                    <div
+                        class="
+                            admin-floating-support-message-meta
+                            direct-message-meta
+                        "
+                    >
+
+                        <small>
+                            ${e(time)}
+                        </small>
+
+
+                        ${
+                            isAdmin
+                                ? `
+                                    <span
+                                        class="
+                                            direct-message-seen
+                                            ${
+                                                isSeen
+                                                    ? "is-seen"
+                                                    : ""
+                                            }
+                                        "
+                                        aria-label="${
+                                            isSeen
+                                                ? "Seen"
+                                                : "Sent"
+                                        }"
+                                    >
+                                        ✓✓
+                                    </span>
+                                `
+                                : ""
+                        }
+
+                    </div>
+
+                </div>
+
+            `;
+
+        })
+        .join("");
+
+}
+
 
 /* =========================================================
    ADMIN DIRECT SUPPORT
@@ -2811,30 +2925,48 @@ async function sendDirectSupportMessage(
     .from(
       "technician_direct_messages"
     )
-    .insert({
+    id="3k4p6z"
+.insert({
 
-      technician_id:
-        technicianId,
+  technician_id:
+    technicianId,
 
-      sender_type:
-        "ADMIN",
+  sender_type:
+    "ADMIN",
 
-      sender_user_id:
-        adminUserId,
+  sender_user_id:
+    adminUserId,
 
-      message:
-        message
+  message:
+    message,
 
-    })
-    .select(`
-      id,
-      technician_id,
-      sender_type,
-      sender_user_id,
-      message,
-      created_at
-    `)
-    .single();
+  /*
+   * Technician has not seen
+   * this message yet.
+   */
+  read_at_technician:
+    null,
+
+  /*
+   * Admin obviously has not
+   * received a "seen" event
+   * from itself.
+   */
+  read_at_admin:
+    null
+
+})
+.select(`
+  id,
+  technician_id,
+  sender_type,
+  sender_user_id,
+  message,
+  read_at_technician,
+  read_at_admin,
+  created_at
+`)
+.single();
 
 
   if (

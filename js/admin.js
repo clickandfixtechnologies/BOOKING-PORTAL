@@ -2581,14 +2581,46 @@ function bindAdminSupportMessageComposer(
    ========================================================= */
 
 const adminFloatingSupportState = {
+
     initialized: false,
+
+    /* Existing Support Request Realtime */
     realtimeChannel: null,
+
+    /* Existing Request Chat */
     currentRequestId: "",
     currentRequest: null,
     currentMessages: [],
+
+    /* Existing Request List */
     requests: [],
+
+    /* Existing Request Unread */
     unread: new Map(),
+
+    /* Existing Request Duplicate Protection */
     seenMessageIds: new Set(),
+
+    /* -----------------------------------------------------
+       DIRECT TECHNICIAN CHAT
+       ----------------------------------------------------- */
+
+    directConversations: [],
+
+    currentDirectTechnicianId: "",
+    currentDirectTechnician: null,
+    currentDirectMessages: [],
+
+    directUnread: new Map(),
+
+    directSeenMessageIds: new Set(),
+
+    /* Direct Chat Realtime */
+    directRealtimeChannel: null,
+    directRealtimeReady: false,
+    directRealtimePending: [],
+
+    /* Widget */
     open: false,
     loading: false
 };
@@ -2738,12 +2770,15 @@ function toggleAdminFloatingSupport() {
 }
 
 
+/* =========================================================
+   OPEN FLOATING SUPPORT
+   ========================================================= */
+
 async function openAdminFloatingSupport() {
 
     ensureAdminFloatingSupportWidget();
 
-    adminFloatingSupportState.open =
-        true;
+    adminFloatingSupportState.open = true;
 
     const panel =
         document.getElementById(
@@ -2754,7 +2789,7 @@ async function openAdminFloatingSupport() {
         panel.hidden = false;
     }
 
-    await loadAdminFloatingSupportRequests();
+    await loadAdminFloatingSupportHome();
 }
 
 
@@ -2886,14 +2921,12 @@ async function loadAdminFloatingSupportRequests() {
     }
 }
 
-
 /* =========================================================
-   REQUEST LIST
+   LOAD FLOATING SUPPORT HOME
+   REQUESTS + DIRECT CONVERSATIONS
    ========================================================= */
 
-function renderAdminFloatingSupportRequestList(
-    requests
-) {
+async function loadAdminFloatingSupportHome() {
 
     const body =
         document.getElementById(
@@ -2903,6 +2936,203 @@ function renderAdminFloatingSupportRequestList(
     if (!body) {
         return;
     }
+
+    adminFloatingSupportState.loading = true;
+
+    body.innerHTML = `
+        <div
+            class="admin-floating-support-loading"
+        >
+            <span
+                class="spinner-border spinner-border-sm"
+            ></span>
+
+            <span>
+                Loading support…
+            </span>
+        </div>
+    `;
+
+    try {
+
+        const [
+            requestResponse,
+            directResponse
+        ] = await Promise.all([
+
+            api(
+                "support_requests",
+                {
+                    offset: 0,
+                    limit: 50
+                }
+            ),
+
+            api(
+                "direct_support_conversations"
+            )
+
+        ]);
+
+
+        const requests =
+            Array.isArray(
+                requestResponse?.requests
+            )
+                ? requestResponse.requests
+                : [];
+
+
+        const conversations =
+            Array.isArray(
+                directResponse?.conversations
+            )
+                ? directResponse.conversations
+                : [];
+
+
+        adminFloatingSupportState.requests =
+            requests;
+
+
+        adminFloatingSupportState.directConversations =
+            conversations;
+
+
+        /*
+         * Refresh direct unread map
+         */
+        adminFloatingSupportState.directUnread.clear();
+
+
+        conversations.forEach(
+            conversation => {
+
+                const technicianId =
+                    String(
+                        conversation?.technician_id ||
+                        conversation?.technician?.id ||
+                        ""
+                    ).trim();
+
+
+                if (!technicianId) {
+                    return;
+                }
+
+
+                const unread =
+                    Number(
+                        conversation?.unread_count ||
+                        conversation?.unread ||
+                        0
+                    );
+
+
+                if (unread > 0) {
+
+                    adminFloatingSupportState.directUnread.set(
+                        technicianId,
+                        unread
+                    );
+
+                }
+
+            }
+        );
+
+
+        updateAdminFloatingSupportBadge();
+
+
+        renderAdminFloatingSupportHome();
+
+
+    } catch (error) {
+
+        console.error(
+            "Floating support home load failed:",
+            error
+        );
+
+
+        body.innerHTML = `
+            <div
+                class="admin-floating-support-error"
+            >
+
+                <strong>
+                    Unable to load Support
+                </strong>
+
+                <span>
+                    ${e(
+                        error?.message ||
+                        "Support loading failed."
+                    )}
+                </span>
+
+                <button
+                    type="button"
+                    class="btn btn-sm btn-primary"
+                    id="adminFloatingSupportRetry"
+                >
+                    Retry
+                </button>
+
+            </div>
+        `;
+
+
+        document
+            .getElementById(
+                "adminFloatingSupportRetry"
+            )
+            ?.addEventListener(
+                "click",
+                () =>
+                    loadAdminFloatingSupportHome()
+            );
+
+    } finally {
+
+        adminFloatingSupportState.loading =
+            false;
+
+    }
+}
+
+/* =========================================================
+   FLOATING SUPPORT HOME
+   REQUESTS + DIRECT TECHNICIAN CHAT
+   ========================================================= */
+
+function renderAdminFloatingSupportHome() {
+
+    const body =
+        document.getElementById(
+            "adminFloatingSupportBody"
+        );
+
+    if (!body) {
+        return;
+    }
+
+
+    const requests =
+        Array.isArray(
+            adminFloatingSupportState.requests
+        )
+            ? adminFloatingSupportState.requests
+            : [];
+
+
+    const conversations =
+        Array.isArray(
+            adminFloatingSupportState.directConversations
+        )
+            ? adminFloatingSupportState.directConversations
+            : [];
 
 
     const activeRequests =
@@ -2919,185 +3149,378 @@ function renderAdminFloatingSupportRequestList(
         );
 
 
-    if (!activeRequests.length) {
-
-        body.innerHTML = `
-            <div
-                class="admin-floating-support-empty"
-            >
-
-                <div class="admin-floating-support-empty-icon">
-                    ✓
-                </div>
-
-                <strong>
-                    No active support requests
-                </strong>
-
-                <span>
-                    There are no active technician support conversations.
-                </span>
-
-                <button
-                    type="button"
-                    class="btn btn-sm btn-outline-primary mt-3"
-                    id="adminFloatingSupportRefresh"
-                >
-                    Refresh
-                </button>
-
-            </div>
-        `;
-
-
-        document
-            .getElementById(
-                "adminFloatingSupportRefresh"
-            )
-            ?.addEventListener(
-                "click",
-                () =>
-                    loadAdminFloatingSupportRequests()
-            );
-
-        return;
-    }
-
-
     body.innerHTML = `
 
         <div
-            class="admin-floating-support-list-header"
+            class="admin-floating-support-home"
         >
 
-            <div>
-                <strong>
-                    Active Requests
-                </strong>
+            <!-- =========================================
+                 ACTIVE REQUESTS
+                 ========================================= -->
 
-                <small>
-                    ${activeRequests.length}
-                    active conversation${activeRequests.length === 1 ? "" : "s"}
-                </small>
-            </div>
-
-
-            <button
-                type="button"
-                id="adminFloatingSupportRefresh"
-                class="admin-floating-support-refresh"
-                title="Refresh"
+            <section
+                class="admin-floating-support-section"
             >
-                ↻
-            </button>
 
-        </div>
+                <div
+                    class="admin-floating-support-list-header"
+                >
 
+                    <div>
 
-        <div
-            class="admin-floating-support-request-list"
-        >
+                        <strong>
+                            Active Requests
+                        </strong>
 
-            ${activeRequests.map(
-                request => {
+                        <small>
+                            ${activeRequests.length}
+                            active conversation${
+                                activeRequests.length === 1
+                                    ? ""
+                                    : "s"
+                            }
+                        </small>
 
-                    const unread =
-                        Number(
-                            adminFloatingSupportState.unread.get(
-                                request.id
-                            ) || 0
-                        );
-
-
-                    const technician =
-                        request.technicians || {};
+                    </div>
 
 
-                    return `
+                    <button
+                        type="button"
+                        id="adminFloatingSupportRefresh"
+                        class="admin-floating-support-refresh"
+                        title="Refresh"
+                    >
+                        ↻
+                    </button>
 
-                        <button
-                            type="button"
-                            class="admin-floating-support-request"
-                            data-floating-support-request="${e(
-                                request.id
-                            )}"
-                        >
+                </div>
+
+
+                ${
+                    activeRequests.length
+                        ? `
 
                             <div
-                                class="admin-floating-support-request-main"
+                                class="admin-floating-support-request-list"
                             >
 
-                                <div
-                                    class="admin-floating-support-request-top"
-                                >
+                                ${activeRequests.map(
+                                    request => {
 
-                                    <strong>
-                                        ${e(
-                                            request.support_token ||
-                                            "Support Request"
-                                        )}
-                                    </strong>
+                                        const unread =
+                                            Number(
+                                                adminFloatingSupportState.unread.get(
+                                                    request.id
+                                                ) || 0
+                                            );
 
-                                    ${
-                                        unread > 0
-                                            ? `
-                                                <span
-                                                    class="admin-floating-support-unread"
+
+                                        const technician =
+                                            request.technicians || {};
+
+
+                                        return `
+
+                                            <button
+                                                type="button"
+                                                class="admin-floating-support-request"
+                                                data-floating-support-request="${e(
+                                                    request.id
+                                                )}"
+                                            >
+
+                                                <div
+                                                    class="admin-floating-support-request-main"
                                                 >
-                                                    ${unread}
-                                                </span>
-                                            `
-                                            : ""
+
+                                                    <div
+                                                        class="admin-floating-support-request-top"
+                                                    >
+
+                                                        <strong>
+                                                            ${e(
+                                                                request.support_token ||
+                                                                "Support Request"
+                                                            )}
+                                                        </strong>
+
+
+                                                        ${
+                                                            unread > 0
+                                                                ? `
+                                                                    <span
+                                                                        class="admin-floating-support-unread"
+                                                                    >
+                                                                        ${unread}
+                                                                    </span>
+                                                                `
+                                                                : ""
+                                                        }
+
+                                                    </div>
+
+
+                                                    <span>
+                                                        ${e(
+                                                            technician.full_name ||
+                                                            "Unknown Technician"
+                                                        )}
+                                                    </span>
+
+
+                                                    <small>
+                                                        ${e(
+                                                            adminSupportTypeLabel(
+                                                                request.support_type
+                                                            )
+                                                        )}
+                                                        ·
+                                                        ${e(
+                                                            adminSupportStatusLabel(
+                                                                request.status
+                                                            )
+                                                        )}
+                                                    </small>
+
+                                                </div>
+
+
+                                                <span
+                                                    class="
+                                                        admin-floating-support-status-dot
+                                                        ${adminSupportStatusClass(
+                                                            request.status
+                                                        )}
+                                                    "
+                                                ></span>
+
+                                            </button>
+
+                                        `;
+
                                     }
-
-                                </div>
-
-
-                                <span>
-                                    ${e(
-                                        technician.full_name ||
-                                        "Unknown Technician"
-                                    )}
-                                </span>
-
-
-                                <small>
-                                    ${e(
-                                        adminSupportTypeLabel(
-                                            request.support_type
-                                        )
-                                    )}
-                                    ·
-                                    ${e(
-                                        adminSupportStatusLabel(
-                                            request.status
-                                        )
-                                    )}
-                                </small>
+                                ).join("")}
 
                             </div>
 
+                        `
+                        : `
 
-                            <span
-                                class="
-                                    admin-floating-support-status-dot
-                                    ${adminSupportStatusClass(
-                                        request.status
-                                    )}
-                                "
-                            ></span>
+                            <div
+                                class="admin-floating-support-mini-empty"
+                            >
+                                No active support requests.
+                            </div>
 
-                        </button>
-
-                    `;
-
+                        `
                 }
-            ).join("")}
+
+            </section>
+
+
+            <!-- =========================================
+                 DIRECT TECHNICIAN CHAT
+                 ========================================= -->
+
+            <section
+                class="admin-floating-support-section admin-floating-direct-section"
+            >
+
+                <div
+                    class="admin-floating-support-list-header"
+                >
+
+                    <div>
+
+                        <strong>
+                            Direct Technician Chat
+                        </strong>
+
+                        <small>
+                            ${
+                                conversations.length
+                            }
+                            conversation${
+                                conversations.length === 1
+                                    ? ""
+                                    : "s"
+                            }
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                ${
+                    conversations.length
+                        ? `
+
+                            <div
+                                class="admin-floating-direct-list"
+                            >
+
+                                ${conversations.map(
+                                    conversation => {
+
+                                        const technicianId =
+                                            String(
+                                                conversation?.technician_id ||
+                                                conversation?.technician?.id ||
+                                                ""
+                                            ).trim();
+
+
+                                        const technician =
+                                            conversation?.technician ||
+                                            conversation?.technicians ||
+                                            {};
+
+
+                                        const technicianName =
+                                            technician?.full_name ||
+                                            conversation?.technician_name ||
+                                            "Technician";
+
+
+                                        const lastMessage =
+                                            conversation?.last_message ||
+                                            conversation?.message ||
+                                            "";
+
+
+                                        const lastMessageTime =
+                                            conversation?.last_message_created_at ||
+                                            conversation?.last_message_at ||
+                                            conversation?.created_at ||
+                                            "";
+
+
+                                        const unread =
+                                            Number(
+                                                adminFloatingSupportState.directUnread.get(
+                                                    technicianId
+                                                ) ||
+                                                conversation?.unread_count ||
+                                                conversation?.unread ||
+                                                0
+                                            );
+
+
+                                        return `
+
+                                            <button
+                                                type="button"
+                                                class="admin-floating-direct-conversation"
+                                                data-admin-direct-technician="${e(
+                                                    technicianId
+                                                )}"
+                                            >
+
+                                                <div
+                                                    class="admin-floating-direct-avatar"
+                                                >
+                                                    ${e(
+                                                        String(
+                                                            technicianName
+                                                        )
+                                                            .trim()
+                                                            .charAt(0)
+                                                            .toUpperCase()
+                                                    )}
+                                                </div>
+
+
+                                                <div
+                                                    class="admin-floating-direct-main"
+                                                >
+
+                                                    <div
+                                                        class="admin-floating-direct-top"
+                                                    >
+
+                                                        <strong>
+                                                            ${e(
+                                                                technicianName
+                                                            )}
+                                                        </strong>
+
+
+                                                        ${
+                                                            unread > 0
+                                                                ? `
+                                                                    <span
+                                                                        class="admin-floating-support-unread"
+                                                                    >
+                                                                        ${unread}
+                                                                    </span>
+                                                                `
+                                                                : ""
+                                                        }
+
+                                                    </div>
+
+
+                                                    <span
+                                                        class="admin-floating-direct-preview"
+                                                    >
+                                                        ${e(
+                                                            lastMessage ||
+                                                            "No messages yet."
+                                                        )}
+                                                    </span>
+
+
+                                                    ${
+                                                        lastMessageTime
+                                                            ? `
+                                                                <small>
+                                                                    ${e(
+                                                                        adminSupportFormatDate(
+                                                                            lastMessageTime
+                                                                        )
+                                                                    )}
+                                                                </small>
+                                                            `
+                                                            : ""
+                                                    }
+
+                                                </div>
+
+                                            </button>
+
+                                        `;
+
+                                    }
+                                ).join("")}
+
+                            </div>
+
+                        `
+                        : `
+
+                            <div
+                                class="admin-floating-support-mini-empty"
+                            >
+
+                                No direct technician conversations yet.
+
+                            </div>
+
+                        `
+                }
+
+            </section>
 
         </div>
 
     `;
 
+
+    /*
+     * REQUEST REFRESH
+     */
 
     document
         .getElementById(
@@ -3109,31 +3532,547 @@ function renderAdminFloatingSupportRequestList(
 
                 event.stopPropagation();
 
-                loadAdminFloatingSupportRequests();
+                loadAdminFloatingSupportHome();
 
             }
         );
 
 
+    /*
+     * REQUEST CHAT OPEN
+     */
+
     document
         .querySelectorAll(
             "[data-floating-support-request]"
         )
-        .forEach(button => {
+        .forEach(
+            button => {
 
-            button.addEventListener(
-                "click",
-                () => {
+                button.addEventListener(
+                    "click",
+                    () => {
 
-                    openAdminFloatingSupportChat(
-                        button.dataset
-                            .floatingSupportRequest
-                    );
+                        openAdminFloatingSupportChat(
+                            button.dataset
+                                .floatingSupportRequest
+                        );
 
+                    }
+                );
+
+            }
+        );
+
+
+    /*
+     * DIRECT CHAT OPEN
+     */
+
+    document
+        .querySelectorAll(
+            "[data-admin-direct-technician]"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        openAdminDirectSupportChat(
+                            button.dataset
+                                .adminDirectTechnician
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+/* =========================================================
+   REQUEST LIST COMPATIBILITY WRAPPER
+   ========================================================= */
+
+function renderAdminFloatingSupportRequestList(
+    requests
+) {
+
+    adminFloatingSupportState.requests =
+        Array.isArray(requests)
+            ? requests
+            : [];
+
+    renderAdminFloatingSupportHome();
+}
+
+/* =========================================================
+   OPEN DIRECT TECHNICIAN CHAT
+   ========================================================= */
+
+async function openAdminDirectSupportChat(
+    technicianId
+) {
+
+    const id =
+        String(
+            technicianId || ""
+        ).trim();
+
+
+    if (!id) {
+        return;
+    }
+
+
+    /*
+     * Switch from Request Chat → Direct Chat
+     */
+
+    adminFloatingSupportState.currentRequestId =
+        "";
+
+    adminFloatingSupportState.currentRequest =
+        null;
+
+    adminFloatingSupportState.currentMessages =
+        [];
+
+
+    adminFloatingSupportState.currentDirectTechnicianId =
+        id;
+
+
+    adminFloatingSupportState.directUnread.delete(
+        id
+    );
+
+
+    updateAdminFloatingSupportBadge();
+
+
+    const body =
+        document.getElementById(
+            "adminFloatingSupportBody"
+        );
+
+
+    if (!body) {
+        return;
+    }
+
+
+    body.innerHTML = `
+
+        <div
+            class="admin-floating-support-chat-loading"
+        >
+
+            <span
+                class="spinner-border spinner-border-sm"
+            ></span>
+
+            <span>
+                Opening direct chat…
+            </span>
+
+        </div>
+
+    `;
+
+
+    try {
+
+        const response =
+            await api(
+                "direct_support_messages",
+                {
+                    technician_id: id
                 }
             );
 
-        });
+
+        const messages =
+            Array.isArray(
+                response?.messages
+            )
+                ? response.messages
+                : [];
+
+
+        const technician =
+            response?.technician ||
+            null;
+
+
+        adminFloatingSupportState.currentDirectTechnician =
+            technician;
+
+
+        adminFloatingSupportState.currentDirectMessages =
+            messages;
+
+
+        messages.forEach(
+            message => {
+
+                if (message?.id) {
+
+                    adminFloatingSupportState.directSeenMessageIds.add(
+                        String(
+                            message.id
+                        )
+                    );
+
+                }
+
+            }
+        );
+
+
+        renderAdminDirectSupportChat();
+
+
+    } catch (error) {
+
+        console.error(
+            "Admin direct support chat failed:",
+            error
+        );
+
+
+        body.innerHTML = `
+
+            <div
+                class="admin-floating-support-error"
+            >
+
+                <button
+                    type="button"
+                    class="btn btn-link p-0"
+                    id="adminFloatingSupportBack"
+                >
+                    ← Back
+                </button>
+
+
+                <strong>
+                    Unable to open direct chat
+                </strong>
+
+
+                <span>
+                    ${e(
+                        error?.message ||
+                        "Direct conversation could not be loaded."
+                    )}
+                </span>
+
+            </div>
+
+        `;
+
+
+        document
+            .getElementById(
+                "adminFloatingSupportBack"
+            )
+            ?.addEventListener(
+                "click",
+                () =>
+                    loadAdminFloatingSupportHome()
+            );
+
+    }
+
+}
+
+/* =========================================================
+   DIRECT CHAT UI
+   ========================================================= */
+
+function renderAdminDirectSupportChat() {
+
+    const body =
+        document.getElementById(
+            "adminFloatingSupportBody"
+        );
+
+
+    const technician =
+        adminFloatingSupportState
+            .currentDirectTechnician;
+
+
+    const messages =
+        adminFloatingSupportState
+            .currentDirectMessages;
+
+
+    if (!body) {
+        return;
+    }
+
+
+    const technicianName =
+        technician?.full_name ||
+        "Technician";
+
+
+    body.innerHTML = `
+
+        <div
+            class="admin-floating-support-chat"
+        >
+
+            <header
+                class="admin-floating-support-chat-header"
+            >
+
+                <button
+                    type="button"
+                    id="adminFloatingSupportBack"
+                    class="admin-floating-support-back"
+                    title="Back"
+                >
+                    ←
+                </button>
+
+
+                <div
+                    class="admin-floating-support-chat-title"
+                >
+
+                    <strong>
+                        Direct Chat
+                    </strong>
+
+                    <small>
+                        ${e(
+                            technicianName
+                        )}
+                    </small>
+
+                </div>
+
+
+                <span
+                    class="admin-floating-direct-header-badge"
+                >
+                    Direct
+                </span>
+
+            </header>
+
+
+            <div
+                id="adminFloatingSupportMessages"
+                class="admin-floating-support-messages"
+            >
+
+                ${renderAdminDirectSupportMessages(
+                    messages
+                )}
+
+            </div>
+
+
+            <form
+                id="adminDirectSupportMessageForm"
+                class="admin-floating-support-composer"
+            >
+
+                <textarea
+                    id="adminDirectSupportMessageInput"
+                    rows="2"
+                    maxlength="2000"
+                    placeholder="Write a message..."
+                    required
+                ></textarea>
+
+
+                <button
+                    type="submit"
+                    id="adminDirectSupportSend"
+                >
+                    Send
+                </button>
+
+            </form>
+
+        </div>
+
+    `;
+
+
+    document
+        .getElementById(
+            "adminFloatingSupportBack"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                adminFloatingSupportState.currentDirectTechnicianId =
+                    "";
+
+                adminFloatingSupportState.currentDirectTechnician =
+                    null;
+
+                adminFloatingSupportState.currentDirectMessages =
+                    [];
+
+                loadAdminFloatingSupportHome();
+
+            }
+        );
+
+
+    bindAdminDirectSupportComposer();
+
+
+    scrollAdminFloatingSupportMessages();
+
+}
+
+/* =========================================================
+   DIRECT CHAT COMPOSER
+   ========================================================= */
+
+function bindAdminDirectSupportComposer() {
+
+    const form =
+        document.getElementById(
+            "adminDirectSupportMessageForm"
+        );
+
+
+    const input =
+        document.getElementById(
+            "adminDirectSupportMessageInput"
+        );
+
+
+    const button =
+        document.getElementById(
+            "adminDirectSupportSend"
+        );
+
+
+    const technicianId =
+        adminFloatingSupportState
+            .currentDirectTechnicianId;
+
+
+    if (
+        !form ||
+        !input ||
+        !button ||
+        !technicianId
+    ) {
+        return;
+    }
+
+
+    form.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            const message =
+                String(
+                    input.value || ""
+                ).trim();
+
+
+            if (!message) {
+
+                input.focus();
+
+                return;
+
+            }
+
+
+            try {
+
+                button.disabled = true;
+
+                button.textContent =
+                    "Sending…";
+
+
+                const response =
+                    await api(
+                        "direct_support_message_send",
+                        {
+                            technician_id:
+                                technicianId,
+
+                            message
+                        }
+                    );
+
+
+                input.value = "";
+
+
+                const sentMessage =
+                    response?.message ||
+                    response?.data ||
+                    null;
+
+
+                /*
+                 * Add immediately.
+                 *
+                 * Realtime may deliver the same
+                 * message shortly afterwards.
+                 */
+
+                if (sentMessage?.id) {
+
+                    addAdminDirectRealtimeMessage(
+                        sentMessage
+                    );
+
+                }
+
+
+                input.focus();
+
+
+            } catch (error) {
+
+                console.error(
+                    "Admin direct message send failed:",
+                    error
+                );
+
+
+                flash(
+                    error?.message ||
+                    "Message could not be sent.",
+                    false
+                );
+
+            } finally {
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Send";
+
+            }
+
+        }
+    );
+
 }
 
 
@@ -3587,6 +4526,128 @@ function renderAdminFloatingSupportMessages(
         .join("");
 }
 
+/* =========================================================
+   DIRECT CHAT MESSAGE HTML
+   ========================================================= */
+
+function renderAdminDirectSupportMessages(
+    messages
+) {
+
+    if (!Array.isArray(messages) || !messages.length) {
+
+        return `
+            <div
+                class="admin-floating-support-no-messages"
+            >
+                No messages yet.
+            </div>
+        `;
+
+    }
+
+
+    return messages
+        .map(message => {
+
+            const sender =
+                String(
+                    message?.sender_type || ""
+                ).toUpperCase();
+
+
+            const isAdmin =
+                sender === "ADMIN";
+
+
+            const isSeen =
+                isAdmin &&
+                Boolean(
+                    message?.read_at_technician
+                );
+
+
+            const time =
+                adminSupportFormatDate(
+                    message?.created_at
+                );
+
+
+            return `
+
+                <div
+                    class="
+                        admin-floating-support-message
+                        ${isAdmin ? "admin" : "technician"}
+                    "
+                    data-direct-message-id="${e(
+                        message.id
+                    )}"
+                >
+
+                    <div
+                        class="admin-floating-support-message-text"
+                    >
+                        ${e(
+                            message.message || ""
+                        ).replaceAll(
+                            "\n",
+                            "<br>"
+                        )}
+                    </div>
+
+
+                    <div
+                        class="
+                            admin-floating-support-message-meta
+                            direct-message-meta
+                        "
+                    >
+
+                        <small>
+                            ${e(time)}
+                        </small>
+
+
+                        ${
+                            isAdmin
+                                ? `
+                                    <span
+                                        class="
+                                            direct-message-seen
+                                            ${isSeen ? "is-seen" : ""}
+                                        "
+                                        aria-label="${
+                                            isSeen
+                                                ? "Seen"
+                                                : "Sent"
+                                        }"
+                                        title="${
+                                            isSeen
+                                                ? "Seen"
+                                                : "Sent"
+                                        }"
+                                    >
+                                        ${
+                                            isSeen
+                                                ? "✓✓"
+                                                : "✓"
+                                        }
+                                    </span>
+                                `
+                                : ""
+                        }
+
+                    </div>
+
+                </div>
+
+            `;
+
+        })
+        .join("");
+}
+
 
 /* =========================================================
    ADD REALTIME MESSAGE WITHOUT DUPLICATE
@@ -3799,6 +4860,379 @@ function addAdminFloatingRealtimeMessage(message) {
     }
 }
 
+/* =========================================================
+   DIRECT CHAT REALTIME - INSERT
+   ========================================================= */
+
+function addAdminDirectRealtimeMessage(
+    message
+) {
+
+    if (!message?.id) {
+        return;
+    }
+
+
+    const messageId =
+        String(message.id);
+
+
+    const technicianId =
+        String(
+            message.technician_id || ""
+        ).trim();
+
+
+    if (!technicianId) {
+        return;
+    }
+
+
+    /* -----------------------------------------------------
+       DUPLICATE PROTECTION
+       ----------------------------------------------------- */
+
+    if (
+        adminFloatingSupportState.directSeenMessageIds.has(
+            messageId
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    adminFloatingSupportState.directSeenMessageIds.add(
+        messageId
+    );
+
+
+    const sender =
+        String(
+            message.sender_type || ""
+        ).toUpperCase();
+
+
+    /* -----------------------------------------------------
+       CURRENT DIRECT CHAT OPEN
+       ----------------------------------------------------- */
+
+    const isCurrentChatVisible =
+        adminFloatingSupportState.open === true &&
+
+        adminFloatingSupportState.currentRequestId === "" &&
+
+        String(
+            adminFloatingSupportState.currentDirectTechnicianId
+        ) === technicianId &&
+
+        document.getElementById(
+            "adminFloatingSupportMessages"
+        );
+
+
+    if (isCurrentChatVisible) {
+
+        adminFloatingSupportState.currentDirectMessages
+            .push(message);
+
+
+        const container =
+            document.getElementById(
+                "adminFloatingSupportMessages"
+            );
+
+
+        if (!container) {
+            return;
+        }
+
+
+        const empty =
+            container.querySelector(
+                ".admin-floating-support-no-messages"
+            );
+
+
+        if (empty) {
+            empty.remove();
+        }
+
+
+        const isAdmin =
+            sender === "ADMIN";
+
+
+        const wrapper =
+            document.createElement("div");
+
+
+        wrapper.className =
+            `
+                admin-floating-support-message
+                ${isAdmin ? "admin" : "technician"}
+            `;
+
+
+        wrapper.dataset.directMessageId =
+            messageId;
+
+
+        const isSeen =
+            isAdmin &&
+            Boolean(
+                message.read_at_technician
+            );
+
+
+        wrapper.innerHTML = `
+
+            <div
+                class="admin-floating-support-message-text"
+            >
+                ${e(
+                    message.message || ""
+                ).replaceAll(
+                    "\n",
+                    "<br>"
+                )}
+            </div>
+
+
+            <div
+                class="
+                    admin-floating-support-message-meta
+                    direct-message-meta
+                "
+            >
+
+                <small>
+                    ${e(
+                        adminSupportFormatDate(
+                            message.created_at
+                        )
+                    )}
+                </small>
+
+
+                ${
+                    isAdmin
+                        ? `
+                            <span
+                                class="
+                                    direct-message-seen
+                                    ${isSeen ? "is-seen" : ""}
+                                "
+                                aria-label="${
+                                    isSeen
+                                        ? "Seen"
+                                        : "Sent"
+                                }"
+                            >
+                                ${
+                                    isSeen
+                                        ? "✓✓"
+                                        : "✓"
+                                }
+                            </span>
+                        `
+                        : ""
+                }
+
+            </div>
+
+        `;
+
+
+        container.appendChild(
+            wrapper
+        );
+
+
+        scrollAdminFloatingSupportMessages();
+
+
+        return;
+    }
+
+
+    /* -----------------------------------------------------
+       DIRECT CHAT NOT OPEN
+       ----------------------------------------------------- */
+
+    if (sender === "TECHNICIAN") {
+
+        const currentUnread =
+            Number(
+                adminFloatingSupportState.directUnread.get(
+                    technicianId
+                ) || 0
+            );
+
+
+        adminFloatingSupportState.directUnread.set(
+            technicianId,
+            currentUnread + 1
+        );
+
+
+        updateAdminFloatingSupportBadge();
+
+    }
+
+}
+
+
+/* =========================================================
+   DIRECT CHAT REALTIME - UPDATE
+   Seen status: ✓ → ✓✓
+   ========================================================= */
+
+function updateAdminDirectRealtimeMessage(
+    message
+) {
+
+    if (!message?.id) {
+        return;
+    }
+
+
+    const messageId =
+        String(message.id);
+
+
+    const technicianId =
+        String(
+            message.technician_id || ""
+        ).trim();
+
+
+    if (!technicianId) {
+        return;
+    }
+
+
+    const isCurrentChatVisible =
+        adminFloatingSupportState.open === true &&
+
+        adminFloatingSupportState.currentRequestId === "" &&
+
+        String(
+            adminFloatingSupportState.currentDirectTechnicianId
+        ) === technicianId;
+
+
+    if (!isCurrentChatVisible) {
+        return;
+    }
+
+
+    const index =
+        adminFloatingSupportState.currentDirectMessages
+            .findIndex(
+                item =>
+                    String(item?.id) === messageId
+            );
+
+
+    if (index === -1) {
+        return;
+    }
+
+
+    /*
+     * Update local message object
+     */
+
+    adminFloatingSupportState.currentDirectMessages[
+        index
+    ] = {
+        ...adminFloatingSupportState.currentDirectMessages[
+            index
+        ],
+        ...message
+    };
+
+
+    /*
+     * Find message bubble
+     */
+
+    const element =
+        document.querySelector(
+            `[data-direct-message-id="${CSS.escape(
+                messageId
+            )}"]`
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    const sender =
+        String(
+            message.sender_type ||
+            adminFloatingSupportState
+                .currentDirectMessages[index]
+                ?.sender_type ||
+            ""
+        ).toUpperCase();
+
+
+    if (sender !== "ADMIN") {
+        return;
+    }
+
+
+    const isSeen =
+        Boolean(
+            message.read_at_technician
+        );
+
+
+    const seenElement =
+        element.querySelector(
+            ".direct-message-seen"
+        );
+
+
+    if (!seenElement) {
+        return;
+    }
+
+
+    seenElement.textContent =
+        isSeen
+            ? "✓✓"
+            : "✓";
+
+
+    seenElement.classList.toggle(
+        "is-seen",
+        isSeen
+    );
+
+
+    seenElement.setAttribute(
+        "aria-label",
+        isSeen
+            ? "Seen"
+            : "Sent"
+    );
+
+
+    seenElement.setAttribute(
+        "title",
+        isSeen
+            ? "Seen"
+            : "Sent"
+    );
+
+}
+
 
 /* =========================================================
    REALTIME
@@ -3972,6 +5406,119 @@ try {
 }
 
 /* =========================================================
+   ADMIN DIRECT SUPPORT REALTIME
+   INSERT + UPDATE
+   ========================================================= */
+
+async function initAdminDirectSupportRealtime() {
+
+    if (!s) {
+
+        console.error(
+            "❌ ADMIN DIRECT REALTIME: Supabase client missing."
+        );
+
+        return;
+    }
+
+
+    /*
+     * Remove previous direct channel
+     */
+
+    if (
+        adminFloatingSupportState.directRealtimeChannel
+    ) {
+
+        try {
+
+            await s.removeChannel(
+                adminFloatingSupportState.directRealtimeChannel
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "⚠️ ADMIN DIRECT REALTIME: old channel cleanup failed:",
+                error
+            );
+
+        }
+
+        adminFloatingSupportState.directRealtimeChannel =
+            null;
+    }
+
+
+    const channelName =
+        "admin-direct-support-live";
+
+
+    const channel =
+        s
+            .channel(channelName)
+
+
+            /* ---------------------------------------------
+               NEW DIRECT MESSAGE
+               --------------------------------------------- */
+
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "technician_direct_messages"
+                },
+                payload => {
+
+                    addAdminDirectRealtimeMessage(
+                        payload?.new
+                    );
+
+                }
+            )
+
+
+            /* ---------------------------------------------
+               READ / SEEN UPDATE
+               --------------------------------------------- */
+
+            .on(
+                "postgres_changes",
+                {
+                    event: "UPDATE",
+                    schema: "public",
+                    table: "technician_direct_messages"
+                },
+                payload => {
+
+                    updateAdminDirectRealtimeMessage(
+                        payload?.new
+                    );
+
+                }
+            )
+
+
+            .subscribe(
+                status => {
+
+                    console.log(
+                        "📡 ADMIN DIRECT REALTIME STATUS:",
+                        status
+                    );
+
+                }
+            );
+
+
+    adminFloatingSupportState.directRealtimeChannel =
+        channel;
+
+}
+
+/* =========================================================
    REALTIME CLEANUP
    ========================================================= */
 
@@ -3995,6 +5542,40 @@ function destroyAdminFloatingSupportRealtime() {
 
 }
 
+/* =========================================================
+   DIRECT REALTIME CLEANUP
+   ========================================================= */
+
+async function destroyAdminDirectSupportRealtime() {
+
+    if (
+        !adminFloatingSupportState.directRealtimeChannel
+    ) {
+
+        return;
+    }
+
+
+    try {
+
+        await s?.removeChannel(
+            adminFloatingSupportState.directRealtimeChannel
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "⚠️ ADMIN DIRECT REALTIME cleanup failed:",
+            error
+        );
+
+    }
+
+
+    adminFloatingSupportState.directRealtimeChannel =
+        null;
+
+}
 
 /* =========================================================
    COMPOSER
@@ -4164,6 +5745,7 @@ function scrollAdminFloatingSupportMessages() {
 
 /* =========================================================
    UNREAD BADGE
+   REQUEST + DIRECT
    ========================================================= */
 
 function updateAdminFloatingSupportBadge() {
@@ -4182,10 +5764,32 @@ function updateAdminFloatingSupportBadge() {
     let total = 0;
 
 
+    /*
+     * Existing Request Chat unread
+     */
+
     adminFloatingSupportState.unread
         .forEach(
             value => {
-                total += Number(value) || 0;
+
+                total +=
+                    Number(value) || 0;
+
+            }
+        );
+
+
+    /*
+     * Direct Technician Chat unread
+     */
+
+    adminFloatingSupportState.directUnread
+        .forEach(
+            value => {
+
+                total +=
+                    Number(value) || 0;
+
             }
         );
 
@@ -4193,7 +5797,9 @@ function updateAdminFloatingSupportBadge() {
     if (total <= 0) {
 
         badge.hidden = true;
-        badge.textContent = "0";
+
+        badge.textContent =
+            "0";
 
     } else {
 
@@ -4724,6 +6330,24 @@ async function () {
 
 ensureAdminFloatingSupportWidget();
 
+
+/*
+ * Existing Request Chat Realtime
+ * DO NOT REMOVE
+ */
+
 initAdminFloatingSupportRealtime();
+
+
+/*
+ * Direct Technician Chat Realtime
+ */
+
+initAdminDirectSupportRealtime();
+
+
+/*
+ * Initial unread badge
+ */
 
 updateAdminFloatingSupportBadge();

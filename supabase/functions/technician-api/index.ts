@@ -2246,324 +2246,317 @@ async function sendSupportMessage(
 }
 
 /* =========================================================
-   DIRECT SUPPORT CHAT
-   LOAD MESSAGES
+   DIRECT SUPPORT MESSAGES
+   TECHNICIAN LOAD + MARK ADMIN MESSAGES AS SEEN
    ========================================================= */
 
 async function directSupportMessages(
-  db: any,
-  technicianId: string
+    db,
+    technicianId
 ) {
 
-  if (
-    !isUuid(technicianId)
-  ) {
-
-    throw new Error(
-      "Invalid technician."
-    );
-
-  }
+    const id =
+        String(technicianId || "").trim();
 
 
-  /*
-   * Mark ADMIN messages as read
-   * before loading the conversation.
-   */
-
-  const {
-    error: readError
-  } = await db
-    .from(
-      "technician_direct_messages"
-    )
-    .update({
-      read_at_technician:
-        new Date().toISOString()
-    })
-    .eq(
-      "technician_id",
-      technicianId
-    )
-    .eq(
-      "sender_type",
-      "ADMIN"
-    )
-    .is(
-      "read_at_technician",
-      null
-    );
+    if (!id) {
+        throw new Error(
+            "INVALID_TECHNICIAN"
+        );
+    }
 
 
-  if (
-    readError
-  ) {
+    /*
+     * -----------------------------------------------------
+     * VERIFY TECHNICIAN
+     * -----------------------------------------------------
+     */
 
-    console.error(
-      "DIRECT SUPPORT TECHNICIAN MARK READ ERROR:",
-      readError.message
-    );
-
-    throw new Error(
-      "DIRECT_MESSAGES_MARK_READ_FAILED"
-    );
-
-  }
-
-
-  /*
-   * Load conversation.
-   */
-
-  const {
-    data,
-    error
-  } = await db
-    .from(
-      "technician_direct_messages"
-    )
-    .select(`
-      id,
-      technician_id,
-      sender_type,
-      sender_user_id,
-      message,
-      created_at
-    `)
-    .eq(
-      "technician_id",
-      technicianId
-    )
-    .order(
-      "created_at",
-      {
-        ascending: true
-      }
-    );
+    const {
+        data: technician,
+        error: technicianError
+    } = await db
+        .from("technicians")
+        .select(`
+            id,
+            technician_code,
+            full_name,
+            mobile,
+            username,
+            is_active
+        `)
+        .eq("id", id)
+        .maybeSingle();
 
 
-  if (
-    error
-  ) {
+    if (technicianError) {
 
-    console.error(
-      "DIRECT SUPPORT MESSAGES QUERY ERROR:",
-      {
-        message:
-          error.message,
+        throw new Error(
+            "TECHNICIAN_QUERY_FAILED"
+        );
 
-        details:
-          error.details,
-
-        hint:
-          error.hint,
-
-        code:
-          error.code
-      }
-    );
-
-    throw new Error(
-      "DIRECT_SUPPORT_MESSAGES_QUERY_FAILED"
-    );
-
-  }
+    }
 
 
-  return {
+    if (!technician) {
 
-    technician_id:
-      technicianId,
+        throw new Error(
+            "TECHNICIAN_NOT_FOUND"
+        );
 
-    messages:
-      data || []
+    }
 
-  };
+
+    /*
+     * -----------------------------------------------------
+     * MARK ADMIN MESSAGES AS SEEN
+     * -----------------------------------------------------
+     *
+     * Technician opened this direct conversation.
+     *
+     * Therefore every unread ADMIN message becomes
+     * read_at_technician = current timestamp.
+     */
+
+    const seenAt =
+        new Date().toISOString();
+
+
+    const {
+        error: readError
+    } = await db
+        .from("technician_direct_messages")
+        .update({
+            read_at_technician: seenAt
+        })
+        .eq(
+            "technician_id",
+            id
+        )
+        .eq(
+            "sender_type",
+            "ADMIN"
+        )
+        .is(
+            "read_at_technician",
+            null
+        );
+
+
+    if (readError) {
+
+        throw new Error(
+            "DIRECT_SUPPORT_READ_UPDATE_FAILED"
+        );
+
+    }
+
+
+    /*
+     * -----------------------------------------------------
+     * LOAD MESSAGES
+     * -----------------------------------------------------
+     */
+
+    const {
+        data: messages,
+        error: messageError
+    } = await db
+        .from("technician_direct_messages")
+        .select(`
+            id,
+            technician_id,
+            sender_type,
+            sender_user_id,
+            message,
+            read_at_technician,
+            read_at_admin,
+            created_at
+        `)
+        .eq(
+            "technician_id",
+            id
+        )
+        .order(
+            "created_at",
+            {
+                ascending: true
+            }
+        );
+
+
+    if (messageError) {
+
+        throw new Error(
+            "DIRECT_SUPPORT_MESSAGES_FAILED"
+        );
+
+    }
+
+
+    return {
+        technician,
+        messages:
+            Array.isArray(messages)
+                ? messages
+                : []
+    };
 
 }
 
 /* =========================================================
-   DIRECT SUPPORT CHAT
-   SEND MESSAGE
+   SEND DIRECT SUPPORT MESSAGE
    ========================================================= */
 
 async function sendDirectSupportMessage(
-  db: any,
-  technicianId: string,
-  body: any
+    db,
+    technicianId,
+    body
 ) {
 
-  if (
-    !isUuid(technicianId)
-  ) {
-
-    throw new Error(
-      "Invalid technician."
-    );
-
-  }
+    const id =
+        String(technicianId || "").trim();
 
 
-  const message =
-    String(
-      body?.message ||
-      ""
-    ).trim();
+    if (!id) {
+
+        throw new Error(
+            "INVALID_TECHNICIAN"
+        );
+
+    }
 
 
-  if (!message) {
-
-    throw new Error(
-      "Message is required."
-    );
-
-  }
+    const message =
+        String(
+            body?.message || ""
+        ).trim();
 
 
-  if (
-    message.length > 2000
-  ) {
+    if (!message) {
 
-    throw new Error(
-      "Message cannot exceed 2000 characters."
-    );
+        throw new Error(
+            "MESSAGE_REQUIRED"
+        );
 
-  }
+    }
 
 
-  /*
-   * Verify technician exists and is active.
-   */
+    if (message.length > 2000) {
 
-  const {
-    data: technician,
-    error: technicianError
-  } = await db
-    .from("technicians")
-    .select(`
-      id,
-      auth_user_id,
-      is_active
-    `)
-    .eq(
-      "id",
-      technicianId
-    )
-    .maybeSingle();
+        throw new Error(
+            "MESSAGE_TOO_LONG"
+        );
+
+    }
 
 
-  if (
-    technicianError
-  ) {
+    /*
+     * -----------------------------------------------------
+     * VERIFY ACTIVE TECHNICIAN
+     * -----------------------------------------------------
+     */
 
-    console.error(
-      "DIRECT SUPPORT TECHNICIAN VERIFY ERROR:",
-      technicianError.message
-    );
-
-    throw new Error(
-      "TECHNICIAN_LOOKUP_FAILED"
-    );
-
-  }
-
-
-  if (
-    !technician
-  ) {
-
-    throw new Error(
-      "TECHNICIAN_NOT_FOUND"
-    );
-
-  }
+    const {
+        data: technician,
+        error: technicianError
+    } = await db
+        .from("technicians")
+        .select(`
+            id,
+            is_active
+        `)
+        .eq("id", id)
+        .maybeSingle();
 
 
-  if (
-    technician.is_active === false
-  ) {
+    if (technicianError) {
 
-    throw new Error(
-      "TECHNICIAN_INACTIVE"
-    );
+        throw new Error(
+            "TECHNICIAN_QUERY_FAILED"
+        );
 
-  }
+    }
 
 
-  /*
-   * Insert message.
-   *
-   * IMPORTANT:
-   * sender_type is NEVER accepted from frontend.
-   */
+    if (!technician) {
 
-  const {
-    data,
-    error
-  } = await db
-    .from(
-      "technician_direct_messages"
-    )
-    .insert({
+        throw new Error(
+            "TECHNICIAN_NOT_FOUND"
+        );
 
-      technician_id:
-        technicianId,
-
-      sender_type:
-        "TECHNICIAN",
-
-      sender_user_id:
-        technicianId,
-
-      message:
-        message
-
-    })
-    .select(`
-      id,
-      technician_id,
-      sender_type,
-      sender_user_id,
-      message,
-      created_at
-    `)
-    .single();
+    }
 
 
-  if (
-    error
-  ) {
+    if (!technician.is_active) {
 
-    console.error(
-      "DIRECT SUPPORT MESSAGE INSERT ERROR:",
-      {
+        throw new Error(
+            "TECHNICIAN_ACCOUNT_INACTIVE"
+        );
+
+    }
+
+
+    /*
+     * -----------------------------------------------------
+     * INSERT
+     * -----------------------------------------------------
+     *
+     * read_at_admin stays NULL.
+     *
+     * This means Admin has not seen the message yet.
+     */
+
+    const {
+        data: insertedMessage,
+        error: insertError
+    } = await db
+        .from("technician_direct_messages")
+        .insert({
+
+            technician_id: id,
+
+            sender_type:
+                "TECHNICIAN",
+
+            sender_user_id:
+                id,
+
+            message,
+
+            read_at_admin:
+                null,
+
+            read_at_technician:
+                null
+
+        })
+        .select(`
+            id,
+            technician_id,
+            sender_type,
+            sender_user_id,
+            message,
+            read_at_technician,
+            read_at_admin,
+            created_at
+        `)
+        .single();
+
+
+    if (insertError) {
+
+        throw new Error(
+            "DIRECT_SUPPORT_MESSAGE_SEND_FAILED"
+        );
+
+    }
+
+
+    return {
         message:
-          error.message,
-
-        details:
-          error.details,
-
-        hint:
-          error.hint,
-
-        code:
-          error.code
-      }
-    );
-
-    throw new Error(
-      "DIRECT_SUPPORT_MESSAGE_SEND_FAILED"
-    );
-
-  }
-
-
-  return {
-
-    message:
-      data
-
-  };
+            insertedMessage
+    };
 
 }
 

@@ -5484,6 +5484,11 @@ i[class*="fa-"]{
         0.2s ease;
 }
 
+.tech-support-form-error[hidden] {
+
+    display: none !important;
+
+}
 
 @keyframes techSupportErrorIn {
 

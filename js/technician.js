@@ -7876,20 +7876,63 @@ modal
 
     try {
 
-        const technicianId =
-            technician?.id;
+    /*
+     * Get currently authenticated technician.
+     */
+    const {
+        data: authData,
+        error: authError
+    } = await sb.auth.getUser();
 
-        if (!technicianId) {
+    if (
+        authError ||
+        !authData?.user?.id
+    ) {
 
-            throw new Error(
-                "Technician session is not ready."
-            );
-
-        }
-
-        await loadDirectSupportMessages(
-            technicianId
+        throw new Error(
+            "Technician session is not ready."
         );
+
+    }
+
+    const authUserId =
+        authData.user.id;
+
+    /*
+     * Get technician profile ID.
+     *
+     * technician_direct_messages.technician_id
+     * uses technicians.id, not auth user id.
+     */
+    const {
+        data: technicianProfile,
+        error: technicianError
+    } = await sb
+        .from("technicians")
+        .select("id")
+        .eq(
+            "auth_user_id",
+            authUserId
+        )
+        .maybeSingle();
+
+    if (
+        technicianError ||
+        !technicianProfile?.id
+    ) {
+
+        throw new Error(
+            "Technician profile is not available."
+        );
+
+    }
+
+    const technicianId =
+        technicianProfile.id;
+
+    await loadDirectSupportMessages(
+        technicianId
+    );
 
         updateDirectSupportChatHeader();
 

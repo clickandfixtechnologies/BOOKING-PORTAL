@@ -8142,6 +8142,100 @@ strong {
 }
 
 /* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   PHASE 5
+   ========================================================= */
+
+.tech-direct-support-message {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-width: 82%;
+    margin-bottom: 12px;
+}
+
+.tech-direct-support-message.is-technician {
+    margin-left: auto;
+    align-items: flex-end;
+}
+
+.tech-direct-support-message.is-support {
+    margin-right: auto;
+    align-items: flex-start;
+}
+
+.tech-direct-support-message-label {
+    font-size: 11px;
+    font-weight: 700;
+    opacity: 0.75;
+}
+
+.tech-direct-support-message-bubble {
+    padding: 10px 13px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.tech-direct-support-message.is-technician
+.tech-direct-support-message-bubble {
+    border-bottom-right-radius: 4px;
+}
+
+.tech-direct-support-message.is-support
+.tech-direct-support-message-bubble {
+    border-bottom-left-radius: 4px;
+}
+
+.tech-direct-support-message-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+.direct-message-seen {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -2px;
+}
+
+.direct-message-seen.is-seen {
+    font-weight: 800;
+}
+
+.tech-direct-support-subtitle {
+    margin: 2px 0 0;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+#directSupportMessages {
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+#directSupportChatInput {
+    resize: none;
+    min-height: 44px;
+    max-height: 140px;
+}
+
+#directSupportChatSend {
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+
+    .tech-direct-support-message {
+        max-width: 90%;
+    }
+
+}
+
+/* =========================================================
    TECHNICIAN FLOATING SUPPORT
    GLOBAL — VISIBLE ON ALL PAGES
    ========================================================= */

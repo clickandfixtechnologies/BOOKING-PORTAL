@@ -7077,6 +7077,1514 @@ async function startSupportChatRealtime(requestId) {
 }
 
 /* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   REALTIME
+   PHASE 5
+   ========================================================= */
+
+async function startDirectSupportRealtime(
+    technicianId
+) {
+
+    const id =
+        String(
+            technicianId || ""
+        ).trim();
+
+    if (!id) {
+        return;
+    }
+
+    /* =====================================================
+       CLEAN OLD DIRECT CHANNEL
+       ===================================================== */
+
+    if (
+        directSupportRealtimeChannel
+    ) {
+
+        try {
+
+            await sb.removeChannel(
+                directSupportRealtimeChannel
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Direct support realtime cleanup failed:",
+                error
+            );
+
+        }
+
+        directSupportRealtimeChannel =
+            null;
+
+    }
+
+
+    directSupportRealtimeTechnicianId =
+        id;
+
+    directSupportRealtimeReady =
+        false;
+
+    directSupportRealtimePending =
+        [];
+
+
+    const channelName =
+        `direct-support-chat-${id}`;
+
+
+    directSupportRealtimeChannel =
+        sb
+            .channel(channelName)
+
+            /* =============================================
+               NEW DIRECT MESSAGE
+               ============================================= */
+
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "technician_direct_messages"
+                },
+                payload => {
+
+                    handleDirectSupportRealtimeInsert(
+                        payload
+                    );
+
+                }
+            )
+
+            /* =============================================
+               SEEN / READ STATUS CHANGE
+               ============================================= */
+
+            .on(
+                "postgres_changes",
+                {
+                    event: "UPDATE",
+                    schema: "public",
+                    table: "technician_direct_messages"
+                },
+                payload => {
+
+                    handleDirectSupportRealtimeUpdate(
+                        payload
+                    );
+
+                }
+            )
+
+            .subscribe(
+                status => {
+
+                    console.log(
+                        "📡 TECH DIRECT SUPPORT REALTIME STATUS:",
+                        status
+                    );
+
+                }
+            );
+
+}
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   SEND MESSAGE
+   PHASE 5
+   ========================================================= */
+
+async function sendDirectSupportMessage(
+    message
+) {
+
+    const technicianId =
+        String(
+            directSupportTechnicianId || ""
+        ).trim();
+
+    const cleanMessage =
+        String(
+            message || ""
+        ).trim();
+
+    if (!technicianId) {
+
+        throw new Error(
+            "Technician session is not ready."
+        );
+
+    }
+
+    if (!cleanMessage) {
+
+        throw new Error(
+            "Message cannot be empty."
+        );
+
+    }
+
+    if (
+        cleanMessage.length > 2000
+    ) {
+
+        throw new Error(
+            "Message cannot exceed 2000 characters."
+        );
+
+    }
+
+    const response =
+        await api(
+            "direct_support_message_send",
+            {
+                technician_id:
+                    technicianId,
+
+                message:
+                    cleanMessage
+            }
+        );
+
+    const newMessage =
+        response?.message;
+
+    if (
+        !newMessage ||
+        !newMessage.id
+    ) {
+
+        throw new Error(
+            "Message was not sent."
+        );
+
+    }
+
+    return newMessage;
+}
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   RENDER MESSAGES
+   PHASE 5
+   ========================================================= */
+
+function renderDirectSupportMessages(
+    messages
+) {
+
+    const container =
+        document.getElementById(
+            "directSupportMessages"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    if (
+        !Array.isArray(messages) ||
+        !messages.length
+    ) {
+
+        container.innerHTML = `
+            <div class="tech-support-chat-empty">
+                <strong>No messages yet.</strong>
+                <span>
+                    Send a message to Click &amp; Fix Support.
+                </span>
+            </div>
+        `;
+
+        return;
+    }
+
+    container.innerHTML =
+        messages.map(
+            message => {
+
+                const senderType =
+                    String(
+                        message?.sender_type || ""
+                    ).toUpperCase();
+
+                const isTechnician =
+                    senderType ===
+                    "TECHNICIAN";
+
+                const isSeen =
+                    isTechnician &&
+                    Boolean(
+                        message?.read_at_admin
+                    );
+
+                const senderLabel =
+                    isTechnician
+                        ? "You"
+                        : "Click & Fix Support";
+
+                const time =
+                    formatSupportChatTime(
+                        message?.created_at
+                    );
+
+                return `
+                    <div
+                        class="
+                            tech-direct-support-message
+                            ${isTechnician
+                                ? "is-technician"
+                                : "is-support"}
+                        "
+                        data-direct-message-id="${escapeHtml(
+                            message?.id || ""
+                        )}"
+                    >
+
+                        <div
+                            class="
+                                tech-direct-support-message-label
+                            "
+                        >
+                            <strong>
+                                ${escapeHtml(
+                                    senderLabel
+                                )}
+                            </strong>
+                        </div>
+
+                        <div
+                            class="
+                                tech-direct-support-message-bubble
+                            "
+                        >
+                            ${escapeHtml(
+                                message?.message || ""
+                            ).replace(
+                                /\n/g,
+                                "<br>"
+                            )}
+                        </div>
+
+                        <div
+                            class="
+                                tech-direct-support-message-meta
+                            "
+                        >
+
+                            <span>
+                                ${escapeHtml(time)}
+                            </span>
+
+                            ${
+                                isTechnician
+                                    ? `
+                                        <span
+                                            class="
+                                                direct-message-seen
+                                                ${
+                                                    isSeen
+                                                        ? "is-seen"
+                                                        : ""
+                                                }
+                                            "
+                                            data-seen-message-id="${escapeHtml(
+                                                message?.id || ""
+                                            )}"
+                                            title="${
+                                                isSeen
+                                                    ? "Seen"
+                                                    : "Sent"
+                                            }"
+                                        >
+                                            ${
+                                                isSeen
+                                                    ? "✓✓"
+                                                    : "✓"
+                                            }
+                                        </span>
+                                    `
+                                    : ""
+                            }
+
+                        </div>
+
+                    </div>
+                `;
+
+            }
+        ).join("");
+
+    container.scrollTop =
+        container.scrollHeight;
+}
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   DUPLICATE SAFE APPEND
+   PHASE 5
+   ========================================================= */
+
+function appendDirectSupportMessageIfNew(
+    message
+) {
+
+    const messageId =
+        String(
+            message?.id || ""
+        ).trim();
+
+    if (!messageId) {
+        return;
+    }
+
+    const container =
+        document.getElementById(
+            "directSupportMessages"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    const existing =
+        container.querySelector(
+            `[data-direct-message-id="${CSS.escape(
+                messageId
+            )}"]`
+        );
+
+    if (existing) {
+        return;
+    }
+
+    const emptyState =
+        container.querySelector(
+            ".tech-support-chat-empty"
+        );
+
+    if (emptyState) {
+        emptyState.remove();
+    }
+
+    directSupportMessages.push(
+        message
+    );
+
+    directSupportSeenMessageIds.add(
+        messageId
+    );
+
+    const senderType =
+        String(
+            message?.sender_type || ""
+        ).toUpperCase();
+
+    const isTechnician =
+        senderType === "TECHNICIAN";
+
+    const isSeen =
+        isTechnician &&
+        Boolean(
+            message?.read_at_admin
+        );
+
+    const senderLabel =
+        isTechnician
+            ? "You"
+            : "Click & Fix Support";
+
+    const time =
+        formatSupportChatTime(
+            message?.created_at
+        );
+
+    const wrapper =
+        document.createElement(
+            "div"
+        );
+
+    wrapper.className =
+        `tech-direct-support-message ${
+            isTechnician
+                ? "is-technician"
+                : "is-support"
+        }`;
+
+    wrapper.dataset.directMessageId =
+        messageId;
+
+    wrapper.innerHTML = `
+
+        <div
+            class="
+                tech-direct-support-message-label
+            "
+        >
+            <strong>
+                ${escapeHtml(senderLabel)}
+            </strong>
+        </div>
+
+        <div
+            class="
+                tech-direct-support-message-bubble
+            "
+        >
+            ${escapeHtml(
+                message?.message || ""
+            ).replace(
+                /\n/g,
+                "<br>"
+            )}
+        </div>
+
+        <div
+            class="
+                tech-direct-support-message-meta
+            "
+        >
+
+            <span>
+                ${escapeHtml(time)}
+            </span>
+
+            ${
+                isTechnician
+                    ? `
+                        <span
+                            class="
+                                direct-message-seen
+                                ${
+                                    isSeen
+                                        ? "is-seen"
+                                        : ""
+                                }
+                            "
+                            data-seen-message-id="${escapeHtml(
+                                messageId
+                            )}"
+                            title="${
+                                isSeen
+                                    ? "Seen"
+                                    : "Sent"
+                            }"
+                        >
+                            ${
+                                isSeen
+                                    ? "✓✓"
+                                    : "✓"
+                            }
+                        </span>
+                    `
+                    : ""
+            }
+
+        </div>
+    `;
+
+    container.appendChild(
+        wrapper
+    );
+
+    container.scrollTop =
+        container.scrollHeight;
+}
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   UPDATE SEEN STATE
+   PHASE 5
+   ========================================================= */
+
+function updateDirectSupportMessageSeenState(
+    message
+) {
+
+    const messageId =
+        String(
+            message?.id || ""
+        ).trim();
+
+    if (!messageId) {
+        return;
+    }
+
+    const index =
+        directSupportMessages.findIndex(
+            item =>
+                String(
+                    item?.id || ""
+                ) === messageId
+        );
+
+    if (index !== -1) {
+
+        directSupportMessages[
+            index
+        ] = {
+            ...directSupportMessages[
+                index
+            ],
+            ...message
+        };
+
+    }
+
+    const senderType =
+        String(
+            message?.sender_type || ""
+        ).toUpperCase();
+
+    if (
+        senderType !==
+        "TECHNICIAN"
+    ) {
+        return;
+    }
+
+    const seen =
+        Boolean(
+            message?.read_at_admin
+        );
+
+    const tick =
+        document.querySelector(
+            `[data-seen-message-id="${CSS.escape(
+                messageId
+            )}"]`
+        );
+
+    if (!tick) {
+        return;
+    }
+
+    tick.textContent =
+        seen
+            ? "✓✓"
+            : "✓";
+
+    tick.classList.toggle(
+        "is-seen",
+        seen
+    );
+
+    tick.setAttribute(
+        "title",
+        seen
+            ? "Seen"
+            : "Sent"
+    );
+
+}
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   OPEN DIRECT CHAT
+   PHASE 5
+   ========================================================= */
+
+async function openDirectSupportChat() {
+
+    removeSupportChatModal();
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+    modal.id =
+        "techDirectSupportChatModal";
+
+    modal.className =
+        "tech-support-chat-modal";
+
+    modal.innerHTML = `
+
+        <div
+            class="
+                tech-support-chat-modal-backdrop
+            "
+            data-close-direct-support-chat="true"
+        ></div>
+
+        <div
+            class="
+                tech-support-chat-dialog
+                tech-support-chat-dialog-live
+            "
+            role="dialog"
+            aria-modal="true"
+            aria-label="Direct Support Chat"
+        >
+
+            <div
+                class="
+                    tech-support-chat-header
+                "
+            >
+
+                <div
+                    class="
+                        tech-support-chat-header-main
+                    "
+                >
+
+                    <span
+                        class="
+                            tech-support-chat-eyebrow
+                        "
+                    >
+                        DIRECT SUPPORT
+                    </span>
+
+                    <h3
+    class="tech-direct-support-title"
+>
+    Click &amp; Fix Support
+</h3>
+
+<p
+    class="tech-direct-support-subtitle"
+>
+    Chat directly with our support team.
+</p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="
+                        tech-support-chat-close
+                    "
+                    id="closeDirectSupportChat"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <div
+                id="directSupportMessages"
+                class="
+                    tech-support-chat-messages
+                "
+            >
+                <div
+                    class="
+                        tech-support-chat-loading
+                    "
+                >
+                    Loading conversation…
+                </div>
+            </div>
+
+            <form
+                id="directSupportChatForm"
+                class="
+                    tech-support-chat-composer
+                "
+            >
+
+                <textarea
+                    id="directSupportChatInput"
+                    rows="1"
+                    maxlength="2000"
+                    placeholder="Type your message…"
+                    autocomplete="off"
+                ></textarea>
+
+                <button
+                    type="submit"
+                    id="directSupportChatSend"
+                    class="
+                        tech-support-chat-send
+                    "
+                >
+                    Send
+                </button>
+
+            </form>
+
+        </div>
+    `;
+
+    document.body.appendChild(
+        modal
+    );
+
+    document
+        .getElementById(
+            "closeDirectSupportChat"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                closeDirectSupportChat();
+
+            }
+        );
+
+    modal
+        .querySelector(
+            "[data-close-direct-support-chat]"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                closeDirectSupportChat();
+
+            }
+        );
+
+    try {
+
+        const technicianId =
+            technician?.id;
+
+        if (!technicianId) {
+
+            throw new Error(
+                "Technician session is not ready."
+            );
+
+        }
+
+        await loadDirectSupportMessages(
+            technicianId
+        );
+
+        updateDirectSupportChatHeader();
+
+        bindDirectSupportComposer();
+
+        await markDirectSupportMessagesRead();
+
+    } catch (error) {
+
+        console.error(
+            "Direct support chat load failed:",
+            error
+        );
+
+        const container =
+            document.getElementById(
+                "directSupportMessages"
+            );
+
+        if (container) {
+
+            container.innerHTML = `
+                <div
+                    class="
+                        tech-support-chat-empty
+                    "
+                >
+                    <strong>
+                        Unable to open direct chat.
+                    </strong>
+
+                    <span>
+                        ${escapeHtml(
+                            error?.message ||
+                            "Please try again."
+                        )}
+                    </span>
+                </div>
+            `;
+
+        }
+
+    }
+
+}
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   MESSAGE COMPOSER
+   PHASE 5
+   ========================================================= */
+
+function bindDirectSupportComposer() {
+
+    const form =
+        document.getElementById(
+            "directSupportChatForm"
+        );
+
+    const input =
+        document.getElementById(
+            "directSupportChatInput"
+        );
+
+    const sendButton =
+        document.getElementById(
+            "directSupportChatSend"
+        );
+
+    if (
+        !form ||
+        !input ||
+        !sendButton
+    ) {
+        return;
+    }
+
+    form.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            const message =
+                String(
+                    input.value || ""
+                ).trim();
+
+            if (!message) {
+
+                input.focus();
+
+                return;
+            }
+
+            if (
+                message.length > 2000
+            ) {
+
+                alert(
+                    "Message cannot exceed 2000 characters."
+                );
+
+                return;
+            }
+
+            input.disabled = true;
+            sendButton.disabled = true;
+
+            try {
+
+                const newMessage =
+                    await sendDirectSupportMessage(
+                        message
+                    );
+
+                /*
+                 * Add immediately.
+                 *
+                 * Realtime INSERT will also arrive,
+                 * but duplicate-safe append prevents
+                 * the same message from appearing twice.
+                 */
+
+                appendDirectSupportMessageIfNew(
+                    newMessage
+                );
+
+                input.value = "";
+
+                input.style.height =
+                    "auto";
+
+            } catch (error) {
+
+                console.error(
+                    "Direct support message send failed:",
+                    error
+                );
+
+                alert(
+                    error?.message ||
+                    "Unable to send message."
+                );
+
+            } finally {
+
+                input.disabled = false;
+                sendButton.disabled = false;
+
+                input.focus();
+
+            }
+
+        }
+    );
+
+    /*
+     * Enter = Send
+     * Shift + Enter = New line
+     */
+
+    input.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+
+                event.preventDefault();
+
+                form.requestSubmit();
+
+            }
+
+        }
+    );
+
+    /*
+     * Auto-grow textarea
+     */
+
+    input.addEventListener(
+        "input",
+        () => {
+
+            input.style.height =
+                "auto";
+
+            input.style.height =
+                Math.min(
+                    input.scrollHeight,
+                    140
+                ) + "px";
+
+        }
+    );
+
+}
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   UPDATE HEADER
+   PHASE 5
+   ========================================================= */
+
+function updateDirectSupportChatHeader() {
+
+    const technician =
+        directSupportTechnician;
+
+    const title =
+        document.querySelector(
+            "#techDirectSupportChatModal .tech-direct-support-title"
+        );
+
+    const subtitle =
+        document.querySelector(
+            "#techDirectSupportChatModal .tech-direct-support-subtitle"
+        );
+
+    if (!title) {
+        return;
+    }
+
+    const technicianName =
+        technician?.name ||
+        technician?.full_name ||
+        technician?.display_name ||
+        "Technician";
+
+    title.textContent =
+        "Click & Fix Support";
+
+    if (subtitle) {
+
+        subtitle.textContent =
+            `Direct support for ${technicianName}`;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   CLOSE DIRECT CHAT
+   PHASE 5
+   ========================================================= */
+
+async function closeDirectSupportChat() {
+
+    if (
+        directSupportRealtimeChannel
+    ) {
+
+        try {
+
+            await sb.removeChannel(
+                directSupportRealtimeChannel
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Direct support realtime cleanup failed:",
+                error
+            );
+
+        }
+
+        directSupportRealtimeChannel =
+            null;
+    }
+
+    directSupportRealtimeReady =
+        false;
+
+    directSupportRealtimePending =
+        [];
+
+    directSupportRealtimeTechnicianId =
+        null;
+
+    directSupportTechnicianId =
+        null;
+
+    directSupportTechnician =
+        null;
+
+    directSupportMessages =
+        [];
+
+    directSupportSeenMessageIds =
+        new Set();
+
+    const modal =
+        document.getElementById(
+            "techDirectSupportChatModal"
+        );
+
+    if (modal) {
+        modal.remove();
+    }
+
+}
+
+
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   REALTIME INSERT HANDLER
+   PHASE 5
+   ========================================================= */
+
+function handleDirectSupportRealtimeInsert(
+    payload
+) {
+
+    const message =
+        payload?.new;
+
+    if (!message?.id) {
+        return;
+    }
+
+    const messageTechnicianId =
+        String(
+            message?.technician_id || ""
+        ).trim();
+
+    const currentTechnicianId =
+        String(
+            directSupportRealtimeTechnicianId || ""
+        ).trim();
+
+    if (
+        messageTechnicianId !==
+        currentTechnicianId
+    ) {
+        return;
+    }
+
+    const messageId =
+        String(
+            message.id
+        );
+
+    /*
+     * Already rendered?
+     */
+
+    const container =
+        document.getElementById(
+            "directSupportMessages"
+        );
+
+    if (container) {
+
+        const existing =
+            container.querySelector(
+                `[data-direct-message-id="${CSS.escape(
+                    messageId
+                )}"]`
+            );
+
+        if (existing) {
+            return;
+        }
+
+    }
+
+    /*
+     * Realtime is not ready yet.
+     * Queue the message.
+     */
+
+    if (
+        !directSupportRealtimeReady
+    ) {
+
+        const alreadyQueued =
+            directSupportRealtimePending.some(
+                item =>
+                    String(
+                        item?.id || ""
+                    ) === messageId
+            );
+
+        if (!alreadyQueued) {
+
+            directSupportRealtimePending.push(
+                message
+            );
+
+        }
+
+        return;
+    }
+
+    /*
+     * Add message.
+     */
+
+    appendDirectSupportMessageIfNew(
+        message
+    );
+
+    const senderType =
+        String(
+            message?.sender_type || ""
+        ).toUpperCase();
+
+    /*
+     * ADMIN sent a new message.
+     */
+
+    if (
+        senderType === "ADMIN"
+    ) {
+
+        if (
+            typeof playSupportMessageSound ===
+            "function"
+        ) {
+
+            playSupportMessageSound();
+
+        }
+
+        /*
+         * Chat is currently open.
+         * Mark ADMIN message as read.
+         */
+
+        if (
+            document.getElementById(
+                "techDirectSupportChatModal"
+            )
+        ) {
+
+            markDirectSupportMessagesRead();
+
+        }
+
+    }
+
+}
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   REALTIME UPDATE HANDLER
+   SEEN / UNSEEN
+   ========================================================= */
+
+function handleDirectSupportRealtimeUpdate(
+    payload
+) {
+
+    const message =
+        payload?.new;
+
+    if (
+        !message?.id
+    ) {
+        return;
+    }
+
+
+    /* =====================================================
+       ONLY CURRENT TECHNICIAN
+       ===================================================== */
+
+    if (
+        String(
+            message?.technician_id || ""
+        ) !==
+        String(
+            directSupportRealtimeTechnicianId || ""
+        )
+    ) {
+        return;
+    }
+
+
+    const messageId =
+        String(
+            message.id
+        );
+
+
+    /* =====================================================
+       UPDATE LOCAL MESSAGE
+       ===================================================== */
+
+    const index =
+        directSupportMessages.findIndex(
+            item =>
+                String(
+                    item?.id
+                ) === messageId
+        );
+
+
+    if (
+        index !== -1
+    ) {
+
+        directSupportMessages[
+            index
+        ] = {
+            ...directSupportMessages[
+                index
+            ],
+            ...message
+        };
+
+    }
+
+
+    /* =====================================================
+       UPDATE TICK UI
+       ===================================================== */
+
+    if (
+        typeof updateDirectSupportMessageSeenState ===
+        "function"
+    ) {
+
+        updateDirectSupportMessageSeenState(
+            message
+        );
+
+    }
+
+}
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   LOAD MESSAGES
+   ========================================================= */
+
+async function loadDirectSupportMessages(
+    technicianId
+) {
+
+    const id =
+        String(
+            technicianId || ""
+        ).trim();
+
+    if (!id) {
+
+        throw new Error(
+            "Invalid technician ID."
+        );
+
+    }
+
+
+    directSupportTechnicianId =
+        id;
+
+
+    /* =====================================================
+       START DIRECT REALTIME FIRST
+       ===================================================== */
+
+    await startDirectSupportRealtime(
+        id
+    );
+
+
+    /* =====================================================
+       LOAD DIRECT MESSAGES
+       ===================================================== */
+
+    const response =
+        await api(
+            "direct_support_messages",
+            {
+                technician_id: id
+            }
+        );
+
+
+    const messages =
+        Array.isArray(
+            response?.messages
+        )
+            ? response.messages
+            : [];
+
+
+    const technician =
+        response?.technician ||
+        null;
+
+
+    directSupportTechnician =
+        technician;
+
+
+    directSupportMessages =
+        messages;
+
+
+    /* =====================================================
+       RESET SEEN MESSAGE IDS
+       ===================================================== */
+
+    directSupportSeenMessageIds =
+        new Set();
+
+
+    messages.forEach(
+        message => {
+
+            if (
+                message?.id
+            ) {
+
+                directSupportSeenMessageIds.add(
+                    String(
+                        message.id
+                    )
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       REALTIME INITIAL LOAD COMPLETE
+       ===================================================== */
+
+    directSupportRealtimeReady =
+        true;
+
+
+    /* =====================================================
+       FLUSH PENDING DIRECT MESSAGES
+       ===================================================== */
+
+    flushDirectSupportRealtimePending();
+
+
+    /* =====================================================
+       RENDER DIRECT CHAT
+       ===================================================== */
+
+    if (
+        typeof renderDirectSupportChat ===
+        "function"
+    ) {
+
+        renderDirectSupportChat(
+            directSupportTechnician,
+            directSupportMessages
+        );
+
+    }
+
+
+    return {
+        technician:
+            directSupportTechnician,
+
+        messages:
+            directSupportMessages
+    };
+
+}
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   MARK ADMIN MESSAGES AS READ
+   ========================================================= */
+
+async function markDirectSupportMessagesRead() {
+
+    const technicianId =
+        String(
+            directSupportTechnicianId || ""
+        ).trim();
+
+
+    if (!technicianId) {
+        return;
+    }
+
+
+    try {
+
+        await api(
+            "direct_support_messages",
+            {
+                technician_id:
+                    technicianId
+            }
+        );
+
+
+    } catch (error) {
+
+        console.warn(
+            "Direct support read status update failed:",
+            error
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
    SUPPORT UNREAD COUNT REALTIME
    ========================================================= */
 
@@ -7753,6 +9261,68 @@ showSupportChatRequestPicker(
     }
 
 }
+
+/* =========================================================
+   TECHNICIAN DIRECT SUPPORT CHAT
+   FLUSH REALTIME PENDING
+   PHASE 5
+   ========================================================= */
+
+function flushDirectSupportRealtimePending() {
+
+    if (
+        !Array.isArray(
+            directSupportRealtimePending
+        ) ||
+        !directSupportRealtimePending.length
+    ) {
+        return;
+    }
+
+    const pendingMessages =
+        [
+            ...directSupportRealtimePending
+        ];
+
+    directSupportRealtimePending =
+        [];
+
+    pendingMessages.forEach(
+        message => {
+
+            if (!message?.id) {
+                return;
+            }
+
+            const messageId =
+                String(
+                    message.id
+                );
+
+            const alreadyExists =
+                directSupportMessages.some(
+                    item =>
+                        String(
+                            item?.id || ""
+                        ) === messageId
+                );
+
+            if (
+                alreadyExists
+            ) {
+                return;
+            }
+
+            appendDirectSupportMessageIfNew(
+                message
+            );
+
+        }
+    );
+
+}
+
+
 
 /* =========================================================
    SUPPORT CHAT
@@ -11801,6 +13371,19 @@ signOut.onclick = async () => {
                 await load();
 
 await startSupportUnreadRealtime();
+
+                /* =====================================================
+                   DIRECT SUPPORT REALTIME
+                   PHASE 5
+                   ===================================================== */
+
+                /*
+                 * Direct chat channel is started only when
+                 * the Direct Chat itself is opened.
+                 *
+                 * No technician ID is required here because
+                 * the active Direct Chat may not exist yet.
+                 */
 
 /* =====================================================
    INITIAL SUPPORT UNREAD BADGE

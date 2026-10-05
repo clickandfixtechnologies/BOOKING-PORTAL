@@ -5121,6 +5121,16 @@ function showSupportRequestError(
         return;
     }
 
+
+    /* Clear previous hide timer */
+
+    clearTimeout(
+        window.techSupportErrorTimer
+    );
+
+
+    /* Show error */
+
     errorBox.hidden = false;
 
     errorBox.innerHTML = `
@@ -5129,6 +5139,18 @@ function showSupportRequestError(
             ${esc(message)}
         </span>
     `;
+
+
+    /* Auto hide after 3.5 seconds */
+
+    window.techSupportErrorTimer =
+        setTimeout(() => {
+
+            errorBox.hidden = true;
+
+            errorBox.innerHTML = "";
+
+        }, 3500);
 
 }
 

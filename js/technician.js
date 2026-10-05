@@ -7607,89 +7607,63 @@ function appendDirectSupportMessageIfNew(
 }
 
 /* =========================================================
-   TECHNICIAN DIRECT SUPPORT CHAT
-   UPDATE SEEN STATE
-   PHASE 5
+   UPDATE DIRECT MESSAGE SEEN STATE
    ========================================================= */
 
 function updateDirectSupportMessageSeenState(
-    message
+    messageId,
+    seen
 ) {
 
-    const messageId =
-        String(
-            message?.id || ""
-        ).trim();
+    const id =
+        String(messageId || "").trim();
 
-    if (!messageId) {
+    if (!id) {
         return;
     }
 
-    const index =
-        directSupportMessages.findIndex(
-            item =>
-                String(
-                    item?.id || ""
-                ) === messageId
+    const statusElements =
+        document.querySelectorAll(
+            `[data-seen-message-id="${CSS.escape(id)}"]`
         );
 
-    if (index !== -1) {
-
-        directSupportMessages[
-            index
-        ] = {
-            ...directSupportMessages[
-                index
-            ],
-            ...message
-        };
-
-    }
-
-    const senderType =
-        String(
-            message?.sender_type || ""
-        ).toUpperCase();
-
-    if (
-        senderType !==
-        "TECHNICIAN"
-    ) {
+    if (!statusElements.length) {
         return;
     }
 
-    const seen =
-        Boolean(
-            message?.read_at_admin
-        );
+    statusElements.forEach(
+        statusElement => {
 
-    const tick =
-        document.querySelector(
-            `[data-seen-message-id="${CSS.escape(
-                messageId
-            )}"]`
-        );
+            statusElement.textContent =
+                seen
+                    ? "Seen"
+                    : "Unseen";
 
-    if (!tick) {
-        return;
-    }
+            statusElement.classList.toggle(
+                "seen",
+                Boolean(seen)
+            );
 
-    tick.textContent =
-    seen
-        ? "Seen"
-        : "Unseen";
+            statusElement.classList.toggle(
+                "unseen",
+                !Boolean(seen)
+            );
 
-tick.classList.remove(
-    "is-seen"
-);
+            statusElement.setAttribute(
+                "title",
+                seen
+                    ? "Seen"
+                    : "Unseen"
+            );
 
-tick.setAttribute(
-    "title",
-    seen
-        ? "Seen"
-        : "Unseen"
-);
-
+            statusElement.setAttribute(
+                "aria-label",
+                seen
+                    ? "Seen"
+                    : "Unseen"
+            );
+        }
+    );
 }
 
 /* =========================================================

@@ -7565,35 +7565,37 @@ function appendDirectSupportMessageIfNew(
                 ${escapeHtml(time)}
             </span>
 
+            ${isTechnician
+    ? `
+        <span
+            class="direct-message-seen ${
+                isSeen
+                    ? "seen"
+                    : "unseen"
+            }"
+            data-seen-message-id="${escapeHtml(
+                message?.id || ""
+            )}"
+            title="${
+                isSeen
+                    ? "Seen"
+                    : "Unseen"
+            }"
+            aria-label="${
+                isSeen
+                    ? "Seen"
+                    : "Unseen"
+            }"
+        >
             ${
-                isTechnician
-                    ? `
-                        <span
-                            class="
-                                direct-message-seen
-                                ${
-                                    isSeen
-                                        ? "is-seen"
-                                        : ""
-                                }
-                            "
-                            data-seen-message-id="${escapeHtml(
-                                messageId
-                            )}"
-                            title="${
-                                isSeen
-                                    ? "Seen"
-                                    : "Unseen"
-}">
-    ${
-        isSeen
-            ? "Seen"
-            : "Unseen"
-    }
-</span>
-                    `
-                    : ""
+                isSeen
+                    ? "Seen"
+                    : "Unseen"
             }
+        </span>
+    `
+    : ""
+}
 
         </div>
     `;

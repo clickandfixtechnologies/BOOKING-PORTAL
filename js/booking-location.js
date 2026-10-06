@@ -143,10 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 longitude.value = lng.toFixed(7);
 
                 mapsUrl.value =
-                    "https://www.google.com/maps/dir/?api=1&destination=" +
-                    latitude.value +
-                    "," +
-                    longitude.value;
+                `https://www.google.com/maps?q=${latitude.value},${longitude.value}`;
 
                 setStatus(
                     "Location captured successfully.",

@@ -1215,9 +1215,25 @@ async function loadProfile() {
     ? p.specialization.join(", ")
     : "Not specified";
 
-const workingDays = Array.isArray(p.working_day)
-    ? p.working_day.join(", ")
-    : String(p.working_day || "Not specified");
+const workingDays = Array.isArray(p.working_days)
+    ? p.working_days
+        .map(Number)
+        .map(day => {
+            const days = [
+                "Sun",
+                "Mon",
+                "Tue",
+                "Wed",
+                "Thu",
+                "Fri",
+                "Sat"
+            ];
+
+            return days[day] || "";
+        })
+        .filter(Boolean)
+        .join(", ")
+    : "Not specified";
 
 const workingHours =
     p.working_start && p.working_end

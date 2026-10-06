@@ -1236,3 +1236,87 @@
     font-weight: 600;
 }
 
+/* =========================================================
+   ADMIN DIRECT CHAT
+   SEEN / UNSEEN STATUS
+   ========================================================= */
+
+.admin-floating-support-message-meta
+.direct-message-meta
+.direct-message-seen {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin-left: 7px !important;
+
+    padding: 2px 8px !important;
+
+    border-radius: 999px !important;
+
+    font-size: 10px !important;
+
+    font-weight: 600 !important;
+
+    line-height: 1.3 !important;
+
+    letter-spacing: 0.2px !important;
+
+    white-space: nowrap !important;
+
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease !important;
+}
+
+
+/* =========================================================
+   UNSEEN
+   ========================================================= */
+
+.admin-floating-support-message-meta
+.direct-message-meta
+.direct-message-seen.unseen {
+
+    color: #8a6d1d !important;
+
+    background-color: #fff8df !important;
+
+    border: 1px solid #ead58a !important;
+}
+
+
+/* =========================================================
+   SEEN
+   ========================================================= */
+
+.admin-floating-support-message-meta
+.direct-message-meta
+.direct-message-seen.seen {
+
+    color: #187a42 !important;
+
+    background-color: #eaf8f0 !important;
+
+    border: 1px solid #9ed7b6 !important;
+}
+
+
+/* =========================================================
+   OLD CLASS SAFETY
+   ========================================================= */
+
+.admin-floating-support-message-meta
+.direct-message-meta
+.direct-message-seen.is-seen {
+
+    color: #187a42 !important;
+
+    background-color: #eaf8f0 !important;
+
+    border: 1px solid #9ed7b6 !important;
+}

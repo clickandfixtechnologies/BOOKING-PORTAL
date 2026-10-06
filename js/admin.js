@@ -4528,13 +4528,17 @@ function renderAdminFloatingSupportMessages(
 
 /* =========================================================
    DIRECT CHAT MESSAGE HTML
+   ADMIN DIRECT CHAT
    ========================================================= */
 
 function renderAdminDirectSupportMessages(
     messages
 ) {
 
-    if (!Array.isArray(messages) || !messages.length) {
+    if (
+        !Array.isArray(messages) ||
+        !messages.length
+    ) {
 
         return `
             <div
@@ -4548,101 +4552,123 @@ function renderAdminDirectSupportMessages(
 
 
     return messages
-        .map(message => {
+        .map(
+            message => {
 
-            const sender =
-                String(
-                    message?.sender_type || ""
-                ).toUpperCase();
-
-
-            const isAdmin =
-                sender === "ADMIN";
+                const sender =
+                    String(
+                        message?.sender_type || ""
+                    ).toUpperCase();
 
 
-            const isSeen =
-                isAdmin &&
-                Boolean(
-                    message?.read_at_technician
-                );
+                const isAdmin =
+                    sender === "ADMIN";
 
 
-            const time =
-                adminSupportFormatDate(
-                    message?.created_at
-                );
+                /*
+                 * Admin message is:
+                 *
+                 * Unseen =
+                 * read_at_technician is NULL
+                 *
+                 * Seen =
+                 * read_at_technician has value
+                 */
+                const isSeen =
+                    isAdmin &&
+                    Boolean(
+                        message?.read_at_technician
+                    );
 
 
-            return `
-
-                <div
-                    class="
-                        admin-floating-support-message
-                        ${isAdmin ? "admin" : "technician"}
-                    "
-                    data-direct-message-id="${e(
-                        message.id
-                    )}"
-                >
-
-                    <div
-                        class="admin-floating-support-message-text"
-                    >
-                        ${e(
-                            message.message || ""
-                        ).replaceAll(
-                            "\n",
-                            "<br>"
-                        )}
-                    </div>
+                const time =
+                    adminSupportFormatDate(
+                        message?.created_at
+                    );
 
 
+                return `
                     <div
                         class="
-                            admin-floating-support-message-meta
-                            direct-message-meta
+                            admin-floating-support-message
+                            ${isAdmin ? "admin" : "technician"}
                         "
+                        data-direct-message-id="${e(
+                            message?.id || ""
+                        )}"
                     >
 
-                        <small>
-                            ${e(time)}
-                        </small>
+                        <div
+                            class="
+                                admin-floating-support-message-text
+                            "
+                        >
+                            ${e(
+                                message?.message || ""
+                            ).replaceAll(
+                                "\n",
+                                "<br>"
+                            )}
+                        </div>
 
 
-                        ${
-    isAdmin
-        ? `
-            <span
-                class="direct-message-seen"
-                aria-label="${
-                    isSeen
-                        ? "Seen"
-                        : "Unseen"
-                }"
-                title="${
-                    isSeen
-                        ? "Seen"
-                        : "Unseen"
-                }"
-            >
-                ${
-                    isSeen
-                        ? "Seen"
-                        : "Unseen"
-                }
-            </span>
-        `
-        : ""
-}
+                        <div
+                            class="
+                                admin-floating-support-message-meta
+                                direct-message-meta
+                            "
+                        >
+
+                            <small>
+                                ${e(time)}
+                            </small>
+
+
+                            ${
+                                isAdmin
+                                    ? `
+                                        <span
+                                            class="
+                                                direct-message-seen
+                                                ${
+                                                    isSeen
+                                                        ? "seen"
+                                                        : "unseen"
+                                                }
+                                            "
+                                            data-seen-message-id="${e(
+                                                message?.id || ""
+                                            )}"
+                                            aria-label="${
+                                                isSeen
+                                                    ? "Seen"
+                                                    : "Unseen"
+                                            }"
+                                            title="${
+                                                isSeen
+                                                    ? "Seen"
+                                                    : "Unseen"
+                                            }"
+                                        >
+                                            ${
+                                                isSeen
+                                                    ? "Seen"
+                                                    : "Unseen"
+                                            }
+                                        </span>
+                                    `
+                                    : ""
+                            }
+
+                        </div>
 
                     </div>
+                `;
 
-                </div>
-
-            `;
-
-        })
+            }
+        )
         .join("");
+
 }
 
 
@@ -5017,7 +5043,17 @@ function addAdminDirectRealtimeMessage(
     isAdmin
         ? `
             <span
-                class="direct-message-seen"
+                class="
+                    direct-message-seen
+                    ${
+                        isSeen
+                            ? "seen"
+                            : "unseen"
+                    }
+                "
+                data-seen-message-id="${e(
+                    messageId
+                )}"
                 aria-label="${
                     isSeen
                         ? "Seen"
@@ -5085,7 +5121,7 @@ function addAdminDirectRealtimeMessage(
 
 /* =========================================================
    DIRECT CHAT REALTIME - UPDATE
-   Seen status: ✓ → ✓✓
+   SEEN / UNSEEN
    ========================================================= */
 
 function updateAdminDirectRealtimeMessage(
@@ -5098,7 +5134,9 @@ function updateAdminDirectRealtimeMessage(
 
 
     const messageId =
-        String(message.id);
+        String(
+            message.id
+        ).trim();
 
 
     const technicianId =
@@ -5112,13 +5150,18 @@ function updateAdminDirectRealtimeMessage(
     }
 
 
+    /* =====================================================
+       ONLY CURRENT DIRECT CHAT
+       ===================================================== */
+
     const isCurrentChatVisible =
         adminFloatingSupportState.open === true &&
 
         adminFloatingSupportState.currentRequestId === "" &&
 
         String(
-            adminFloatingSupportState.currentDirectTechnicianId
+            adminFloatingSupportState
+                .currentDirectTechnicianId
         ) === technicianId;
 
 
@@ -5127,11 +5170,18 @@ function updateAdminDirectRealtimeMessage(
     }
 
 
+    /* =====================================================
+       FIND MESSAGE IN LOCAL STATE
+       ===================================================== */
+
     const index =
-        adminFloatingSupportState.currentDirectMessages
+        adminFloatingSupportState
+            .currentDirectMessages
             .findIndex(
                 item =>
-                    String(item?.id) === messageId
+                    String(
+                        item?.id
+                    ) === messageId
             );
 
 
@@ -5140,23 +5190,28 @@ function updateAdminDirectRealtimeMessage(
     }
 
 
-    /*
-     * Update local message object
-     */
+    /* =====================================================
+       UPDATE LOCAL MESSAGE
+       ===================================================== */
 
-    adminFloatingSupportState.currentDirectMessages[
-        index
-    ] = {
-        ...adminFloatingSupportState.currentDirectMessages[
+    adminFloatingSupportState
+        .currentDirectMessages[
             index
-        ],
-        ...message
-    };
+        ] = {
+
+            ...adminFloatingSupportState
+                .currentDirectMessages[
+                    index
+                ],
+
+            ...message
+
+        };
 
 
-    /*
-     * Find message bubble
-     */
+    /* =====================================================
+       FIND MESSAGE BUBBLE
+       ===================================================== */
 
     const element =
         document.querySelector(
@@ -5171,26 +5226,42 @@ function updateAdminDirectRealtimeMessage(
     }
 
 
+    /* =====================================================
+       ONLY ADMIN SENT MESSAGE
+       ===================================================== */
+
     const sender =
         String(
-            message.sender_type ||
+            message?.sender_type ||
             adminFloatingSupportState
-                .currentDirectMessages[index]
+                .currentDirectMessages[
+                    index
+                ]
                 ?.sender_type ||
             ""
         ).toUpperCase();
 
 
-    if (sender !== "ADMIN") {
+    if (
+        sender !== "ADMIN"
+    ) {
         return;
     }
 
 
+    /* =====================================================
+       SEEN STATE
+       ===================================================== */
+
     const isSeen =
         Boolean(
-            message.read_at_technician
+            message?.read_at_technician
         );
 
+
+    /* =====================================================
+       FIND STATUS ELEMENT
+       ===================================================== */
 
     const seenElement =
         element.querySelector(
@@ -5203,28 +5274,57 @@ function updateAdminDirectRealtimeMessage(
     }
 
 
+    /* =====================================================
+       UPDATE TEXT
+       ===================================================== */
+
     seenElement.textContent =
-    isSeen
-        ? "Seen"
-        : "Unseen";
+        isSeen
+            ? "Seen"
+            : "Unseen";
 
-seenElement.classList.remove(
-    "is-seen"
-);
 
-seenElement.setAttribute(
-    "aria-label",
-    isSeen
-        ? "Seen"
-        : "Unseen"
-);
+    /* =====================================================
+       UPDATE CSS STATE
+       ===================================================== */
 
-seenElement.setAttribute(
-    "title",
-    isSeen
-        ? "Seen"
-        : "Unseen"
-);
+    seenElement.classList.toggle(
+        "seen",
+        isSeen
+    );
+
+    seenElement.classList.toggle(
+        "unseen",
+        !isSeen
+    );
+
+
+    /*
+     * Remove old class if any old version
+     * of the markup still has it.
+     */
+    seenElement.classList.remove(
+        "is-seen"
+    );
+
+
+    /* =====================================================
+       ACCESSIBILITY
+       ===================================================== */
+
+    seenElement.setAttribute(
+        "aria-label",
+        isSeen
+            ? "Seen"
+            : "Unseen"
+    );
+
+    seenElement.setAttribute(
+        "title",
+        isSeen
+            ? "Seen"
+            : "Unseen"
+    );
 
 }
 

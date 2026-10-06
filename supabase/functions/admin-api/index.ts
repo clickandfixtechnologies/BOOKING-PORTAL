@@ -3318,6 +3318,7 @@ async function updateSupportStatus(
 
 /* =========================================================
    DELETE APPOINTMENT
+   DELETE ALL RELATED BOOKING DATA FIRST
    ========================================================= */
 
 async function deleteAppointment(
@@ -3325,34 +3326,127 @@ async function deleteAppointment(
   id: string
 ) {
 
+  /* =====================================================
+     VALIDATE APPOINTMENT ID
+     ===================================================== */
+
   if (
     !/^[0-9a-f-]{36}$/i.test(
       id || ""
     )
   ) {
+
     throw new Error(
       "Invalid appointment."
     );
+
   }
 
+
+  /* =====================================================
+     VERIFY APPOINTMENT EXISTS
+     ===================================================== */
+
   const {
-    error
+    data: appointment,
+    error: appointmentLookupError
   } =
     await db
       .from("appointments")
-      .delete()
+      .select(
+        "id"
+      )
       .eq(
         "id",
         id
-      );
+      )
+      .maybeSingle();
 
-  if (error) {
-    throw error;
+
+  if (
+    appointmentLookupError
+  ) {
+
+    throw new Error(
+      "Appointment lookup failed."
+    );
+
   }
+
+
+  if (
+    !appointment
+  ) {
+
+    throw new Error(
+      "Appointment not found."
+    );
+
+  }
+
+
+  /* =====================================================
+     DELETE USING DATABASE RPC
+     ===================================================== */
+
+  const {
+    data,
+    error
+  } =
+    await db.rpc(
+      "admin_delete_appointment",
+      {
+        appointment_uuid:
+          id
+      }
+    );
+
+
+  if (
+    error
+  ) {
+
+    console.error(
+      "DELETE APPOINTMENT RPC ERROR:",
+      {
+        message:
+          error.message,
+
+        details:
+          error.details,
+
+        hint:
+          error.hint,
+
+        code:
+          error.code
+      }
+    );
+
+
+    throw new Error(
+      error.message ||
+      "Appointment could not be deleted."
+    );
+
+  }
+
+
+  if (
+    data !== true
+  ) {
+
+    throw new Error(
+      "Appointment deletion was not completed."
+    );
+
+  }
+
 
   return {
     ok: true
   };
+
 }
 
 

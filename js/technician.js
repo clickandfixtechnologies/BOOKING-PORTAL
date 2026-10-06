@@ -7664,8 +7664,10 @@ function updateDirectSupportMessageSeenState(
                     ? "Seen"
                     : "Unseen"
             );
+
         }
     );
+
 }
 
 /* =========================================================

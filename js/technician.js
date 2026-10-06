@@ -1212,17 +1212,17 @@ async function loadProfile() {
     updateTechnicianHeaderAvatar(p);
 
     const specialization = Array.isArray(p.specialization)
-        ? p.specialization.join(", ")
+    ? p.specialization.join(", ")
+    : "Not specified";
+
+const workingDays = Array.isArray(p.working_day)
+    ? p.working_day.join(", ")
+    : String(p.working_day || "Not specified");
+
+const workingHours =
+    p.working_start && p.working_end
+        ? `${formatTime(p.working_start)} - ${formatTime(p.working_end)}`
         : "Not specified";
-
-    const workingDays = Array.isArray(working_day)
-    ? working_day.join(", ")
-    : String(working_day || "");
-
-    const workingHours =
-        p.working_start && p.working_end
-            ? `${formatTime(p.working_start)} - ${formatTime(p.working_end)}`
-            : "Not specified";
 
     const statusClass = p.is_active
         ? "tech-status-completed"

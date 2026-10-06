@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Private application areas
+Disallow: /admin
+Disallow: /admin/
+Disallow: /technician
+Disallow: /technician/
+Disallow: /tracking
+Disallow: /tracking/
+Disallow: /api/
+Disallow: /functions/
+
+Sitemap: https://booking.clickandfix.site/sitemap.xml

@@ -7408,10 +7408,24 @@ function renderDirectSupportMessages(
                             ${isTechnician
     ? `
         <span
-            class="direct-message-seen"
+            class="direct-message-seen ${
+                isSeen
+                    ? "seen"
+                    : "unseen"
+            }"
             data-seen-message-id="${escapeHtml(
                 message?.id || ""
             )}"
+            title="${
+                isSeen
+                    ? "Seen"
+                    : "Unseen"
+            }"
+            aria-label="${
+                isSeen
+                    ? "Seen"
+                    : "Unseen"
+            }"
         >
             ${
                 isSeen
@@ -8692,7 +8706,6 @@ await refreshTechnicianSupportUnreadBadge();
          * Refresh the combined floating badge
          * immediately.
          */
-        await refreshTechnicianSupportUnreadBadge();
 
 
     } catch (error) {

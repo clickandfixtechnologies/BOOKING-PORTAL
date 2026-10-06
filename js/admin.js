@@ -260,7 +260,26 @@ function days(v){return(v||[1,2,3,4,5,6]).join(",")}
 
 function renderTechForm(t={}){
 
-  const needsAccount=Boolean(t.id&&!t.auth_user_id);
+  const needsAccount =
+    Boolean(
+      t.id &&
+      !t.auth_user_id
+    );
+
+  const selectedDays =
+    Array.isArray(t.working_days)
+      ? t.working_days.map(Number)
+      : [1, 2, 3, 4, 5, 6];
+
+  const daysOfWeek = [
+    { value: 0, label: "Sun" },
+    { value: 1, label: "Mon" },
+    { value: 2, label: "Tue" },
+    { value: 3, label: "Wed" },
+    { value: 4, label: "Thu" },
+    { value: 5, label: "Fri" },
+    { value: 6, label: "Sat" }
+  ];
 
   return`
   <form id="techForm" class="row g-2">
@@ -269,10 +288,9 @@ function renderTechForm(t={}){
       <input
         name="technician_code"
         class="form-control"
-        required
-        placeholder="CFX-TECH-2026-0001"
+        placeholder="Auto-generated: CFX-TECH-2026-12345"
         value="${e(t.technician_code||"")}"
-        ${t.id?"readonly":""}
+        readonly
       >
     </div>
 
@@ -320,6 +338,7 @@ function renderTechForm(t={}){
 
     <div class="col-md-4">
       <div class="input-group">
+
         <input
           id="technicianPassword"
           name="password"
@@ -343,6 +362,7 @@ function renderTechForm(t={}){
         >
           👁
         </button>
+
       </div>
     </div>
 
@@ -368,14 +388,42 @@ function renderTechForm(t={}){
       >
     </div>
 
-    <div class="col-md-4">
-      <input
-        name="working_days"
-        class="form-control"
-        required
-        value="${days(t.working_days)}"
-        placeholder="1,2,3,4,5,6"
+    <!-- WORKING DAYS -->
+
+    <div class="col-md-8">
+
+      <label class="form-label mb-1">
+        Working Days
+      </label>
+
+      <div
+        class="d-flex flex-wrap gap-2"
+        id="workingDaysContainer"
       >
+
+        ${
+          daysOfWeek.map(day => `
+            <label
+              class="btn btn-outline-primary btn-sm"
+              style="min-width:58px;"
+            >
+
+              <input
+                type="checkbox"
+                name="working_day"
+                value="${day.value}"
+                class="working-day-checkbox me-1"
+                ${selectedDays.includes(day.value) ? "checked" : ""}
+              >
+
+              ${day.label}
+
+            </label>
+          `).join("")
+        }
+
+      </div>
+
     </div>
 
     <div class="col-md-2">
@@ -404,143 +452,524 @@ function renderTechForm(t={}){
 
   </form>
   `;
+}techniciansView
+
+/* =========================================================
+   TECHNICIANS VIEW
+   ========================================================= */
+
+async function techniciansView(){
+
+    pageTitle.textContent =
+        "Technicians";
+
+    let t =
+        (await api("technicians"))
+            .technicians;
+
+    q.innerHTML = `
+        <div class="admin-card">
+
+            <h2 class="h6">
+                ${
+                    window.editTech
+                        ? "Edit technician"
+                        : "Add technician"
+                }
+            </h2>
+
+            ${renderTechForm(
+                window.editTech || {}
+            )}
+
+        </div>
+
+        <div class="admin-card mt-3">
+
+            <h2 class="h6">
+                Technicians
+            </h2>
+
+            ${
+                t.map(x => `
+                    <div class="border rounded p-2 mb-2">
+
+                        <b>
+                            ${e(x.technician_code)}
+                        </b>
+
+                        ${e(x.full_name)}
+                        ·
+                        ${e(x.mobile)}
+                        ·
+                        ${
+                            x.is_active
+                                ? "Active"
+                                : "Inactive"
+                        }
+
+                        <div class="actions float-end">
+
+                            <button
+                                class="btn btn-sm btn-outline-primary"
+                                data-edit-tech="${x.id}"
+                            >
+                                Edit
+                            </button>
+
+                            <button
+                                class="btn btn-sm btn-outline-secondary"
+                                data-toggle-tech="${x.id}"
+                            >
+                                ${
+                                    x.is_active
+                                        ? "Deactivate"
+                                        : "Activate"
+                                }
+                            </button>
+
+                            <button
+                                class="btn btn-sm btn-outline-danger"
+                                data-delete-tech="${x.id}"
+                                ${
+                                    x.is_active
+                                        ? 'disabled title="Deactivate this technician before deleting"'
+                                        : ""
+                                }
+                            >
+                                Delete
+                            </button>
+
+                        </div>
+
+                    </div>
+                `).join("")
+                ||
+                "No technicians yet."
+            }
+
+        </div>
+    `;
+
+
+    /* =========================================================
+       PASSWORD TOGGLE
+       ========================================================= */
+
+    const technicianPassword =
+        document.getElementById(
+            "technicianPassword"
+        );
+
+    const toggleTechnicianPassword =
+        document.getElementById(
+            "toggleTechnicianPassword"
+        );
+
+    if (
+        technicianPassword &&
+        toggleTechnicianPassword
+    ){
+
+        toggleTechnicianPassword.onclick =
+            () => {
+
+                const isHidden =
+                    technicianPassword.type ===
+                    "password";
+
+                technicianPassword.type =
+                    isHidden
+                        ? "text"
+                        : "password";
+
+                toggleTechnicianPassword.textContent =
+                    isHidden
+                        ? "🙈"
+                        : "👁";
+
+                toggleTechnicianPassword.setAttribute(
+                    "aria-label",
+                    isHidden
+                        ? "Hide password"
+                        : "Show password"
+                );
+
+                toggleTechnicianPassword.title =
+                    isHidden
+                        ? "Hide password"
+                        : "Show password";
+            };
+    }
+
+
+    /* =========================================================
+       TECHNICIAN FORM SUBMIT
+       ========================================================= */
+
+    const techFormElement =
+        document.getElementById(
+            "techForm"
+        );
+
+    techFormElement.onsubmit =
+        async ev => {
+
+            ev.preventDefault();
+
+            const f =
+                new FormData(
+                    techFormElement
+                );
+
+            const x =
+                Object.fromEntries(f);
+
+
+            /* =================================================
+               SPECIALIZATION
+               ================================================= */
+
+            x.specialization =
+                String(
+                    x.specialization || ""
+                )
+                .split(",")
+                .map(
+                    v => v.trim()
+                )
+                .filter(Boolean);
+
+
+            /* =================================================
+               WORKING DAYS
+               
+               0 = Sunday
+               1 = Monday
+               2 = Tuesday
+               3 = Wednesday
+               4 = Thursday
+               5 = Friday
+               6 = Saturday
+               ================================================= */
+
+            x.working_days =
+                Array.from(
+                    document.querySelectorAll(
+                        ".working-day-checkbox:checked"
+                    )
+                )
+                .map(
+                    checkbox =>
+                        Number(
+                            checkbox.value
+                        )
+                )
+                .sort(
+                    (a, b) =>
+                        a - b
+                );
+
+
+            /* =================================================
+               AT LEAST ONE WORKING DAY REQUIRED
+               ================================================= */
+
+            if (
+                !x.working_days.length
+            ){
+
+                flash(
+                    "Please select at least one working day.",
+                    false
+                );
+
+                return;
+            }
+
+
+            /* =================================================
+               CREATE / UPDATE
+               ================================================= */
+
+            try {
+
+                if (
+                    window.editTech
+                ){
+
+                    /*
+                     * EDIT
+                     *
+                     * Existing technician_code
+                     * will remain unchanged because
+                     * backend updateTechnician()
+                     * does not update technician_code.
+                     */
+
+                    x.id =
+                        window.editTech.id;
+
+                    await api(
+                        "update_technician",
+                        {
+                            technician: x
+                        }
+                    );
+
+                } else {
+
+                    /*
+                     * CREATE
+                     *
+                     * Backend generates the
+                     * random technician code.
+                     */
+
+                    await api(
+                        "create_technician",
+                        {
+                            technician: x
+                        }
+                    );
+                }
+
+
+                window.editTech =
+                    null;
+
+                flash(
+                    "Technician saved."
+                );
+
+                techniciansView();
+
+            } catch (err) {
+
+                flash(
+                    err.message ||
+                    "Technician could not be saved.",
+                    false
+                );
+            }
+        };
+
+
+    /* =========================================================
+       EDIT TECHNICIAN
+       ========================================================= */
+
+    document
+        .querySelectorAll(
+            "[data-edit-tech]"
+        )
+        .forEach(
+            b => {
+
+                b.onclick = () => {
+
+                    window.editTech =
+                        t.find(
+                            x =>
+                                x.id ===
+                                b.dataset.editTech
+                        );
+
+                    techniciansView();
+                };
+            }
+        );
+
+
+    /* =========================================================
+       ACTIVATE / DEACTIVATE
+       ========================================================= */
+
+    document
+        .querySelectorAll(
+            "[data-toggle-tech]"
+        )
+        .forEach(
+            b => {
+
+                b.onclick =
+                    async () => {
+
+                        const technician =
+                            t.find(
+                                x =>
+                                    x.id ===
+                                    b.dataset.toggleTech
+                            );
+
+                        if (
+                            !technician
+                        ){
+
+                            flash(
+                                "Technician not found.",
+                                false
+                            );
+
+                            return;
+                        }
+
+
+                        const newStatus =
+                            !technician.is_active;
+
+
+                        try {
+
+                            await api(
+                                "toggle_technician_status",
+                                {
+                                    id:
+                                        technician.id,
+
+                                    is_active:
+                                        newStatus
+                                }
+                            );
+
+
+                            flash(
+                                newStatus
+                                    ? "Technician activated successfully."
+                                    : "Technician deactivated successfully."
+                            );
+
+
+                            techniciansView();
+
+                        } catch (err) {
+
+                            flash(
+                                err.message ||
+                                "Technician status could not be updated.",
+                                false
+                            );
+                        }
+                    };
+            }
+        );
+
+
+    /* =========================================================
+       DELETE TECHNICIAN
+       ========================================================= */
+
+    document
+        .querySelectorAll(
+            "[data-delete-tech]"
+        )
+        .forEach(
+            b => {
+
+                b.onclick =
+                    async () => {
+
+                        const technician =
+                            t.find(
+                                x =>
+                                    x.id ===
+                                    b.dataset.deleteTech
+                            );
+
+
+                        if (
+                            !technician
+                        ){
+
+                            flash(
+                                "Technician not found.",
+                                false
+                            );
+
+                            return;
+                        }
+
+
+                        /*
+                         * Frontend safety check.
+                         * Backend also checks this independently.
+                         */
+
+                        if (
+                            technician.is_active
+                        ){
+
+                            flash(
+                                "Active technician cannot be deleted. Deactivate the technician first.",
+                                false
+                            );
+
+                            return;
+                        }
+
+
+                        const confirmed =
+                            window.confirm(
+                                `Delete technician "${technician.full_name}" permanently?\n\n` +
+                                "This will also delete the technician's portal login account.\n\n" +
+                                "This action cannot be undone."
+                            );
+
+
+                        if (
+                            !confirmed
+                        ){
+
+                            return;
+                        }
+
+
+                        try {
+
+                            b.disabled =
+                                true;
+
+                            b.textContent =
+                                "Deleting…";
+
+
+                            await api(
+                                "delete_technician",
+                                {
+                                    id:
+                                        technician.id
+                                }
+                            );
+
+
+                            flash(
+                                "Technician deleted successfully."
+                            );
+
+
+                            techniciansView();
+
+                        } catch (err) {
+
+                            b.disabled =
+                                false;
+
+                            b.textContent =
+                                "Delete";
+
+
+                            flash(
+                                err.message ||
+                                "Technician could not be deleted.",
+                                false
+                            );
+                        }
+                    };
+            }
+        );
 }
 
-async function techniciansView(){pageTitle.textContent="Technicians";let t=(await api("technicians")).technicians;q.innerHTML=`<div class="admin-card"><h2 class="h6">${window.editTech?"Edit technician":"Add technician"}</h2>${renderTechForm(window.editTech||{})}</div><div class="admin-card mt-3"><h2 class="h6">Technicians</h2>${t.map(x=>`<div class="border rounded p-2 mb-2"><b>${e(x.technician_code)}</b> ${e(x.full_name)} · ${e(x.mobile)} · ${x.is_active?"Active":"Inactive"}<div class="actions float-end">
-
-<button class="btn btn-sm btn-outline-primary" data-edit-tech="${x.id}">Edit</button>
-<button class="btn btn-sm btn-outline-secondary" data-toggle-tech="${x.id}">${x.is_active?"Deactivate":"Activate"}</button>
-
-<button
-  class="btn btn-sm btn-outline-danger"
-  data-delete-tech="${x.id}"
-  ${x.is_active ? "disabled title=\"Deactivate this technician before deleting\"" : ""}
->
-  Delete
-</button>
-
-</div></div>`).join("")||"No technicians yet."}</div>`
-
-const technicianPassword=document.getElementById("technicianPassword");
-const toggleTechnicianPassword=document.getElementById("toggleTechnicianPassword");
-
-if(technicianPassword && toggleTechnicianPassword){
-  toggleTechnicianPassword.onclick=()=>{
-    const isHidden=technicianPassword.type==="password";
-
-    technicianPassword.type=isHidden?"text":"password";
-    toggleTechnicianPassword.textContent=isHidden?"🙈":"👁";
-    toggleTechnicianPassword.setAttribute(
-      "aria-label",
-      isHidden?"Hide password":"Show password"
-    );
-    toggleTechnicianPassword.title=isHidden?"Hide password":"Show password";
-  };
-}
-
-const techFormElement=document.getElementById("techForm");techFormElement.onsubmit=async ev=>{ev.preventDefault();let f=new FormData(techFormElement),x=Object.fromEntries(f);x.specialization=x.specialization.split(",").map(v=>v.trim()).filter(Boolean);x.working_days=x.working_days.split(",").map(Number);try{if(window.editTech){x.id=window.editTech.id;await api("update_technician",{technician:x})}else await api("create_technician",{technician:x});window.editTech=null;flash("Technician saved.");techniciansView()}catch(err){flash(err.message,false)}};document.querySelectorAll("[data-edit-tech]").forEach(b=>b.onclick=()=>{window.editTech=t.find(x=>x.id===b.dataset.editTech);techniciansView()})
-    
-    document.querySelectorAll("[data-toggle-tech]").forEach(b =>
-    b.onclick = async () => {
-        const technician = t.find(
-            x => x.id === b.dataset.toggleTech
-        );
-
-        if (!technician) {
-            flash("Technician not found.", false);
-            return;
-        }
-
-        const newStatus = !technician.is_active;
-
-        try {
-            await api("toggle_technician_status", {
-                id: technician.id,
-                is_active: newStatus
-            });
-
-            flash(
-                newStatus
-                    ? "Technician activated successfully."
-                    : "Technician deactivated successfully."
-            );
-
-            techniciansView();
-
-        } catch (err) {
-            flash(
-                err.message ||
-                "Technician status could not be updated.",
-                false
-            );
-        }
-    }
-);
-
-document.querySelectorAll("[data-delete-tech]").forEach(b =>
-    b.onclick = async () => {
-
-        const technician = t.find(
-            x => x.id === b.dataset.deleteTech
-        );
-
-        if (!technician) {
-            flash("Technician not found.", false);
-            return;
-        }
-
-        /*
-         * Frontend safety check.
-         * Backend also checks this independently.
-         */
-        if (technician.is_active) {
-            flash(
-                "Active technician cannot be deleted. Deactivate the technician first.",
-                false
-            );
-            return;
-        }
-
-        const confirmed = window.confirm(
-            `Delete technician "${technician.full_name}" permanently?\n\n` +
-            "This will also delete the technician's portal login account.\n\n" +
-            "This action cannot be undone."
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
-        try {
-
-            b.disabled = true;
-            b.textContent = "Deleting…";
-
-            await api("delete_technician", {
-                id: technician.id
-            });
-
-            flash(
-                "Technician deleted successfully."
-            );
-
-            techniciansView();
-
-        } catch (err) {
-
-            b.disabled = false;
-            b.textContent = "Delete";
-
-            flash(
-                err.message ||
-                "Technician could not be deleted.",
-                false
-            );
-        }
-    }
-);
-
-} async function detail(id){let[{appointment:a},{technicians}]=await Promise.all([api("appointment",{id}),api("technicians")]);let active=technicians.filter(x=>x.is_active);const hasGps=Number.isFinite(Number(a.latitude))&&Number.isFinite(Number(a.longitude));const mapsUrl=hasGps?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${a.latitude},${a.longitude}`)}`:"";const locationType=a.service_location_type==="home_office"?"Home / Office Visit":a.service_location_type||"—";pageTitle.textContent=a.appointment_id;q.innerHTML=`<button id="back" class="btn btn-link p-0 mb-3">← Back</button><div class="detail-grid"><section><h2 class="h6">Customer</h2><p>${e(a.customer_name)}<br>${e(a.mobile)}<br>${e(a.email)}</p></section><section><h2 class="h6">Service Location</h2><p><strong>Location Type:</strong> ${e(locationType)}<br><strong>Address:</strong> ${e(a.service_address||"—")}<br><strong>Landmark:</strong> ${e(a.landmark||"—")}</p>${hasGps?`<div class="mt-2"><strong>GPS Coordinates:</strong><div>${e(String(a.latitude))}, ${e(String(a.longitude))}</div></div>`:`<p class="text-muted mb-0">GPS location not available.</p>`}${hasGps?`<div class="mt-3"><a class="btn btn-sm btn-primary" href="${e(mapsUrl)}" target="_blank" rel="noopener noreferrer">Open Customer Location in Google Maps</a></div>`:""}</section>
+async function detail(id){let[{appointment:a},{technicians}]=await Promise.all([api("appointment",{id}),api("technicians")]);let active=technicians.filter(x=>x.is_active);const hasGps=Number.isFinite(Number(a.latitude))&&Number.isFinite(Number(a.longitude));const mapsUrl=hasGps?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${a.latitude},${a.longitude}`)}`:"";const locationType=a.service_location_type==="home_office"?"Home / Office Visit":a.service_location_type||"—";pageTitle.textContent=a.appointment_id;q.innerHTML=`<button id="back" class="btn btn-link p-0 mb-3">← Back</button><div class="detail-grid"><section><h2 class="h6">Customer</h2><p>${e(a.customer_name)}<br>${e(a.mobile)}<br>${e(a.email)}</p></section><section><h2 class="h6">Service Location</h2><p><strong>Location Type:</strong> ${e(locationType)}<br><strong>Address:</strong> ${e(a.service_address||"—")}<br><strong>Landmark:</strong> ${e(a.landmark||"—")}</p>${hasGps?`<div class="mt-2"><strong>GPS Coordinates:</strong><div>${e(String(a.latitude))}, ${e(String(a.longitude))}</div></div>`:`<p class="text-muted mb-0">GPS location not available.</p>`}${hasGps?`<div class="mt-3"><a class="btn btn-sm btn-primary" href="${e(mapsUrl)}" target="_blank" rel="noopener noreferrer">Open Customer Location in Google Maps</a></div>`:""}</section>
 
 <section><h2 class="h6">Service</h2><p>${e(serviceCategoryLabel(a.service_category))} - ${e(serviceTypeLabel(a.service_type))}<br>${e(a.problem_description)}</p></section><section><h2 class="h6">Additional Notes</h2><p class="mb-0">${e(a.additional_notes||"No additional notes provided.")}</p></section>
 

@@ -929,6 +929,72 @@ async function technicians(
   };
 }
 
+/* =========================================================
+   GENERATE UNIQUE TECHNICIAN CODE
+   ========================================================= */
+
+async function generateUniqueTechnicianCode(
+  db: any
+) {
+
+  const year =
+    new Date()
+      .getFullYear();
+
+  for (
+    let attempt = 0;
+    attempt < 50;
+    attempt++
+  ) {
+
+    const randomValues =
+      new Uint32Array(1);
+
+    crypto.getRandomValues(
+      randomValues
+    );
+
+    const randomNumber =
+      randomValues[0] %
+      100000;
+
+    const randomSuffix =
+      String(
+        randomNumber
+      ).padStart(
+        5,
+        "0"
+      );
+
+    const technicianCode =
+      `CFX-TECH-${year}-${randomSuffix}`;
+
+    const {
+      data,
+      error
+    } =
+      await db
+        .from("technicians")
+        .select("id")
+        .eq(
+          "technician_code",
+          technicianCode
+        )
+        .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      return technicianCode;
+    }
+  }
+
+  throw new Error(
+    "Could not generate a unique technician code. Please try again."
+  );
+}
 
 /* =========================================================
    CREATE TECHNICIAN
@@ -940,21 +1006,28 @@ async function createTechnician(
 ) {
 
   if (
-    !input ||
-    !/^CFX-TECH-\d{4}-\d{4,6}$/.test(
-      input.technician_code || ""
-    ) ||
+    !input
+  ) {
+    throw new Error(
+      "Technician details are invalid."
+    );
+  }
+
+  const normalizedMobile =
+    String(
+      input.mobile || ""
+    ).replace(
+      /\D/g,
+      ""
+    );
+
+  if (
     !/^[6-9]\d{9}$/.test(
-      String(
-        input.mobile || ""
-      ).replace(
-        /\D/g,
-        ""
-      )
+      normalizedMobile
     )
   ) {
     throw new Error(
-      "Technician ID and mobile must be valid."
+      "Technician mobile number must be valid."
     );
   }
 
@@ -986,6 +1059,15 @@ async function createTechnician(
     );
   }
 
+  /*
+   * Generate technician code on server.
+   * Never trust technician_code sent by frontend.
+   */
+  const technicianCode =
+    await generateUniqueTechnicianCode(
+      db
+    );
+
   const {
     data: authData,
     error: authError
@@ -1015,7 +1097,7 @@ async function createTechnician(
           authData.user.id,
 
         technician_code:
-          input.technician_code,
+          technicianCode,
 
         full_name:
           clean(
@@ -1024,12 +1106,7 @@ async function createTechnician(
           ),
 
         mobile:
-          String(
-            input.mobile
-          ).replace(
-            /\D/g,
-            ""
-          ),
+          normalizedMobile,
 
         username:
           clean(
@@ -1049,7 +1126,14 @@ async function createTechnician(
 
         working_days:
           input.working_days ||
-          [1, 2, 3, 4, 5, 6],
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
 
         working_start:
           input.working_start ||

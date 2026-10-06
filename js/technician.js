@@ -1215,9 +1215,9 @@ async function loadProfile() {
         ? p.specialization.join(", ")
         : "Not specified";
 
-    const workingDays = Array.isArray(p.working_days)
-        ? p.working_days.join(", ")
-        : "Not specified";
+    const workingDays = Array.isArray(working_day)
+    ? working_day.join(", ")
+    : String(working_day || "");
 
     const workingHours =
         p.working_start && p.working_end

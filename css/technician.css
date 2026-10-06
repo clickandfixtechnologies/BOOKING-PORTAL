@@ -9407,7 +9407,7 @@ strong {
 /* =========================================================
    TECHNICIAN DIRECT SUPPORT CHAT
    PHASE 5
-   REFERENCE CHAT UI
+   FINAL REFERENCE-STYLE CHAT UI
    ========================================================= */
 
 
@@ -9453,7 +9453,7 @@ strong {
             15,
             23,
             42,
-            .08
+            0.08
         );
 
     backdrop-filter:
@@ -9511,7 +9511,7 @@ strong {
             15,
             23,
             42,
-            .07
+            0.07
         );
 
     box-shadow:
@@ -9520,14 +9520,14 @@ strong {
             15,
             23,
             42,
-            .18
+            0.18
         );
 
     pointer-events: auto;
 
     animation:
         technicianDirectChatOpen
-        .22s ease
+        0.22s ease
         both;
 }
 
@@ -9544,7 +9544,7 @@ strong {
 
         transform:
             translateY(18px)
-            scale(.975);
+            scale(0.975);
     }
 
     to {
@@ -9592,7 +9592,7 @@ strong {
             15,
             23,
             42,
-            .07
+            0.07
         );
 }
 
@@ -9628,21 +9628,20 @@ strong {
     margin:
         0 0 3px;
 
-    font-size:
-        8px;
+    padding: 0;
+
+    font-size: 8px;
 
     line-height: 1;
 
     font-weight: 800;
 
-    letter-spacing:
-        1px;
+    letter-spacing: 1px;
 
-    text-transform:
-        uppercase;
+    text-transform: uppercase;
 
     color:
-        #a3aab4;
+        #a0a6ae;
 }
 
 
@@ -9657,14 +9656,11 @@ strong {
 
     padding: 0;
 
-    font-size:
-        15px;
+    font-size: 15px;
 
-    line-height:
-        1.25;
+    line-height: 1.25;
 
-    font-weight:
-        750;
+    font-weight: 750;
 
     color:
         #263238;
@@ -9683,16 +9679,12 @@ strong {
 
     padding: 0;
 
-    font-size:
-        10px;
+    font-size: 10px;
 
-    line-height:
-        1.3;
+    line-height: 1.35;
 
     color:
         #9aa1aa;
-
-    opacity: 1;
 }
 
 
@@ -9703,25 +9695,21 @@ strong {
 #techDirectSupportChatModal
 .tech-support-chat-close {
 
-    width:
-        32px;
+    width: 34px;
 
-    height:
-        32px;
+    height: 34px;
 
-    min-width:
-        32px;
+    min-width: 34px;
 
-    padding: 0;
-
-    flex:
-        0 0 32px;
+    flex: 0 0 34px;
 
     display: flex;
 
     align-items: center;
 
     justify-content: center;
+
+    padding: 0;
 
     border: 0;
 
@@ -9733,17 +9721,18 @@ strong {
     color:
         #69727d;
 
-    font-size:
-        20px;
+    font-family: inherit;
+
+    font-size: 20px;
 
     line-height: 1;
 
     cursor: pointer;
 
     transition:
-        background .18s ease,
-        color .18s ease,
-        transform .18s ease;
+        background 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease;
 }
 
 
@@ -9751,7 +9740,7 @@ strong {
 .tech-support-chat-close:hover {
 
     background:
-        #eceef2;
+        #e9ebef;
 
     color:
         #3f4650;
@@ -9765,7 +9754,7 @@ strong {
 .tech-support-chat-close:active {
 
     transform:
-        scale(.94);
+        scale(0.94);
 }
 
 
@@ -9795,7 +9784,7 @@ strong {
     align-items: stretch;
 
     padding:
-        18px 13px 12px;
+        17px 13px 12px;
 
     background:
         #ffffff;
@@ -9805,18 +9794,19 @@ strong {
 
     overscroll-behavior:
         contain;
+
+    box-sizing: border-box;
 }
 
 
 /* =========================================================
-   MESSAGE AREA SCROLLBAR
+   SCROLLBAR
    ========================================================= */
 
 #techDirectSupportChatModal
 #directSupportMessages::-webkit-scrollbar {
 
-    width:
-        4px;
+    width: 4px;
 }
 
 
@@ -9836,7 +9826,7 @@ strong {
             148,
             163,
             184,
-            .25
+            0.28
         );
 
     border-radius:
@@ -9852,7 +9842,7 @@ strong {
             148,
             163,
             184,
-            .42
+            0.45
         );
 }
 
@@ -9874,16 +9864,16 @@ strong {
 
     justify-content: center;
 
-    text-align: center;
+    padding: 30px;
 
-    padding:
-        30px;
+    text-align: center;
 
     color:
         #9aa1aa;
 
-    font-size:
-        12px;
+    font-size: 12px;
+
+    box-sizing: border-box;
 }
 
 
@@ -9908,21 +9898,21 @@ strong {
 
     gap: 6px;
 
-    padding:
-        30px;
+    padding: 30px;
 
     text-align: center;
 
     color:
         #9aa1aa;
+
+    box-sizing: border-box;
 }
 
 
 #techDirectSupportChatModal
 .tech-support-chat-empty strong {
 
-    font-size:
-        13px;
+    font-size: 13px;
 
     color:
         #59616c;
@@ -9932,11 +9922,9 @@ strong {
 #techDirectSupportChatModal
 .tech-support-chat-empty span {
 
-    font-size:
-        11px;
+    font-size: 11px;
 
-    line-height:
-        1.5;
+    line-height: 1.5;
 
     color:
         #9aa1aa;
@@ -9944,7 +9932,9 @@ strong {
 
 
 /* =========================================================
-   DIRECT MESSAGE
+   DIRECT MESSAGE WRAPPER
+   IMPORTANT:
+   WIDTH FOLLOWS CONTENT
    ========================================================= */
 
 #techDirectSupportChatModal
@@ -9954,30 +9944,32 @@ strong {
 
     flex-direction: column;
 
-    gap:
-        3px;
+    gap: 3px;
 
-    width:
-        fit-content;
+    width: fit-content;
 
-    max-width:
-        74%;
+    max-width: 76%;
 
-    margin-top:
-        2px;
+    flex: 0 0 auto;
 
-    margin-bottom:
-        8px;
+    margin-top: 2px;
 
-    padding:
-        0;
+    margin-bottom: 8px;
+
+    padding: 0;
+
+    box-sizing: border-box;
 
     animation:
         technicianDirectMessageIn
-        .16s ease
+        0.16s ease
         both;
 }
 
+
+/* =========================================================
+   MESSAGE ANIMATION
+   ========================================================= */
 
 @keyframes technicianDirectMessageIn {
 
@@ -10001,39 +9993,45 @@ strong {
 
 /* =========================================================
    TECHNICIAN MESSAGE
-   RIGHT SIDE
+   RIGHT
    ========================================================= */
 
 #techDirectSupportChatModal
 .tech-direct-support-message.is-technician {
 
+    align-self:
+        flex-end;
+
+    align-items:
+        flex-end;
+
     margin-left:
         auto;
 
     margin-right:
         0;
-
-    align-items:
-        flex-end;
 }
 
 
 /* =========================================================
    ADMIN / SUPPORT MESSAGE
-   LEFT SIDE
+   LEFT
    ========================================================= */
 
 #techDirectSupportChatModal
 .tech-direct-support-message.is-support {
+
+    align-self:
+        flex-start;
+
+    align-items:
+        flex-start;
 
     margin-left:
         0;
 
     margin-right:
         auto;
-
-    align-items:
-        flex-start;
 }
 
 
@@ -10044,20 +10042,28 @@ strong {
 #techDirectSupportChatModal
 .tech-direct-support-message-label {
 
-    display:
-        none;
+    display: none;
 }
 
 
 /* =========================================================
    MESSAGE BUBBLE
+   IMPORTANT:
+   BUBBLE WIDTH = TEXT CONTENT WIDTH
    ========================================================= */
 
 #techDirectSupportChatModal
 .tech-direct-support-message-bubble {
 
-    display:
-        block;
+    display: block;
+
+    width: fit-content;
+
+    max-width: 100%;
+
+    min-width: 0;
+
+    box-sizing: border-box;
 
     padding:
         8px 12px;
@@ -10070,6 +10076,9 @@ strong {
 
     line-height:
         1.45;
+
+    font-weight:
+        400;
 
     word-break:
         break-word;
@@ -10091,18 +10100,24 @@ strong {
 
 /* =========================================================
    TECHNICIAN BUBBLE
-   RIGHT / MAGENTA
+   RIGHT / PINK
    ========================================================= */
 
 #techDirectSupportChatModal
 .tech-direct-support-message.is-technician
 .tech-direct-support-message-bubble {
 
+    width:
+        fit-content;
+
+    max-width:
+        100%;
+
     background:
         linear-gradient(
             135deg,
-            #a90062,
-            #d81b78
+            #b50067,
+            #d71978
         );
 
     color:
@@ -10113,25 +10128,25 @@ strong {
             255,
             255,
             255,
-            .08
+            0.08
         );
 
     border-bottom-right-radius:
         4px;
 
     box-shadow:
-        0 3px 9px
+        0 3px 10px
         rgba(
             185,
             20,
             105,
-            .12
+            0.13
         );
 }
 
 
 /* =========================================================
-   ADMIN BUBBLE
+   ADMIN / SUPPORT BUBBLE
    LEFT / LIGHT GREY
    ========================================================= */
 
@@ -10139,8 +10154,14 @@ strong {
 .tech-direct-support-message.is-support
 .tech-direct-support-message-bubble {
 
+    width:
+        fit-content;
+
+    max-width:
+        100%;
+
     background:
-        #f1f3f6;
+        #f0f2f5;
 
     color:
         #59616b;
@@ -10150,7 +10171,7 @@ strong {
             15,
             23,
             42,
-            .025
+            0.025
         );
 
     border-bottom-left-radius:
@@ -10163,6 +10184,8 @@ strong {
 
 /* =========================================================
    MESSAGE META
+   TIME + SEEN
+   CONTENT WIDTH ONLY
    ========================================================= */
 
 #techDirectSupportChatModal
@@ -10174,14 +10197,35 @@ strong {
     align-items:
         center;
 
+    justify-content:
+        flex-start;
+
     gap:
         5px;
 
-    min-height:
-        12px;
+    width:
+        fit-content;
+
+    max-width:
+        100%;
+
+    min-width:
+        0;
+
+    flex:
+        0 0 auto;
+
+    align-self:
+        flex-start;
+
+    margin:
+        0;
 
     padding:
         0 3px;
+
+    box-sizing:
+        border-box;
 
     font-size:
         8px;
@@ -10192,8 +10236,8 @@ strong {
     color:
         #a2a8b0;
 
-    opacity:
-        1;
+    white-space:
+        nowrap;
 }
 
 
@@ -10205,11 +10249,14 @@ strong {
 .tech-direct-support-message.is-technician
 .tech-direct-support-message-meta {
 
+    align-self:
+        flex-end;
+
     justify-content:
         flex-end;
 
-    color:
-        #a2a8b0;
+    width:
+        fit-content;
 }
 
 
@@ -10221,11 +10268,56 @@ strong {
 .tech-direct-support-message.is-support
 .tech-direct-support-message-meta {
 
+    align-self:
+        flex-start;
+
     justify-content:
         flex-start;
 
+    width:
+        fit-content;
+}
+
+
+/* =========================================================
+   META TIME
+   ========================================================= */
+
+#techDirectSupportChatModal
+.tech-direct-support-message-meta small {
+
+    display:
+        inline-block;
+
+    width:
+        auto;
+
+    min-width:
+        0;
+
+    max-width:
+        none;
+
+    flex:
+        0 0 auto;
+
+    margin:
+        0;
+
+    padding:
+        0;
+
+    font-size:
+        8px;
+
+    line-height:
+        1;
+
     color:
         #a2a8b0;
+
+    white-space:
+        nowrap;
 }
 
 
@@ -10245,11 +10337,20 @@ strong {
     justify-content:
         center;
 
-    min-width:
+    width:
         auto;
 
-    margin-left:
-        2px;
+    min-width:
+        0;
+
+    max-width:
+        none;
+
+    flex:
+        0 0 auto;
+
+    margin:
+        0 0 0 2px;
 
     padding:
         0;
@@ -10277,6 +10378,9 @@ strong {
 
     border-radius:
         0;
+
+    white-space:
+        nowrap;
 }
 
 
@@ -10300,7 +10404,7 @@ strong {
 .direct-message-seen.seen {
 
     color:
-        #d11b72;
+        #c91470;
 
     font-weight:
         700;
@@ -10315,7 +10419,7 @@ strong {
 .direct-message-seen.is-seen {
 
     color:
-        #d11b72;
+        #c91470;
 
     font-weight:
         700;
@@ -10323,7 +10427,7 @@ strong {
 
 
 /* =========================================================
-   COMPOSER AREA
+   COMPOSER
    ========================================================= */
 
 #techDirectSupportChatModal
@@ -10339,7 +10443,7 @@ strong {
         flex;
 
     align-items:
-        flex-end;
+        center;
 
     gap:
         7px;
@@ -10348,7 +10452,7 @@ strong {
         100%;
 
     padding:
-        10px 11px 11px;
+        9px 10px 10px;
 
     background:
         #ffffff;
@@ -10359,8 +10463,11 @@ strong {
             15,
             23,
             42,
-            .055
+            0.055
         );
+
+    box-sizing:
+        border-box;
 }
 
 
@@ -10381,7 +10488,7 @@ strong {
         40px;
 
     max-height:
-        120px;
+        140px;
 
     width:
         100%;
@@ -10400,7 +10507,7 @@ strong {
 
     border:
         1px solid
-        #e2e5e9;
+        #e1e4e8;
 
     border-radius:
         22px;
@@ -10429,13 +10536,12 @@ strong {
             15,
             23,
             42,
-            .07
+            0.07
         );
 
     transition:
-        border-color .18s ease,
-        box-shadow .18s ease,
-        background .18s ease;
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
 }
 
 
@@ -10447,10 +10553,10 @@ strong {
 
     border-color:
         rgba(
-            209,
-            27,
-            114,
-            .30
+            201,
+            20,
+            112,
+            0.30
         );
 
     box-shadow:
@@ -10459,14 +10565,14 @@ strong {
             15,
             23,
             42,
-            .08
+            0.08
         ),
         0 0 0 3px
         rgba(
-            209,
-            27,
-            114,
-            .06
+            201,
+            20,
+            112,
+            0.06
         );
 }
 
@@ -10475,7 +10581,7 @@ strong {
 #directSupportChatInput::placeholder {
 
     color:
-        #b0b5bc;
+        #adb3ba;
 
     font-style:
         italic;
@@ -10490,19 +10596,16 @@ strong {
 #directSupportChatSend {
 
     width:
-        38px;
+        42px;
 
     height:
-        38px;
+        42px;
 
     min-width:
-        38px;
-
-    padding:
-        0;
+        42px;
 
     flex:
-        0 0 38px;
+        0 0 42px;
 
     display:
         flex;
@@ -10512,6 +10615,9 @@ strong {
 
     justify-content:
         center;
+
+    padding:
+        0;
 
     border:
         0;
@@ -10529,7 +10635,7 @@ strong {
         inherit;
 
     font-size:
-        13px;
+        10px;
 
     font-weight:
         700;
@@ -10541,18 +10647,18 @@ strong {
         pointer;
 
     box-shadow:
-        0 4px 10px
+        0 4px 11px
         rgba(
             201,
             20,
             112,
-            .18
+            0.20
         );
 
     transition:
-        transform .16s ease,
-        background .16s ease,
-        box-shadow .16s ease;
+        transform 0.16s ease,
+        background 0.16s ease,
+        box-shadow 0.16s ease;
 }
 
 
@@ -10560,18 +10666,18 @@ strong {
 #directSupportChatSend:hover {
 
     background:
-        #a9005d;
+        #aa005e;
 
     transform:
         translateY(-1px);
 
     box-shadow:
-        0 6px 14px
+        0 6px 15px
         rgba(
             201,
             20,
             112,
-            .25
+            0.26
         );
 }
 
@@ -10580,7 +10686,7 @@ strong {
 #directSupportChatSend:active {
 
     transform:
-        scale(.94);
+        scale(0.94);
 }
 
 
@@ -10588,7 +10694,7 @@ strong {
 #directSupportChatSend:disabled {
 
     opacity:
-        .45;
+        0.45;
 
     cursor:
         not-allowed;
@@ -10610,7 +10716,7 @@ strong {
     #techDirectSupportChatModal.tech-support-chat-modal {
 
         padding:
-            8px;
+            7px;
 
         align-items:
             flex-end;
@@ -10630,10 +10736,10 @@ strong {
             100%;
 
         height:
-            calc(100vh - 16px);
+            calc(100vh - 14px);
 
         max-height:
-            calc(100vh - 16px);
+            calc(100vh - 14px);
 
         border-radius:
             20px;
@@ -10740,13 +10846,16 @@ strong {
     #directSupportChatSend {
 
         width:
-            38px;
+            40px;
 
         height:
-            38px;
+            40px;
 
         min-width:
-            38px;
+            40px;
+
+        flex-basis:
+            40px;
     }
 
 }
@@ -10761,7 +10870,7 @@ strong {
     #techDirectSupportChatModal.tech-support-chat-modal {
 
         padding:
-            5px;
+            4px;
     }
 
 
@@ -10769,10 +10878,10 @@ strong {
     .tech-support-chat-dialog {
 
         height:
-            calc(100vh - 10px);
+            calc(100vh - 8px);
 
         max-height:
-            calc(100vh - 10px);
+            calc(100vh - 8px);
 
         border-radius:
             18px;
@@ -10783,7 +10892,7 @@ strong {
     .tech-direct-support-message {
 
         max-width:
-            88%;
+            87%;
     }
 
 
